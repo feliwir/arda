@@ -1,3 +1,9 @@
 [submodule "deps/glfw"]
 	path = deps/glfw
 	url = https://github.com/glfw/glfw.git
+[submodule "deps/rapidjson"]
+	path = deps/rapidjson
+	url = https://github.com/miloyip/rapidjson.git
+[submodule "deps/cxxopts"]
+	path = deps/cxxopts
+	url = https://github.com/jarro2783/cxxopts.git
