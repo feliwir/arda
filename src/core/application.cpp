@@ -1,10 +1,12 @@
 #include "application.hpp"
 #include <GLFW/glfw3.h>
+#include <iostream>
+#include <chrono>
 #include "config.hpp"
 #include "global.hpp"
 #include "../filesystem/filesystem.hpp"
 #include "../filesystem/stream.hpp"
-#include "../ini/tokenizer.hpp"
+#include "../ini/ini.hpp"
 std::unique_ptr<arda::Global> arda::Application::s_global;
 
 arda::Application::Application(const std::vector<std::string>& args)
@@ -16,15 +18,20 @@ arda::Application::Application(const std::vector<std::string>& args)
 	//Load configuration first
 	m_config = std::make_unique<Config>(args);
 
+	auto t1 = std::chrono::high_resolution_clock::now();
+
 	//Initialize virtual filesystem
 	m_fs = std::make_unique<FileSystem>(*m_config);
 
-	auto map = m_fs->listDirectory("data/ini");
-	auto weapon = m_fs->getFile("data/ini/weapon.ini");
-	std::string buffer(weapon->getSize(), ' ');
-	weapon->read(&buffer[0], buffer.size());
-	Tokenizer tok;
-	tok.Parse(buffer);
+	auto t2 = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
+	std::cout << "Done creating FileSystem: " << duration / 1000.0 << std::endl;
+	t1 = t2;
+
+	m_ini = std::make_unique<Ini>(*m_config,*m_fs);
+	t2 = std::chrono::high_resolution_clock::now();
+	duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
+	std::cout << "Done INI parsing: " << duration / 1000.0 << std::endl;
 
 	glfwInit();
 

@@ -2,7 +2,7 @@ file(GLOB_RECURSE SRCS *.cpp)
 file(GLOB_RECURSE HDRS *.hpp)
 
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost REQUIRED filesystem iostreams)
+find_package(Boost REQUIRED filesystem iostreams regex)
 
 add_executable(${PROJECT} ${SRCS} ${HDRS})
 

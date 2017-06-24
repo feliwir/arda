@@ -25,10 +25,15 @@ namespace arda
 		inline void setRoot(const std::string& root) { m_root = root; }
 		inline const std::string& getRootDir() const { return m_root; }
 
+		inline void setIniDir(const std::string& dir) { m_iniDir = dir; }
+		inline const std::string& getIniDir() const { return m_iniDir; }
+
+
 	private:
 		bool m_debug;
 		std::string m_title;
 		std::string m_root;
+		std::string m_iniDir;
 		uint32_t m_width;
 		uint32_t m_height;
 

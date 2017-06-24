@@ -12,7 +12,7 @@ namespace arda
 
 		// Inherited via IStream
 		virtual void seek(int offset, SeekOrigin origin) override;
-		virtual int read(char * buffer, int numBytes) override;
+		virtual unsigned int read(char * buffer, size_t numBytes) override;
 
 		void checkOpen();
 	protected:

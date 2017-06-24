@@ -25,7 +25,7 @@ namespace arda
 		}
 
 	protected:
-		int read(char* buffer, int offset, int size);
+		unsigned int read(char* buffer, int offset, size_t size);
 
 		std::fstream m_stream;
 		Version m_version;

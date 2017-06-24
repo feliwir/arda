@@ -6,7 +6,7 @@ arda::FileStream::FileStream(const std::string& file)
 {
 	m_path = file;
 	m_position = 0;
-	m_size = boost::filesystem::file_size(file);
+	m_size = static_cast<int>(boost::filesystem::file_size(file));
 }
 
 void arda::FileStream::checkOpen()
@@ -43,11 +43,11 @@ void arda::FileStream::seek(int offset, SeekOrigin origin)
 	m_stream.seekg(offset, way);
 }
 
-int arda::FileStream::read(char * buffer, int numBytes)
+unsigned int arda::FileStream::read(char * buffer, size_t numBytes)
 {
 	checkOpen();
 	m_stream.read(buffer, numBytes);
-	int bytesRead = m_stream.gcount();
+	unsigned int bytesRead = m_stream.gcount();
 	m_position += bytesRead;
 	return bytesRead;
 }

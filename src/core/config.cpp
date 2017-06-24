@@ -7,7 +7,8 @@ arda::Config::Config(const std::vector<std::string>& args) :
 	m_width(800),
 	m_height(600),
 	m_debug(false),
-	m_root(".")
+	m_root("."),
+	m_iniDir("data/ini")
 {
 	cxxopts::Options options("Arda Engine", "A modern reimplementation of the SAGE engine");
 	options.add_options()

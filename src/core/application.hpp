@@ -10,6 +10,7 @@ namespace arda
 	class Config;
 	class FileSystem;
 	class Global;
+	class Ini;
 
 	class Application
 	{
@@ -24,6 +25,7 @@ namespace arda
 
 	private:
 		GLFWwindow* m_window;
+		std::unique_ptr<Ini> m_ini;
 		std::unique_ptr<Config> m_config;
 		std::unique_ptr<FileSystem> m_fs;
 

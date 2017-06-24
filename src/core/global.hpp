@@ -14,7 +14,7 @@ namespace arda
 		}
 
 		template<class T>
-		int TimeFromStart()
+		long long TimeFromStart()
 		{
 			auto current_time = clock::now();
 			return std::chrono::duration_cast<T>(current_time - m_start).count();

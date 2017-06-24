@@ -12,7 +12,7 @@ arda::BigArchive::BigArchive(const std::string & file)
 
 	m_path = file;
 	m_stream.seekg(0, std::ios::end);
-	m_size = m_stream.tellg();
+	m_size = static_cast<unsigned int>(m_stream.tellg());
 	m_stream.seekg(0, std::ios::beg);
 
 	std::string magic;
@@ -46,9 +46,9 @@ arda::BigArchive::BigArchive(const std::string & file)
 	}
 }
 
-int arda::BigArchive::read(char * buffer, int offset, int size)
+unsigned int arda::BigArchive::read(char * buffer, int offset, size_t size)
 {
 	m_stream.seekg(offset, std::ios::beg);
 	m_stream.read(buffer, size);
-	return m_stream.gcount();
+	return static_cast<unsigned int>(m_stream.gcount());
 }
