@@ -24,7 +24,6 @@ namespace arda
 		std::shared_ptr<IEntry> getEntry(const std::string& path) const;
 
 		std::map<std::string, std::shared_ptr<IEntry>> listDirectory(const std::string& path) const;
-
 	private:
 		void AddArchive(const std::string& path);
 		void AddFile(const std::string& path);

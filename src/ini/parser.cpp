@@ -24,15 +24,14 @@ inline std::string trim(const std::string& str,
 
 void arda::Parser::Parse(std::shared_ptr<IStream> s,const std::string& path,const FileSystem& fs)
 {
-	std::string buffer(s->getSize(), ' ');
-	s->read(&buffer[0], s->getSize());
-	Parse(buffer,path,fs);
+	Parse(s->readAll(),path,fs);
 }
 
 void arda::Parser::Parse(const std::string& ini, const std::string& path,const FileSystem& fs)
 {
-	std::stringstream sourcestream(ini);
-	
+	std::stringstream sourcestream;
+	sourcestream << ini;
+
 	std::map<std::string, std::string> macros;
 	std::string basepath = path.substr(0,path.find_last_of('/')+1);
 
@@ -77,7 +76,14 @@ void arda::Parser::Parse(const std::string& ini, const std::string& path,const F
 			end = str.find_first_of('\"', beg+1);
 			first = str.substr(beg+1, end - (beg+1));
 			std::replace(first.begin(), first.end(), '\\', '/');
-			int a = 0;
+			std::transform(first.begin(), first.end(), first.begin(), ::tolower);
+			auto stream = fs.getStream(basepath + first);
+			auto t = sourcestream.str();
+			auto p = sourcestream.tellg();
+			sourcestream.seekp(p,std::ios::beg);
+			auto buf = stream->readAll();
+			sourcestream.write(buf.c_str(),buf.size());
+			auto t2 = sourcestream.str();
 		}
 
 		return "";

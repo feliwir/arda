@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 namespace arda
 {
@@ -17,6 +18,14 @@ namespace arda
 
 		virtual void seek(int offset, SeekOrigin origin) = 0;
 		virtual unsigned int read(char* buffer,size_t numBytes) = 0;
+
+		inline std::string readAll()
+		{
+			std::string buffer(getSize(), ' ');
+			read(&buffer[0], getSize());
+			return buffer;
+		}
+
 	protected:
 		int m_position;
 		int m_size; 

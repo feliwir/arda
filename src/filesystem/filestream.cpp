@@ -23,7 +23,7 @@ void arda::FileStream::seek(int offset, SeekOrigin origin)
 {
 	checkOpen();
 
-	int way = 0;
+	std::ios::seekdir way = std::ios::beg;
 	switch (origin)
 	{
 	default:
