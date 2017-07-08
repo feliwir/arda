@@ -45,3 +45,7 @@ arda::Ini::Ini(Config & config, FileSystem & fs)
 arda::Ini::~Ini()
 {
 }
+
+void arda::Ini::AddWeapon(const std::string name, std::shared_ptr<Template>)
+{
+}

@@ -73,6 +73,14 @@ std::shared_ptr<arda::IStream> arda::FileSystem::getStream(const std::string & p
 	for (auto part : fs::path(path))
 	{
 		auto entry = dir->getEntry(part.string());
+		
+		if (entry == nullptr)
+		{
+			std::cout << "Invalid path: " << path << std::endl;
+			return nullptr;
+		}
+			
+
 		if (IEntry::isDirectory(*entry))
 			dir = std::static_pointer_cast<Directory>(entry);
 		else
