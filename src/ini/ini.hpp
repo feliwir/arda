@@ -16,7 +16,7 @@ namespace arda
 		Ini(Config& config,FileSystem& fs);
 		~Ini();
 
-		void AddWeapon(const std::string name, std::shared_ptr<Template> weapon);
+		void AddTemplate(std::shared_ptr<Template> temp, const std::string& name="");
 	private:
 		std::map<const std::string, std::shared_ptr<Template>> m_weapons;
 	};

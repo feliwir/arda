@@ -7,7 +7,7 @@ namespace arda
 {
 	class Template
 	{
-	private:
+	public:
 		enum Type
 		{
 			WEAPON	= 0,
@@ -24,13 +24,21 @@ namespace arda
 
 		static std::shared_ptr<Template> Create(const std::string& type);
 
-		inline void IntProperty(const std::string& prop)	{ m_properties[prop] = int(); }
-		inline void FloatProperty(const std::string& prop)	{ m_properties[prop] = float(); }
-		inline void StringProperty(const std::string& prop) { m_properties[prop] = std::string(); }
-		inline void BoolProperty(const std::string& prop)	{ m_properties[prop] = bool(); }
+		inline Type GetType()
+		{
+			return m_type;
+		}
+
+	protected:
+		template<class T>
+		inline void CreateProperty(const std::string& prop)
+		{
+			m_properties[prop] = T();
+		}
 	protected:
 		std::map<std::string, boost::variant<int, float, std::string,bool>> m_properties;
-	private:
+		Type m_type;
+	private:	
 		static std::map<std::string, Type> m_types;
 	};
 }

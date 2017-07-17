@@ -2,34 +2,57 @@
 
 arda::Weapon::Weapon()
 {
-	FloatProperty("ScatterRadiusVsInfantry");
-	FloatProperty("ScatterRadius");
+	CreateProperty<float>("ScatterRadiusVsInfantry");
+	CreateProperty<float>("ScatterRadius");
 
-	FloatProperty("AttackRange");
-	
-	FloatProperty("MinimumAttackRange");
-	IntProperty("MinWeaponSpeed");
-	IntProperty("WeaponSpeed");
-	IntProperty("MaxWeaponSpeed");
+	CreateProperty<float>("AttackRange");
+	CreateProperty<float>("MinimumAttackRange");
 
-	IntProperty("DelayBetweenShots");
+	CreateProperty<int>("MinWeaponSpeed");
+	CreateProperty<int>("WeaponSpeed");
+	CreateProperty<int>("MaxWeaponSpeed");
 
-	IntProperty("PreAttackDelay");
+	CreateProperty<int>("DelayBetweenShots");
+	CreateProperty<int>("PreAttackDelay");
+	CreateProperty<int>("FiringDuration");
+	CreateProperty<std::string>("RadiusDamageAffects");
+	CreateProperty<std::string>("PreAttackType");
+	CreateProperty<bool>("ScaleWeaponSpeed");
+	CreateProperty<int>("HitPercentage");
+	CreateProperty<int>("PreAttackRandomAmount");
+	CreateProperty<int>("RangeBonusMinHeight");
+	CreateProperty<int>("RangeBonus");
+	CreateProperty<int>("RangeBonusPerFoot");
+	CreateProperty<int>("AcceptableAimDelta");
+	CreateProperty<int>("ClipSize");
+	CreateProperty<bool>("AutoReloadsClip");
+	CreateProperty<bool>("InstantLoadClipOnActivate");
+	CreateProperty<bool>("AutoReloadWhenIdle");
+	CreateProperty<int>("ClipReloadTime");
 
-	IntProperty("FiringDuration");
+	CreateProperty<int>("ContinuousFireOne");
+	CreateProperty<int>("ContinuousFireCoast");
+	CreateProperty<int>("CanFireWhileMoving");
+	CreateProperty<int>("IdleAfterFiringDelay");
+	CreateProperty<std::string>("ProjectileCollidesWith");
 
-	StringProperty("FireFX");
-	StringProperty("RadiusDamageAffects");
+	CreateProperty<bool>("HitStoredTarget");
+	CreateProperty<bool>("IsAimingWeapon");
+	CreateProperty<bool>("AntiAirborneVehicle");
+	CreateProperty<bool>("AntiAirborneMonster");
+	CreateProperty<bool>("LeechRangeWeapon");
+	CreateProperty<bool>("MeleeWeapon");
+	CreateProperty<bool>("DamageDealtAtSelfPosition");
+	CreateProperty<bool>("ShouldPlayUnderAttackEvaEvent");
 
-	StringProperty("PreAttackType");
+	CreateProperty<std::string>("FireFX");
+	CreateProperty<std::string>("FireFlankFX");
+	CreateProperty<std::string>("PreAttackFX");
+	CreateProperty<std::string>("FXTrigger");
 
-	BoolProperty("ScaleWeaponSpeed");
-
-	IntProperty("HitPercentage");
-	IntProperty("PreAttackRandomAmount");
-
-	BoolProperty("IsAimingWeapon");
-	BoolProperty("AntiAirborneVehicle");
-	StringProperty("FXTrigger");
+	CreateProperty<std::string>("PreferredTargetBone");
+	CreateProperty<bool>("ProjectileSelf");
+	CreateProperty<std::string>("HitPassengerPercentage");
+	CreateProperty<bool>("CanBeDodged");
 }
 

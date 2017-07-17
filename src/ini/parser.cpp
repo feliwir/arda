@@ -2,7 +2,9 @@
 #include "../core/exception.hpp"
 #include "../filesystem/stream.hpp"
 #include "../filesystem/filesystem.hpp"
+#include "../filesystem/file.hpp"
 #include "template.hpp"
+#include "ini.hpp"
 #include <string>
 #include <algorithm>
 #include <boost/regex.hpp>
@@ -25,21 +27,31 @@ inline std::string trim(const std::string& str,
 	return str.substr(strBegin, strRange);
 }
 
-void arda::Parser::Parse(std::shared_ptr<IStream> s,const std::string& path,const FileSystem& fs, std::map<std::string, std::string>& macros)
+void arda::Parser::Parse(std::shared_ptr<IStream> s,const std::string& path,const FileSystem& fs, Ini& ini,std::map<std::string, std::string>& macros)
 {
 	auto it = m_cache.find(path);
 
 	if (it == m_cache.end())
-		Parse(s->readAll(), path, fs, macros);
+		Parse(s->readAll(), path, fs,ini, macros);
 	else
-		macros.insert(it->second.begin(), it->second.begin());
+		macros.insert(it->second.begin(), it->second.end());
 }
 
-void arda::Parser::Parse(std::shared_ptr<IStream> stream, const std::string & path, const FileSystem & fs)
+void arda::Parser::Parse(std::shared_ptr<IStream> stream, const std::string & path, const FileSystem & fs,Ini& ini)
 {
 	std::map<std::string, std::string> macros;
 
-	Parse(stream, path, fs, macros);
+	Parse(stream, path, fs,ini, macros);
+}
+
+void arda::Parser::Preload(const std::string & path, const FileSystem & fs,Ini& ini)
+{
+	auto preload_entry = fs.getEntry(path);
+	auto preload_stream = (std::static_pointer_cast<File>(preload_entry))->getStream();
+	std::map<std::string, std::string> macros;
+
+	Parse(preload_stream, path, fs,ini, macros);
+	m_global.insert(macros.begin(), macros.end());
 }
 
 void arda::Parser::ClearCache()
@@ -47,7 +59,7 @@ void arda::Parser::ClearCache()
 	m_cache.clear();
 }
 
-void arda::Parser::Parse(const std::string & content, const std::string & path, const FileSystem & fs, std::map<std::string, std::string>& macros)
+void arda::Parser::Parse(const std::string & content, const std::string & path, const FileSystem & fs, Ini& ini, std::map<std::string, std::string>& macros)
 {
 
 	auto it = m_cache.find(path);
@@ -70,7 +82,20 @@ void arda::Parser::Parse(const std::string & content, const std::string & path, 
 	{
 		if (!std::isdigit(macro.front()))
 		{
-			macro = macros[macro];
+			auto it = macros.find(macro);
+			if (it != macros.end())
+			{
+				macro = it->second;
+			}
+			else
+			{
+				it = m_global.find(macro);
+				if (it != m_global.end())
+				{
+					macro = it->second;
+				}
+			}
+			
 		}
 	};
 
@@ -114,7 +139,7 @@ void arda::Parser::Parse(const std::string & content, const std::string & path, 
 			auto stream = fs.getStream(inc_path);
 			
 			if(stream)
-				Parse(stream, inc_path, fs, macros);
+				Parse(stream, inc_path, fs,ini, macros);
 		}
 		else if (directive == "#ADD")
 		{
@@ -140,17 +165,62 @@ void arda::Parser::Parse(const std::string & content, const std::string & path, 
 			int sum = std::stoi(first) + std::stoi(second);
 			return std::to_string(sum) + suffix;
 		}
-		else
+		else if (directive == "#SUBTRACT")
 		{
-			int a = 0;
+			++end;
+			skipws(str, end);
+			beg = end;
+			end = str.find_first_of(' ', beg);
+			first = str.substr(beg, end - beg);
+			skipws(str, end);
+			beg = end;
+			end = str.find_first_of(' ', beg);
+			second = str.substr(beg, end - beg);
+
+			getmacro(first);
+			getmacro(second);
+			if (first.size() == 0) { first = "0"; }
+			if (second.size() == 0) { second = "0"; }
+
+			std::string suffix = "";
+			if (first.back() == '%' || second.back() == '%')
+				suffix = "%";
+
+			int sum = std::stoi(first) - std::stoi(second);
+			return std::to_string(sum) + suffix;
 		}
+		else if (directive == "#MULTIPLY")
+		{
+			++end;
+			skipws(str, end);
+			beg = end;
+			end = str.find_first_of(' ', beg);
+			first = str.substr(beg, end - beg);
+			skipws(str, end);
+			beg = end;
+			end = str.find_first_of(' ', beg);
+			second = str.substr(beg, end - beg);
+
+			getmacro(first);
+			getmacro(second);
+			if (first.size() == 0) { first = "0"; }
+			if (second.size() == 0) { second = "0"; }
+
+			std::string suffix = "";
+			if (first.back() == '%' || second.back() == '%')
+				suffix = "%";
+
+			int sum = std::stof(first) * std::stof(second);
+			return std::to_string(sum) + suffix;
+		}
+
 		return "";
 	};
 
 
 	std::string line, first, second, third;
 	std::string name,type;
-	std::shared_ptr<Template> temp;
+	std::shared_ptr<Template> main,child;
 	int level = 0;
 	size_t pos, beg, end;
 
@@ -206,12 +276,19 @@ void arda::Parser::Parse(const std::string & content, const std::string & path, 
 			if (line == "End")
 			{
 				level--;
-				temp = nullptr;
+				if (child == nullptr&&main)
+				{
+					ini.AddTemplate(main,name);
+					main = nullptr;
+				}
 			}
 			//unnamed block
 			else
 			{
-				temp = Template::Create(line);
+				if(main)
+					child = Template::Create(line);
+				else
+					main = Template::Create(line);
 				level++;
 			}
 			continue;
@@ -229,14 +306,23 @@ void arda::Parser::Parse(const std::string & content, const std::string & path, 
 			++pos;
 			skipws(line, pos);
 			second = line.substr(pos, line.size());
-			if(temp)
-				temp->SetProperty(first, second);
+			auto block = (child) ? child : main;
+			
+			if (block)
+			{
+				if (second.front() == '#')
+					second = preprocess(second);
+
+				getmacro(second);
+				block->SetProperty(first, second);
+			}
 		}
 		//named block
 		else
 		{
 			second = line.substr(pos, line.size());
-			temp = Template::Create(first);
+			auto& block = (main) ? child : main;
+			block = Template::Create(first);
 			name = second;
 			level++;
 		}

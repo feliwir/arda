@@ -12,31 +12,38 @@ void arda::Template::SetProperty(const std::string & name, const std::string & v
 {
 	auto it = m_properties.find(name);
 	
-	if (it != m_properties.end())
+	try
 	{
-		switch (it->second.which())
+		if (it != m_properties.end())
 		{
-		//INT 
-		case 0:
-			m_properties[name] = std::stoi(value);
-			break;
-		//FLOAT
-		case 1:
-			m_properties[name] = std::stof(value);
-			break;
-		//STRING
-		case 2:
-			m_properties[name] = value;
-			break;
-		//BOOLEAN
-		case 3:
-			m_properties[name] = (value == "Yes") ? true : false;
-			break;
+			switch (it->second.which())
+			{
+				//INT 
+			case 0:
+				m_properties[name] = std::stoi(value);
+				break;
+				//FLOAT
+			case 1:
+				m_properties[name] = std::stof(value);
+				break;
+				//STRING
+			case 2:
+				m_properties[name] = value;
+				break;
+				//BOOLEAN
+			case 3:
+				m_properties[name] = (value == "Yes") ? true : false;
+				break;
+			}
+		}
+		else
+		{
+			std::cout << "Unknown property: " << name << std::endl;
 		}
 	}
-	else
+	catch (...)
 	{
-		std::cout << "Unknown property: " << name << std::endl;
+		std::cout << "Invalid argument!" << std::endl;
 	}
 }
 
@@ -55,6 +62,9 @@ std::shared_ptr<arda::Template> arda::Template::Create(const std::string & type)
 		default:
 			ptr = nullptr;
 		}
+
+		if(ptr)
+			ptr->m_type = it->second;
 	}
 
 	return ptr;
