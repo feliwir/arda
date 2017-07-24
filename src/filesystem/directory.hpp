@@ -3,8 +3,9 @@
 #include <memory>
 #include <string>
 #include <mutex>
+#include <algorithm>
 #include "entry.hpp"
-
+ 
 namespace arda
 {
 	class IStream;
