@@ -270,10 +270,11 @@ void arda::Parser::Parse(const std::string & content, const std::string & path, 
 		pos = line.find_first_of(" =");
 
 		//either an anonymous block or End
+		
 		if (pos == std::string::npos)
 		{
 			//end of block
-			if (line == "End")
+			if (line == "End" || line == "END")
 			{
 				level--;
 				if (child == nullptr&&main)
@@ -297,6 +298,14 @@ void arda::Parser::Parse(const std::string & content, const std::string & path, 
 		//property/block name
 		first = line.substr(0, pos);
 
+		//weird controlbarsheme.ini stuff
+		if (first == "ImageName" || first == "Layer" || first == "Side")
+			continue;
+
+		//weird controlbarsheme.ini stuff
+		if (first == "ParticleSysBone")
+			continue;
+
 		//skip all whitespaces
 		skipws(line, pos);
 
@@ -317,12 +326,42 @@ void arda::Parser::Parse(const std::string & content, const std::string & path, 
 				block->SetProperty(first, second);
 			}
 		}
+		//X Y values 
+		else if (line[pos] == 'X' && line[pos+1] == ':')
+		{
+			second = line.substr(pos - 1, line.size());
+			//TODO: parse values here, can it only be Y also?
+			int k = 3;
+		}
+		//R G B A values
+		else if (line[pos] == 'R' && line[pos + 1] == ':')
+		{
+			second = line.substr(pos - 1, line.size());
+			//TODO: parse values here, can it only be one value?
+			int y = 0;
+		}
+
 		//named block
 		else
 		{
-			second = line.substr(pos, line.size());
-			auto& block = (main) ? child : main;
-			block = Template::Create(first);
+			if (first == "ChildObject")
+			{
+				second = line.substr(pos, line.size());
+				pos = second.find(' ');
+				third = second.substr(pos, second.size());
+				second = second.substr(0, pos);
+				auto& block = child;
+				block = Template::Create(second);
+				//TODO: get parent object (third) and add child
+			}
+			else
+			{
+				second = line.substr(pos, line.size());
+				auto& block = (main) ? child : main;
+				block = Template::Create(first);
+			}
+			if (path == "data/ini/crate.ini")
+				int k = 0;
 			name = second;
 			level++;
 		}
@@ -330,4 +369,6 @@ void arda::Parser::Parse(const std::string & content, const std::string & path, 
 
 	m_cache[path] = macros;
 	std::cout << level << std::endl;
+	if (level != 0)
+		int i = 0;
 }
