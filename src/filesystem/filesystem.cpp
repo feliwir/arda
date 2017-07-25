@@ -69,8 +69,10 @@ std::shared_ptr<arda::IStream> arda::FileSystem::getStream(const std::string & p
 {
 	auto dir = m_vfsRoot;
 	std::shared_ptr<File> file = nullptr;
-	
-	for (auto part : fs::path(path))
+	std::string p = path;
+	std::transform(p.begin(), p.end(), p.begin(), ::tolower);
+
+	for (auto part : fs::path(p))
 	{
 		auto entry = dir->getEntry(part.string());
 		
@@ -97,8 +99,10 @@ std::shared_ptr<arda::IEntry> arda::FileSystem::getEntry(const std::string & pat
 {
 	auto dir = m_vfsRoot;
 	std::shared_ptr<IEntry> result = dir;
+	std::string p = path;
+	std::transform(p.begin(), p.end(), p.begin(), ::tolower);
 
-	for (auto part : fs::path(path))
+	for (auto part : fs::path(p))
 	{
 		auto entry = dir->getEntry(part.string());
 		result = entry;

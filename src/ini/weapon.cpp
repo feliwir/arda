@@ -54,5 +54,11 @@ arda::Weapon::Weapon()
 	CreateProperty<bool>("ProjectileSelf");
 	CreateProperty<std::string>("HitPassengerPercentage");
 	CreateProperty<bool>("CanBeDodged");
+
+	CreateProperty<std::string>("ProjectileTemplateName");
+	CreateProperty<std::string>("WarheadTemplateName");
+	CreateProperty<int>("Damage");
+	CreateProperty<float>("Radius");
+	CreateProperty<int>("DelayTime");
 }
 
