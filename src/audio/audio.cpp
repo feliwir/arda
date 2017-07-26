@@ -26,7 +26,7 @@ void arda::Audio::checkError(const std::string& message)
 }
 
 arda::Audio::Audio(Config& config) :
-	m_internals(new AudioInternals)
+	m_internals(std::make_unique<AudioInternals>())
 {
 	auto& device = m_internals->m_device;
 	auto& context = m_internals->m_context;
@@ -47,6 +47,4 @@ arda::Audio::~Audio()
 	alcMakeContextCurrent(NULL);
 	alcDestroyContext(context);
 	alcCloseDevice(device);
-
-	delete m_internals;
 }

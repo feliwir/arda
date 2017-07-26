@@ -5,6 +5,7 @@
 #include "config.hpp"
 #include "global.hpp"
 #include "../audio/audio.hpp"
+#include "../video/video.hpp"
 #include "../graphics/graphics.hpp"
 #include "../filesystem/filesystem.hpp"
 #include "../filesystem/stream.hpp"
@@ -49,6 +50,8 @@ arda::Application::Application(const std::vector<std::string>& args)
 	auto stream = m_fs->getStream("GermanSplash.jpg");
 	Image img(stream);
 
+	stream = m_fs->getStream("data/movies/CS71.vp6");
+	Video vid(stream);
 
 	auto t2 = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
