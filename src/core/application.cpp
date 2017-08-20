@@ -31,7 +31,7 @@ arda::Application::Application(const std::vector<std::string>& args)
 	glfwInit();
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	m_window = glfwCreateWindow(m_config->getWidth(),
@@ -50,7 +50,7 @@ arda::Application::Application(const std::vector<std::string>& args)
 	auto stream = m_fs->getStream("GermanSplash.jpg");
 	Image img(stream);
 
-	stream = m_fs->getStream("data/movies/CS71.vp6");
+	stream = m_fs->getStream("data/movies/Credits_with_alpha.vp6");
 	Video vid(stream);
 
 	auto t2 = std::chrono::high_resolution_clock::now();

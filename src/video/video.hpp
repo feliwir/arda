@@ -13,5 +13,10 @@ namespace arda
 		~Video();
 	private:
 		std::unique_ptr<VideoInternals> m_internals;
+		bool m_hasAlpha;
+		float m_fps;
+		int m_duration;
+		int m_width;
+		int m_height;
 	};
 }

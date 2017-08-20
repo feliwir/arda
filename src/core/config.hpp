@@ -28,7 +28,8 @@ namespace arda
 		inline void setIniDir(const std::string& dir) { m_iniDir = dir; }
 		inline const std::string& getIniDir() const { return m_iniDir; }
 
-
+		inline void setIniPreprocessor(const bool pp) { m_iniPp = pp; }
+		inline const bool getIniPreprocessor() const { return m_iniPp; }
 	private:
 		bool m_debug;
 		std::string m_title;
@@ -36,6 +37,8 @@ namespace arda
 		std::string m_iniDir;
 		uint32_t m_width;
 		uint32_t m_height;
+		bool m_iniPp;
+
 
     };
 }

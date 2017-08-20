@@ -2,6 +2,7 @@
 #include <string>
 #include <memory>
 #include <map>
+#include "tokenstream.hpp"
 
 namespace arda
 {
@@ -19,5 +20,6 @@ namespace arda
 		void AddTemplate(std::shared_ptr<Template> temp, const std::string& name="");
 	private:
 		std::map<const std::string, std::shared_ptr<Template>> m_weapons;
+		std::map<const std::string, TokenStream> m_lexed;
 	};
 }

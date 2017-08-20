@@ -48,18 +48,20 @@ void arda::AvStream::Attach(AVFormatContext * ctx)
 {
 	ctx->pb = GetContext();
 	ctx->flags = AVFMT_FLAG_CUSTOM_IO;
-
+	
 	// Determining the input format:
+	std::memset(m_buffer, 0, m_bufSize);
 	int readBytes = 0;
-	readBytes = m_stream->read(reinterpret_cast<char*>(m_buffer), m_bufSize);
+	int size = m_bufSize - AVPROBE_PADDING_SIZE;
+	readBytes = m_stream->read(reinterpret_cast<char*>(m_buffer), size);
 	m_stream->seek(0, IStream::BEGIN);
-
 
 	// Now we set the ProbeData-structure for av_probe_input_format:
 	AVProbeData probeData;
 	probeData.buf = m_buffer;
 	probeData.buf_size = readBytes;
 	probeData.filename = "";
+	probeData.mime_type = NULL;
 
 	// Determine the input-format:
 	ctx->iformat = av_probe_input_format(&probeData, 1);
@@ -74,12 +76,18 @@ int64_t arda::AvStream::SeekFunc(void* ptr, int64_t pos, int whence)
 	IStream::SeekOrigin origin;
 	switch (whence)
 	{
-	case 0:
+	case AVSEEK_SIZE:
+		return stream->getSize();
+		break;
+	case SEEK_SET:
 		origin = IStream::BEGIN;
-	case 1:
+		break;
+	case SEEK_CUR:
 		origin = IStream::CURRENT;
-	case 2:
+		break;
+	case SEEK_END:
 		origin = IStream::END;
+		break;
 	}
 
 	stream->seek(pos, origin);

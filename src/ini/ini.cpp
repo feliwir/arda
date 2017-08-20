@@ -4,6 +4,7 @@
 #include "../filesystem/directory.hpp"
 #include "../filesystem/file.hpp"
 #include "../filesystem/stream.hpp"
+#include "lexer.hpp"
 #include "parser.hpp"
 #include "template.hpp"
 #include <iostream>
@@ -17,13 +18,16 @@ arda::Ini::Ini(Config & config, FileSystem & fs)
 
 	//walk down the directory recursively
 	std::function<void(std::shared_ptr<IEntry>,const std::string& path)> recurse;
-	recurse = [&p,&recurse,&num,&fs,this](std::shared_ptr<IEntry> e,const std::string& path)
+	recurse = [this,&p,&recurse,&num,&fs](std::shared_ptr<IEntry> e,const std::string& path)
 	{
 		if (IEntry::isRegular(*e))
 		{
 			auto file = std::static_pointer_cast<File>(e);
 			auto s = file->getStream();
-			p.Parse(s,path,fs,*this);
+			//p.Parse(s,path,fs,*this);
+			auto source = s->readAll();
+			m_lexed[path] = Lexer::Lex(source, path);
+
 			++num;
 		}
 		else if (IEntry::isDirectory(*e))
