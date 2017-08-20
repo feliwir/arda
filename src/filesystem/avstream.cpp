@@ -1,6 +1,8 @@
 #include "avstream.hpp"
 #include "stream.hpp"
 #include <functional>
+#include <cstring>
+
 extern "C"
 {
 #include <libavformat/avio.h>
