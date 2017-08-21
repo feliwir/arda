@@ -8,11 +8,6 @@ namespace arda
 	class TokenStream
 	{
 	public:
-		TokenStream()
-		{
-			int a = 0;
-		}
-
 		inline TokenStream(const std::string& file)
 		{
 			m_file = file;
@@ -28,6 +23,16 @@ namespace arda
 		{
 			return m_tokens[m_currentToken];
 			++m_currentToken;
+		}
+
+		inline std::vector<Token>& GetTokens()
+		{
+			return m_tokens;
+		}
+
+		inline const Token GetBack()
+		{
+			return m_tokens.back();
 		}
 
 		//Preprocessor related

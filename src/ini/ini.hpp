@@ -2,7 +2,7 @@
 #include <string>
 #include <memory>
 #include <map>
-#include "tokenstream.hpp"
+#include "parser/context.hpp"
 
 namespace arda
 {
@@ -18,8 +18,12 @@ namespace arda
 		~Ini();
 
 		void AddTemplate(std::shared_ptr<Template> temp, const std::string& name="");
+
+		inline std::vector<std::string>& GetGlobalIncludes() { return m_globalIncludes; }
+		std::shared_ptr<ParsingContext> GetContext(const std::string& path,FileSystem& fs);
 	private:
+		std::vector<std::string> m_globalIncludes;
 		std::map<const std::string, std::shared_ptr<Template>> m_weapons;
-		std::map<const std::string, TokenStream> m_lexed;
+		std::map<const std::string, std::shared_ptr<ParsingContext>> m_files;
 	};
 }

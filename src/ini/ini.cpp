@@ -4,8 +4,8 @@
 #include "../filesystem/directory.hpp"
 #include "../filesystem/file.hpp"
 #include "../filesystem/stream.hpp"
-#include "lexer.hpp"
-#include "parser.hpp"
+#include "parser/lexer.hpp"
+#include "parser/parser.hpp"
 #include "template.hpp"
 #include <iostream>
 
@@ -24,10 +24,8 @@ arda::Ini::Ini(Config & config, FileSystem & fs)
 		{
 			auto file = std::static_pointer_cast<File>(e);
 			auto s = file->getStream();
-			//p.Parse(s,path,fs,*this);
-			auto source = s->readAll();
-			m_lexed[path] = Lexer::Lex(source, path);
 
+			m_files.emplace(path, Lexer::Lex(s, path,*this,fs));
 			++num;
 		}
 		else if (IEntry::isDirectory(*e))
@@ -43,7 +41,13 @@ arda::Ini::Ini(Config & config, FileSystem & fs)
 		}
 	};
 
-	p.Preload("data/ini/gamedata.ini",fs,*this);
+	m_globalIncludes = { "data/ini/gamedata.ini" };
+
+	for (const auto& p : m_globalIncludes)
+	{
+		m_files.emplace(p, Lexer::Lex(fs.getStream(p), p, *this,fs));
+	}
+
 	recurse(entry,"data/ini");
 	std::cout << num << std::endl;
 }
@@ -60,4 +64,17 @@ void arda::Ini::AddTemplate(std::shared_ptr<Template> temp, const std::string& n
 		m_weapons[name] = temp;
 		break;
 	}
+}
+
+std::shared_ptr<arda::ParsingContext> arda::Ini::GetContext(const std::string & path, FileSystem& fs)
+{
+	auto it = m_files.find(path);
+	if (it != m_files.end())
+		return it->second;
+	else
+	{
+		auto s = fs.getStream(path);
+		m_files.emplace(path, Lexer::Lex(s, path, *this,fs));
+	}
+	return std::shared_ptr<ParsingContext>();
 }

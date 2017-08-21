@@ -1,11 +1,13 @@
 #pragma once
 #include <fstream>
+#include <string>
 #include <stdint.h>
 
 namespace arda
 {
 	namespace util
 	{
+
 		inline uint32_t reverse(uint32_t v)
 		{
 			return (v << 24) | (v << 8 & 0xff0000) | (v >> 8 & 0xff00) | (v >> 24);
