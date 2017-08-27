@@ -23,17 +23,20 @@ namespace arda
 			SINGLE_CHAR,
 		};
 	public:
-		static std::shared_ptr<ParsingContext> Lex(std::shared_ptr<IStream> stream, 
-												const std::string& filename, 
-												Ini& ini,FileSystem& fs);
-	private:
-		static Token CreateToken(const std::string& line, int& pos, std::shared_ptr<ParsingContext>);
-		static void AddEol(std::shared_ptr<TokenStream> stream,int col);
-		static bool CheckEol(const std::string& line, std::shared_ptr<TokenStream> stream);
-		static void SkipWhitespaces(const std::string& str, int& pos);
-		static void Preprocess(const std::string& str, int& pos,std::shared_ptr<ParsingContext> context);
-		static std::string ReadToWs(const std::string& str, int& pos);
+		Lexer(Ini& ini, FileSystem& fs);
 
+		std::shared_ptr<ParsingContext> Lex(std::shared_ptr<IStream> stream, 
+												const std::string& filename);
+	private:
+		std::vector<Token> Tokenize(const std::string&, std::shared_ptr<ParsingContext> context = nullptr);
+		Token CreateToken(const std::string& line, int& pos, std::shared_ptr<ParsingContext> context=nullptr);
+		void AddEol(std::shared_ptr<TokenStream> stream,int col);
+		bool CheckEol(const std::string& line, std::shared_ptr<TokenStream> stream);
+		void SkipWhitespaces(const std::string& str, int& pos);
+		void Preprocess(const std::string& str, int& pos,std::shared_ptr<ParsingContext> context);
+		std::string ReadToWs(const std::string& str, int& pos);
+		std::string ReadQuoted(const std::string& str, int & pos);
+		std::string ReadCmd(const std::string& str, int& pos);
 
 		static inline std::string trim(const std::string& str)
 		{
@@ -46,6 +49,11 @@ namespace arda
 			return str.substr(first, (last - first + 1));
 		}
 
-		static int cline;
+	private:
+		Ini& m_ini;
+		FileSystem& m_fs;
+		std::string m_basepath;
+		std::string m_path;
+		int m_line;
 	};
 }

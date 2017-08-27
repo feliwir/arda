@@ -31,8 +31,7 @@ namespace arda
 			int Column;
 		};
 
-		Token();
-		Token(TokenType type);
+		Token(TokenType type=Unknown);
 		Token(const std::string& str,bool unicode = false);
 		Token(const long long num);
 		Token(const double num, bool percent = false);

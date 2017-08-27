@@ -105,7 +105,7 @@ inline bool arda::Image::Load(std::shared_ptr<IStream> stream)
 arda::Image::Magic arda::Image::GetMagic(uint8_t * m)
 {
 	//JPEG magic
-	if (m[0] == 0xFF | m[1] == 0xD8 | m[2] == 0xFF)
+	if ((m[0] == 0xFF) | (m[1] == 0xD8) | (m[2] == 0xFF))
 		return JPEG;
 
 	return Magic();

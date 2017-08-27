@@ -1,9 +1,5 @@
 #include "token.hpp"
 
-arda::Token::Token()
-{
-}
-
 arda::Token::Token(TokenType type)
 {
 	Type = type;

@@ -76,11 +76,13 @@ int64_t arda::AvStream::SeekFunc(void* ptr, int64_t pos, int whence)
 	auto stream = reinterpret_cast<IStream*>(ptr);
 
 	IStream::SeekOrigin origin;
+
 	switch (whence)
 	{
 	case AVSEEK_SIZE:
 		return stream->getSize();
 		break;
+	default:
 	case SEEK_SET:
 		origin = IStream::BEGIN;
 		break;

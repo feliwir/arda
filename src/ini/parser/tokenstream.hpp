@@ -19,10 +19,14 @@ namespace arda
 			m_tokens.push_back(t);
 		}
 
-		inline const Token GetToken()
+		inline void InsertTokens(const std::vector<Token>& tokens)
 		{
-			return m_tokens[m_currentToken];
-			++m_currentToken;
+			m_tokens.insert(m_tokens.end(), tokens.begin(), tokens.end());
+		}
+
+		inline const Token& GetToken()
+		{
+			return m_tokens[m_currentToken++];
 		}
 
 		inline std::vector<Token>& GetTokens()
@@ -30,28 +34,31 @@ namespace arda
 			return m_tokens;
 		}
 
+		inline void Start()
+		{
+			m_currentToken = 0;
+		}
+
+		inline const Token& Current()
+		{
+			return m_tokens[m_currentToken];
+		}
+
+		inline const Token& Peek()
+		{
+			return m_tokens[m_currentToken + 1];
+		}
+
 		inline const Token GetBack()
 		{
 			return m_tokens.back();
 		}
 
-		//Preprocessor related
-		inline const std::string& GetMacro(const std::string& macro)
+		inline void Clear()
 		{
-			return m_macros[macro];
-		}
-
-		inline std::map<std::string, std::string>& GetMacros()
-		{
-			return m_macros;
-		}
-
-		inline void AddMacro(const std::string& macro,const std::string& value)
-		{
-			m_macros[macro] = value;
+			m_tokens.clear();
 		}
 	private:
-		std::map<std::string, std::string> m_macros;
 		std::string m_file;
 		int m_currentToken;
 		std::vector<Token> m_tokens;

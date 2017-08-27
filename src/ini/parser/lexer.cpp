@@ -3,28 +3,25 @@
 #include <algorithm>
 #include <codecvt>
 #include <locale>
+#include <boost/filesystem.hpp>
 #include "../ini.hpp"
 #include "../../filesystem/stream.hpp"
+namespace fs = boost::filesystem;
 
-int arda::Lexer::cline = 0;
+std::map<std::string, std::string> arda::ParsingContext::m_globalMacros;
 
-std::shared_ptr<arda::ParsingContext> arda::Lexer::Lex(std::shared_ptr<IStream> stream, 
-	const std::string & filename,Ini& ini, FileSystem& fs)
+std::shared_ptr<arda::ParsingContext> arda::Lexer::Lex(std::shared_ptr<IStream> stream, const std::string & path)
 {
 	auto context = std::make_shared<ParsingContext>();
-	
-	for (const auto& include : ini.GetGlobalIncludes())
-	{
-		if (include != filename)
-			context->GetIncludes().push_back(ini.GetContext(include,fs));
-	}
+	m_path = path;
+	m_basepath = path.substr(0, path.find_last_of('/') + 1);
+	m_line = 0;
 
-
-	auto tokens = std::make_shared<TokenStream>(filename);
+	auto tokens = std::make_shared<TokenStream>(path);
+	context->SetTokens(tokens);
 
 	std::string line;
 	int pos;
-	cline = 0;
 	std::stringstream sourcestream;
 	std::string source = stream->readAll();
 	sourcestream << source;
@@ -66,27 +63,40 @@ std::shared_ptr<arda::ParsingContext> arda::Lexer::Lex(std::shared_ptr<IStream> 
 			continue;
 
 
-		pos = 0;
 
-		while (pos < line.size())
-		{
-			Token tok = CreateToken(line, pos,context);
-			
-			if(tok.Type!=Token::Unknown)
-				tokens->AddToken(tok);
-		}
+		tokens->InsertTokens(Tokenize(line, context));
+
 
 		AddEol(tokens,pos);
 	}
 
-	context->SetTokens(tokens);
+	tokens->AddToken(Token(Token::EndOfFile));
+
 	return context;
+}
+
+arda::Lexer::Lexer(Ini & ini, FileSystem & fs) : m_ini(ini), m_fs(fs)
+{
+}
+
+std::vector<arda::Token> arda::Lexer::Tokenize(const std::string & line, std::shared_ptr<ParsingContext> context)
+{
+	std::vector<Token> tokens;
+	int pos = 0;
+	while (pos < line.size())
+	{
+		Token tok = CreateToken(line, pos, context);
+		if(tok.Type!=Token::Unknown)
+			tokens.push_back(tok);
+	}
+
+	return tokens;
 }
 
 arda::Token arda::Lexer::CreateToken(const std::string & line, int & pos, std::shared_ptr<ParsingContext> context)
 {
 	bool parse = true;
-	Token t;
+	Token t(Token::Unknown);
 	LexerMode mode = NORMAL;
 	Token::TokenType type = Token::Unknown;
 	std::string content;
@@ -177,7 +187,10 @@ arda::Token arda::Lexer::CreateToken(const std::string & line, int & pos, std::s
 	switch (mode)
 	{
 	case STRING:
-		t = Token(content);
+		if (context && context->CheckMacro(content))
+			context->GetTokenStream()->InsertTokens(Tokenize(content,context));
+		else
+			t = Token(content);
 		break;
 	case INTEGER:
 		t = Token(std::stoll(content));
@@ -197,7 +210,7 @@ arda::Token arda::Lexer::CreateToken(const std::string & line, int & pos, std::s
 	}
 
 	t.Position.Column = col;
-	t.Position.Line = cline;
+	t.Position.Line = m_line;
 	return t;
 }
 
@@ -208,11 +221,11 @@ void arda::Lexer::AddEol(std::shared_ptr<TokenStream> stream,int col)
 	if (add)
 	{
 		Token t(Token::EndOfLine);
-		t.Position.Line = cline;
+		t.Position.Line = m_line;
 		t.Position.Column = col;
 		stream->AddToken(t);
 	}
-	++cline;
+	++m_line;
 }
 
 bool arda::Lexer::CheckEol(const std::string & line, std::shared_ptr<TokenStream> stream)
@@ -233,7 +246,7 @@ void arda::Lexer::Preprocess(const std::string & str, int & pos, std::shared_ptr
 {
 	SkipWhitespaces(str, pos);
 
-	std::string cmd = ReadToWs(str, pos);
+	std::string cmd = ReadCmd(str, pos);
 
 	SkipWhitespaces(str, pos);
 
@@ -241,9 +254,35 @@ void arda::Lexer::Preprocess(const std::string & str, int & pos, std::shared_ptr
 	{
 		std::string name = ReadToWs(str, pos);
 		SkipWhitespaces(str, pos);
-		std::string value = ReadToWs(str, pos);
-
+		std::string value = str.substr(pos, str.size());
+		pos = str.size();
 		context->AddMacro(name, value);
+	}
+	else if (cmd=="#include")
+	{
+		std::string include = ReadQuoted(str, pos);
+		std::string inc_path = m_basepath + include;
+		inc_path = fs::weakly_canonical(fs::path(inc_path)).string();
+		std::replace(inc_path.begin(), inc_path.end(), '\\', '/');
+		std::transform(inc_path.begin(), inc_path.end(), inc_path.begin(), ::tolower);
+		context->Include(m_ini.GetContext(inc_path));
+	}
+	else if (cmd == "#MULTIPLY")
+	{
+		int tok_pos= 0;
+		Token tok1, tok2;
+		++pos;
+		SkipWhitespaces(str, pos);
+
+		std::string first = ReadToWs(str, pos);
+		context->CheckMacro(first);
+		tok1 = CreateToken(first, tok_pos);
+
+		SkipWhitespaces(str, pos);
+		std::string second = ReadToWs(str, pos);
+		context->CheckMacro(second);
+		tok_pos = 0;
+		tok2 = CreateToken(second, tok_pos);
 	}
 	else
 	{
@@ -262,6 +301,38 @@ std::string arda::Lexer::ReadToWs(const std::string & str, int & pos)
 		c = str[++pos];
 	}
 		
+
+	return word;
+}
+
+std::string arda::Lexer::ReadQuoted(const std::string & str, int & pos)
+{
+	std::string out;
+
+	while (str[pos] != '\"' && pos < str.size()) ++pos;
+
+	++pos;
+
+	while (str[pos] != '\"' && pos < str.size())
+	{
+		out += str[pos];
+		++pos;
+	}
+
+	return out;
+}
+
+std::string arda::Lexer::ReadCmd(const std::string & str, int & pos)
+{
+	std::string word;
+	char c = str[pos];
+
+	while (c != ' '&&c!='(' && pos < str.size())
+	{
+		word += c;
+		c = str[++pos];
+	}
+
 
 	return word;
 }

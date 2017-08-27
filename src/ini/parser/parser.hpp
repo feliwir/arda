@@ -1,33 +1,42 @@
 #pragma once
 #include <map>
 #include <memory>
+#include <stack>
 #include <sstream>
+#include "token.hpp"
 
 namespace arda
 {
+	class ParsingContext;
 	class IStream;
 	class FileSystem;
 	class Ini;
+	class TokenStream;
 
 	class Parser
 	{
 	private:
 		enum State
 		{
-			NO_BLOCK	= 0,
-			IN_BLOCK	= 1,
+			NO_BLOCK,
+			IN_BLOCK,
+			BLOCK_OPEN,
+			PROP_SET,
 		};
 
 	public:
-		void Parse(std::shared_ptr<IStream> stream, const std::string& path, const FileSystem& fs,Ini& ini);
-		
-		void Preload(const std::string& path, const FileSystem & fs,Ini& ini);
-		void ClearCache();
+		Parser(Ini& m_ini);
+		void Parse(std::shared_ptr<ParsingContext> context);
 	private:
-		void Parse(std::shared_ptr<IStream> stream, const std::string& path, const FileSystem& fs, Ini& ini, std::map<std::string, std::string>& macros);
-		void Parse(const std::string& content, const std::string& path, const FileSystem& fs, Ini& ini,std::map<std::string,std::string>& macros);
-		//cache for macros and parsed files
-		std::map<std::string, std::map<std::string, std::string>> m_cache;
-		std::map<std::string, std::string> m_global;
+		void BlockOpen(std::shared_ptr<TokenStream> t, State& s);
+		void InBlock(std::shared_ptr<TokenStream> t, State& s);
+
+		std::string PopString();
+	private:
+		std::stack<Token> m_arguments;
+		Ini& m_ini;
+
+	
+
 	};
 }

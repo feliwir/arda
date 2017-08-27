@@ -9,23 +9,24 @@
 #include "template.hpp"
 #include <iostream>
 
-arda::Ini::Ini(Config & config, FileSystem & fs)
+arda::Ini::Ini(Config & config, FileSystem & fs) : m_fs(fs)
 {
 	auto entry = fs.getEntry("data/ini");
 
-	Parser p;
 	int num = 0;
+	Parser p(*this);
+	Lexer l(*this, m_fs);
 
 	//walk down the directory recursively
 	std::function<void(std::shared_ptr<IEntry>,const std::string& path)> recurse;
-	recurse = [this,&p,&recurse,&num,&fs](std::shared_ptr<IEntry> e,const std::string& path)
+	recurse = [this,&p,&recurse,&num,&l](std::shared_ptr<IEntry> e,const std::string& path)
 	{
 		if (IEntry::isRegular(*e))
 		{
 			auto file = std::static_pointer_cast<File>(e);
 			auto s = file->getStream();
 
-			m_files.emplace(path, Lexer::Lex(s, path,*this,fs));
+			m_files.emplace(path, l.Lex(s, path));
 			++num;
 		}
 		else if (IEntry::isDirectory(*e))
@@ -43,12 +44,31 @@ arda::Ini::Ini(Config & config, FileSystem & fs)
 
 	m_globalIncludes = { "data/ini/gamedata.ini" };
 
-	for (const auto& p : m_globalIncludes)
+	auto& macros = ParsingContext::GetGlobalMacros();
+
+	for (const auto& path : m_globalIncludes)
 	{
-		m_files.emplace(p, Lexer::Lex(fs.getStream(p), p, *this,fs));
+		auto context = l.Lex(fs.getStream(path), path);
+		p.Parse(context);
+
+
+		auto& m = context->GetMacros();
+		macros.insert(m.begin(), m.end());
+
+		m_files.emplace(path, context);
 	}
 
 	recurse(entry,"data/ini");
+
+	//clear macro cache
+	for (const auto& f : m_files)
+	{
+		f.second->GetMacros().clear();
+
+		f.second->GetTokenStream()->Clear();
+	}
+	macros.clear();
+
 	std::cout << num << std::endl;
 }
 
@@ -66,15 +86,19 @@ void arda::Ini::AddTemplate(std::shared_ptr<Template> temp, const std::string& n
 	}
 }
 
-std::shared_ptr<arda::ParsingContext> arda::Ini::GetContext(const std::string & path, FileSystem& fs)
+std::shared_ptr<arda::ParsingContext> arda::Ini::GetContext(const std::string & path,bool load)
 {
 	auto it = m_files.find(path);
 	if (it != m_files.end())
 		return it->second;
-	else
+	else if (load)
 	{
-		auto s = fs.getStream(path);
-		m_files.emplace(path, Lexer::Lex(s, path, *this,fs));
+		auto s = m_fs.getStream(path);
+		Lexer l(*this, m_fs);
+		m_files.emplace(path, l.Lex(s, path));
+		return m_files[path];
 	}
-	return std::shared_ptr<ParsingContext>();
+	else
+		return nullptr;
+	
 }

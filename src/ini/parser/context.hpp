@@ -17,7 +17,7 @@ namespace arda
 			m_tokens = tokens;
 		}
 
-		inline std::shared_ptr<TokenStream> GetTokens()
+		inline std::shared_ptr<TokenStream> GetTokenStream()
 		{
 			return m_tokens;
 		}
@@ -27,18 +27,48 @@ namespace arda
 			return m_macros;
 		}
 
+		static std::map<std::string, std::string>& GetGlobalMacros()
+		{
+			return m_globalMacros;
+		}
+
 		inline void AddMacro(const std::string& name, const std::string& value)
 		{
 			m_macros[name] = value;
 		}
 
-		std::vector<std::shared_ptr<ParsingContext>>& GetIncludes()
+		inline const bool CheckMacro(std::string& value)
 		{
-			return m_includes;
+			auto it = m_macros.find(value);
+			if (it != m_macros.end())
+			{
+				value = it->second;
+				return true;
+			}		
+			else
+			{
+				it = m_globalMacros.find(value);
+				if (it != m_globalMacros.end())
+				{
+					value = it->second;
+					return true;
+				}
+				else
+					return false;
+			}
+				
 		}
+
+		inline void Include(std::shared_ptr<ParsingContext> include)
+		{
+			if(include)
+				m_macros.insert(include->GetMacros().begin(), include->GetMacros().end());
+		}
+
+
 	private:
 		std::map<std::string, std::string> m_macros;
+		static std::map<std::string, std::string> m_globalMacros;
 		std::shared_ptr<TokenStream> m_tokens;
-		std::vector<std::shared_ptr<ParsingContext>> m_includes;
 	};
 }
