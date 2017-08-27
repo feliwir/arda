@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <memory>
 
 namespace arda
 {
@@ -12,8 +13,9 @@ namespace arda
 		Audio(Config& config);
 		~Audio();
 	private:
-		void checkError(const std::string& msg);
+		void checkErrorAl(const std::string& msg);
+		void checkErrorAlc(const std::string& msg);
 	private:
-		AudioInternals* m_internals;
+		std::unique_ptr<AudioInternals> m_internals;
 	};
 }

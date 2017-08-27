@@ -4,26 +4,29 @@
 #include "../filesystem/directory.hpp"
 #include "../filesystem/file.hpp"
 #include "../filesystem/stream.hpp"
-#include "parser.hpp"
+#include "parser/lexer.hpp"
+#include "parser/parser.hpp"
 #include "template.hpp"
 #include <iostream>
 
-arda::Ini::Ini(Config & config, FileSystem & fs)
+arda::Ini::Ini(Config & config, FileSystem & fs) : m_fs(fs)
 {
 	auto entry = fs.getEntry("data/ini");
 
-	Parser p;
 	int num = 0;
+	Parser p(*this);
+	Lexer l(*this, m_fs);
 
 	//walk down the directory recursively
 	std::function<void(std::shared_ptr<IEntry>,const std::string& path)> recurse;
-	recurse = [&p,&recurse,&num,&fs,this](std::shared_ptr<IEntry> e,const std::string& path)
+	recurse = [this,&p,&recurse,&num,&l](std::shared_ptr<IEntry> e,const std::string& path)
 	{
 		if (IEntry::isRegular(*e))
 		{
 			auto file = std::static_pointer_cast<File>(e);
 			auto s = file->getStream();
-			p.Parse(s,path,fs,*this);
+
+			m_files.emplace(path, l.Lex(s, path));
 			++num;
 		}
 		else if (IEntry::isDirectory(*e))
@@ -39,8 +42,33 @@ arda::Ini::Ini(Config & config, FileSystem & fs)
 		}
 	};
 
-	p.Preload("data/ini/gamedata.ini",fs,*this);
+	m_globalIncludes = { "data/ini/gamedata.ini" };
+
+	auto& macros = ParsingContext::GetGlobalMacros();
+
+	for (const auto& path : m_globalIncludes)
+	{
+		auto context = l.Lex(fs.getStream(path), path);
+		p.Parse(context);
+
+
+		auto& m = context->GetMacros();
+		macros.insert(m.begin(), m.end());
+
+		m_files.emplace(path, context);
+	}
+
 	recurse(entry,"data/ini");
+
+	//clear macro cache
+	for (const auto& f : m_files)
+	{
+		f.second->GetMacros().clear();
+
+		f.second->GetTokenStream()->Clear();
+	}
+	macros.clear();
+
 	std::cout << num << std::endl;
 }
 
@@ -56,4 +84,21 @@ void arda::Ini::AddTemplate(std::shared_ptr<Template> temp, const std::string& n
 		m_weapons[name] = temp;
 		break;
 	}
+}
+
+std::shared_ptr<arda::ParsingContext> arda::Ini::GetContext(const std::string & path,bool load)
+{
+	auto it = m_files.find(path);
+	if (it != m_files.end())
+		return it->second;
+	else if (load)
+	{
+		auto s = m_fs.getStream(path);
+		Lexer l(*this, m_fs);
+		m_files.emplace(path, l.Lex(s, path));
+		return m_files[path];
+	}
+	else
+		return nullptr;
+	
 }

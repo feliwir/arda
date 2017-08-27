@@ -1,7 +1,7 @@
 #
 # Find the native FFMPEG includes and library
 # This module defines
-# FFMPEG_INCLUDE_DIR, where to find avcodec.h, avformat.h ...
+# FFMPEG_INCLUDE_DIRS, where to find avcodec.h, avformat.h ...
 # FFMPEG_LIBRARIES, the libraries to link against to use FFMPEG.
 # FFMPEG_FOUND, If false, do not try to use FFMPEG.
 # FFMPEG_ROOT, if this module use this path to find FFMPEG headers
@@ -68,7 +68,6 @@ MACRO(FFMPEG_FIND varname shortname headername)
     IF (FFMPEG_${varname}_LIBRARIES AND FFMPEG_${varname}_INCLUDE_DIRS)
         SET(FFMPEG_${varname}_FOUND 1)
     ENDIF(FFMPEG_${varname}_LIBRARIES AND FFMPEG_${varname}_INCLUDE_DIRS)
-
 ENDMACRO(FFMPEG_FIND)
 
 SET(FFMPEG_ROOT "$ENV{FFMPEG_DIR}" CACHE PATH "Location of FFMPEG")
@@ -81,11 +80,15 @@ FFMPEG_FIND(LIBSWSCALE  swscale  swscale.h)  # not sure about the header to look
 
 SET(FFMPEG_FOUND "NO")
 
+include(FindPackageHandleStandardArgs)
+
+# Handle required and optional
+find_package_handle_standard_args(FFMPEG DEFAULT_MSG 
+FFMPEG_LIBAVFORMAT_LIBRARIES FFMPEG_LIBAVFORMAT_INCLUDE_DIRS)
+
 # Note we don't check FFMPEG_LIBSWSCALE_FOUND, FFMPEG_LIBAVDEVICE_FOUND,
 # and FFMPEG_LIBAVUTIL_FOUND as they are optional.
 IF (FFMPEG_LIBAVFORMAT_FOUND AND FFMPEG_LIBAVCODEC_FOUND)
-
-    SET(FFMPEG_FOUND "YES")
 
     SET(FFMPEG_INCLUDE_DIRS ${FFMPEG_LIBAVFORMAT_INCLUDE_DIRS})
 
@@ -99,4 +102,6 @@ IF (FFMPEG_LIBAVFORMAT_FOUND AND FFMPEG_LIBAVCODEC_FOUND)
         ${FFMPEG_LIBAVCODEC_LIBRARIES}
         ${FFMPEG_LIBAVUTIL_LIBRARIES}
         ${FFMPEG_LIBSWSCALE_LIBRARIES})
+
+    mark_as_advanced(FFMPEG_INCLUDE_DIRS FFMPEG_LIBRARY_DIRS FFMPEG_LIBRARIES)
 ENDIF()

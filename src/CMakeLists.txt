@@ -32,3 +32,11 @@ target_include_directories(${PROJECT} PRIVATE
                             ${FFMPEG_INCLUDE_DIRS}
                             ${PROJECT_ROOT}/deps/cxxopts/include 
                             ${PROJECT_ROOT}/deps/rapidjson/include)
+
+if (MSVC_VERSION GREATER_EQUAL "1900")
+    include(CheckCXXCompilerFlag)
+    CHECK_CXX_COMPILER_FLAG("/std:c++latest" _cpp_latest_flag_supported)
+    if (_cpp_latest_flag_supported)
+        target_compile_options(${PROJECT} PRIVATE "/std:c++latest")
+    endif()
+endif()
