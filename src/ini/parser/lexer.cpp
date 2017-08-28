@@ -34,9 +34,9 @@ std::shared_ptr<arda::ParsingContext> arda::Lexer::Lex(std::shared_ptr<IStream> 
 		//replace tabs with spaces
 		std::replace(line.begin(), line.end(), '\t', ' ');
 
-		if (line.size() == 0)
+		if (CheckEol(line, tokens))
 			continue;
-
+			
 		//remove comments
 		pos = line.find(';');
 		if (pos != std::string::npos)
@@ -231,8 +231,11 @@ void arda::Lexer::AddEol(std::shared_ptr<TokenStream> stream,int col)
 bool arda::Lexer::CheckEol(const std::string & line, std::shared_ptr<TokenStream> stream)
 {
 	if (line.size() == 0)
-		AddEol(stream,0);
-
+	{
+		AddEol(stream, 0);
+		return true;
+	}
+		
 	return false;
 }
 

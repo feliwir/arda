@@ -31,6 +31,7 @@ void arda::Parser::Parse(std::shared_ptr<ParsingContext> context)
 			InBlock(stream, s);
 			break;
 		case PROP_SET:
+			PropSet(stream, s);
 			break;
 		}
 	}
@@ -89,6 +90,15 @@ void arda::Parser::InBlock(std::shared_ptr<TokenStream> stream, State & s)
 		}
 		break;
 	}
+
+}
+
+void arda::Parser::PropSet(std::shared_ptr<TokenStream> stream, State & s)
+{
+	Token t = stream->Current();
+
+	if (t.Type == Token::EndOfLine)
+		s = IN_BLOCK;
 
 }
 

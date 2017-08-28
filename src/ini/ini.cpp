@@ -51,7 +51,6 @@ arda::Ini::Ini(Config & config, FileSystem & fs) : m_fs(fs)
 		auto context = l.Lex(fs.getStream(path), path);
 		p.Parse(context);
 
-
 		auto& m = context->GetMacros();
 		macros.insert(m.begin(), m.end());
 

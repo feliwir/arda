@@ -30,6 +30,7 @@ namespace arda
 	private:
 		void BlockOpen(std::shared_ptr<TokenStream> t, State& s);
 		void InBlock(std::shared_ptr<TokenStream> t, State& s);
+		void PropSet(std::shared_ptr<TokenStream> t, State& s);
 
 		std::string PopString();
 	private:
