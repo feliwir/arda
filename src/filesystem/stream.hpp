@@ -34,7 +34,7 @@ namespace arda
 		}
 
 	protected:
-		int m_position;
-		int m_size; 
+		int m_position = 0;
+		int m_size = 0; 
 	};
 }

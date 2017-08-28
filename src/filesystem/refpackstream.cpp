@@ -5,7 +5,8 @@
 
 arda::RefPackStream::RefPackStream(std::shared_ptr<IStream> compressedstream) :
 	m_currentOutputPosition(0),
-	m_nextOutputPosition(0)
+	m_nextOutputPosition(0),
+	m_offset(0)
 {
 	m_eof = false;
 	m_stream = compressedstream;

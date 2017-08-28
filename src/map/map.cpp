@@ -36,6 +36,6 @@ bool arda::Map::Load(std::shared_ptr<IStream> stream)
 	}
 
 	//fine 
-
+	return true;
 
 }
