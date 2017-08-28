@@ -4,6 +4,8 @@
 #include "../filesystem/refpackstream.hpp"
 #include <iostream>
 
+using namespace std::string_literals;
+
 arda::Map::Map(std::shared_ptr<IStream> stream)
 {
 	Load(stream);
@@ -16,22 +18,24 @@ arda::Map::~Map()
 
 bool arda::Map::Load(std::shared_ptr<IStream> stream)
 {
-	uint32_t flag = util::read<uint32_t>(stream);
-	switch (flag)
-	{
-	case 1884121923U:
-		std::cout << "map is uncompressed " << std::endl;
-		break;
+	std::string magic;
+	for (int i = 0; i < 4; ++i)
+		magic += stream->get();
+	
 
-	case 5390661U: // "EAR\0"
+	if (magic == std::string("EAR\0"s))
+	{
 		std::cout << "### Map is in compressed RefPack format, decompressing..." << std::endl;
 		m_uncompressed_size = util::read<uint32_t>(stream);
-		new RefPackStream(stream);
-		break;
-
-	default: // "ZL5\0"
-		std::cout << "### Unknow map format, not supported" << std::endl;
+		return Load(std::make_shared<RefPackStream>(stream));
+	}
+	else if (magic != std::string("CkMp"s))
+	{
+		//bad
 		return false;
 	}
-	return true;
+
+	//fine 
+
+
 }

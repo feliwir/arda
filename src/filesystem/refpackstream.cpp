@@ -3,12 +3,15 @@
 #include <iostream>
 #include <algorithm>
 
-arda::RefPackStream::RefPackStream(std::shared_ptr<IStream> compressedstream)
+arda::RefPackStream::RefPackStream(std::shared_ptr<IStream> compressedstream) :
+	m_currentOutputPosition(0),
+	m_nextOutputPosition(0)
 {
 	m_eof = false;
 	m_stream = compressedstream;
 	std::cout << "loading map " << std::endl;
 	uint8_t headerByte1 = util::read<uint8_t>(m_stream);
+
 	if ((headerByte1 & 0b00111110) != 0b00010000)
 	{
 		std::cout << "invalid map data " << std::endl;

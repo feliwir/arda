@@ -4,6 +4,8 @@
 #include "util.hpp"
 #include <algorithm>
 
+using namespace std::string_literals;
+
 arda::BigArchive::BigArchive(const std::string & file)
 {
 	m_stream.open(file, std::ios::in | std::ios::binary);
@@ -19,9 +21,9 @@ arda::BigArchive::BigArchive(const std::string & file)
 	for (int i = 0; i < 4; ++i)
 		magic += m_stream.get();
 
-	if (magic == std::string("BIGF"))
+	if (magic == std::string("BIGF"s))
 		m_version = CC;
-	else if (magic == std::string("BIG4"))
+	else if (magic == std::string("BIG4"s))
 		m_version = BFME;
 	else
 		throw RuntimeException("Invalid BigArchive - unknown magic: "+magic+". File: " + file);

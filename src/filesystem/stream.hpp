@@ -16,6 +16,13 @@ namespace arda
 		inline int getSize() { return m_size; }
 		inline int getPosition() { return m_position; }
 
+		inline int get()
+		{
+			char byte[1];
+			read(byte, 1);
+			return byte[0];
+		}
+
 		virtual void seek(int offset, SeekOrigin origin) = 0;
 		virtual unsigned int read(char* buffer,size_t numBytes) = 0;
 
