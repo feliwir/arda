@@ -10,7 +10,7 @@ namespace arda
 	class BigStream : public IStream
 	{
 	public:
-		BigStream(int size,int offset,BigArchive* archive);
+		BigStream(int size, int offset, BigArchive* archive);
 
 		// Inherited via IStream
 		virtual void seek(int offset, SeekOrigin origin) override;

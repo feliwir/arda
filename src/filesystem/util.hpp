@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <stdint.h>
+#include "stream.hpp"
 
 namespace arda
 {
@@ -30,6 +31,14 @@ namespace arda
 			}
 
 			return buffer;
+		}
+
+		template <class T>
+		inline T read(std::shared_ptr<IStream> stream)
+		{
+			T result;
+			stream->read(reinterpret_cast<char*>(&result), sizeof(T));
+			return result;
 		}
 	}
 }

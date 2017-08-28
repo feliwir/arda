@@ -6,6 +6,7 @@
 #include "global.hpp"
 #include "../audio/audio.hpp"
 #include "../video/video.hpp"
+#include "../map/map.hpp"
 #include "../graphics/graphics.hpp"
 #include "../filesystem/filesystem.hpp"
 #include "../filesystem/stream.hpp"
@@ -47,7 +48,10 @@ arda::Application::Application(const std::vector<std::string>& args)
 	//Initialize virtual filesystem
 	m_fs = std::make_unique<FileSystem>(*m_config);
 
-	auto stream = m_fs->getStream("GermanSplash.jpg");
+	auto stream = m_fs->getStream("maps/map mp evendim/map mp evendim.map");
+	Map map(stream);
+
+	stream = m_fs->getStream("GermanSplash.jpg");
 	Image img(stream);
 
 	stream = m_fs->getStream("data/movies/Credits_with_alpha.vp6");
