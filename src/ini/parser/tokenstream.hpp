@@ -41,12 +41,12 @@ namespace arda
 
 		inline const Token& Current()
 		{
-			return m_tokens[m_currentToken];
+			return m_tokens[m_currentToken-1];
 		}
 
 		inline const Token& Peek()
 		{
-			return m_tokens[m_currentToken + 1];
+			return m_tokens[m_currentToken];
 		}
 
 		inline const Token GetBack()

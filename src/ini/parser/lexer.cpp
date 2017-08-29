@@ -3,7 +3,9 @@
 #include <algorithm>
 #include <codecvt>
 #include <locale>
+#include <chrono>
 #include <boost/filesystem.hpp>
+#include <iostream>
 #include "../ini.hpp"
 #include "../../filesystem/stream.hpp"
 namespace fs = boost::filesystem;
@@ -26,8 +28,13 @@ std::shared_ptr<arda::ParsingContext> arda::Lexer::Lex(std::shared_ptr<IStream> 
 	std::string source = stream->readAll();
 	sourcestream << source;
 
+	//auto start = std::chrono::high_resolution_clock::now();
+	//auto end = start;
+
 	while (std::getline(sourcestream, line))
-	{
+	{/*
+		start = std::chrono::high_resolution_clock::now();*/
+
 		//remove all \r
 		line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
 
@@ -68,6 +75,9 @@ std::shared_ptr<arda::ParsingContext> arda::Lexer::Lex(std::shared_ptr<IStream> 
 
 
 		AddEol(tokens,pos);
+
+		/*end = std::chrono::high_resolution_clock::now();
+		std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() <<"ns" << std::endl;*/
 	}
 
 	tokens->AddToken(Token(Token::EndOfFile));

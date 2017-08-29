@@ -2,11 +2,13 @@
 #include <map>
 #include <memory>
 #include <stack>
+#include <functional>
 #include <sstream>
 #include "token.hpp"
 
 namespace arda
 {
+	class Block;
 	class ParsingContext;
 	class IStream;
 	class FileSystem;
@@ -15,6 +17,8 @@ namespace arda
 
 	class Parser
 	{
+		typedef std::function<std::shared_ptr<Block>(void)> BlockConstruct;
+
 	private:
 		enum State
 		{
@@ -32,9 +36,16 @@ namespace arda
 		void InBlock(std::shared_ptr<TokenStream> t, State& s);
 		void PropSet(std::shared_ptr<TokenStream> t, State& s);
 
-		std::string PopString();
+		const std::string PopString();
+		const Token PopToken();
+
+		void CreateBlock(const std::string& type, const std::string& name="");
+		void CreateProperty(State& state);
 	private:
+		std::shared_ptr<Block> m_block;
+		std::string m_blockName;
 		std::stack<Token> m_arguments;
+		static const std::map<const std::string, BlockConstruct> m_constructors;
 		Ini& m_ini;
 
 	

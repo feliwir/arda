@@ -1,12 +1,20 @@
 #include "parser.hpp"
 #include "../core/exception.hpp"
-#include "../template.hpp"
 #include "../ini.hpp"
 #include "token.hpp"
+#include "block.hpp"
+#include "../blocks/all.hpp"
 #include <string>
 #include <algorithm>
 #include <iostream>
 #include <chrono>
+
+
+const std::map<const std::string, arda::Parser::BlockConstruct> arda::Parser::m_constructors =
+{
+	{"GameData", Block::Create<GameData>},
+	{"Weapon", Block::Create<Weapon>}
+};
 
 arda::Parser::Parser(Ini & ini) : m_ini(ini)
 {
@@ -63,6 +71,9 @@ void arda::Parser::BlockOpen(std::shared_ptr<TokenStream> stream, State& s)
 				name = PopString();
 
 			type = PopString();
+
+			CreateBlock(type, name);
+
 			s = IN_BLOCK;
 		}
 		break;
@@ -78,14 +89,32 @@ void arda::Parser::InBlock(std::shared_ptr<TokenStream> stream, State & s)
 	{
 	case Token::StringLiteral:
 		str = std::get<std::string>(t.Value);
-		if (str == "End") { s = NO_BLOCK; }
+		if (str == "End") 
+		{ 
+			if (m_block)
+			{
+				//TODO: Add block to library
+
+				//clear
+				s = NO_BLOCK;
+				m_block = nullptr;
+
+			}
+			
+		}
 		else
 		{
+			//PROPERTY
 			if (stream->Peek().Type == Token::Equals)
 			{
 				s = PROP_SET;
 				stream->GetToken();
 				m_arguments.push(t);
+			}
+			//NUGGET or undefined Block
+			else
+			{
+				int a = 0;
 			}
 		}
 		break;
@@ -98,13 +127,58 @@ void arda::Parser::PropSet(std::shared_ptr<TokenStream> stream, State & s)
 	Token t = stream->Current();
 
 	if (t.Type == Token::EndOfLine)
-		s = IN_BLOCK;
-
+		CreateProperty(s);
+	else
+		m_arguments.push(t);
 }
 
-std::string arda::Parser::PopString()
+const std::string arda::Parser::PopString()
 {
 	std::string result = std::get<std::string>(m_arguments.top().Value);
 	m_arguments.pop();
 	return result;
+}
+
+const arda::Token arda::Parser::PopToken()
+{
+	Token result = m_arguments.top();
+	m_arguments.pop();
+	return result;
+}
+
+void arda::Parser::CreateBlock(const std::string & type, const std::string & name)
+{
+	auto it = m_constructors.find(type);
+
+	if (it == m_constructors.end())
+	{
+		std::cout << "Unknown block: " << type << std::endl;
+		return;
+	}
+		
+
+	m_block = it->second();
+}
+
+void arda::Parser::CreateProperty(State & state)
+{
+	std::vector<Token> arguments;
+	std::string name;
+
+	while (m_arguments.size() > 1)
+		arguments.push_back(PopToken());
+
+	name = PopString();
+
+	if (m_block)
+	{
+		m_block->SetProperty(name, arguments);
+		state = IN_BLOCK;
+	}
+	else
+	{
+		state = IN_BLOCK;
+	}
+
+	 
 }

@@ -6,7 +6,6 @@
 #include "../filesystem/stream.hpp"
 #include "parser/lexer.hpp"
 #include "parser/parser.hpp"
-#include "template.hpp"
 #include <iostream>
 
 arda::Ini::Ini(Config & config, FileSystem & fs) : m_fs(fs)
@@ -62,9 +61,11 @@ arda::Ini::Ini(Config & config, FileSystem & fs) : m_fs(fs)
 	//clear macro cache
 	for (const auto& f : m_files)
 	{
-		f.second->GetMacros().clear();
+		auto& context = f.second;
 
-		f.second->GetTokenStream()->Clear();
+		context->GetMacros().clear();
+		p.Parse(context);
+		context->GetTokenStream()->Clear();
 	}
 	macros.clear();
 
@@ -75,15 +76,6 @@ arda::Ini::~Ini()
 {
 }
 
-void arda::Ini::AddTemplate(std::shared_ptr<Template> temp, const std::string& name)
-{
-	switch (temp->GetType())
-	{
-	case Template::WEAPON:
-		m_weapons[name] = temp;
-		break;
-	}
-}
 
 std::shared_ptr<arda::ParsingContext> arda::Ini::GetContext(const std::string & path,bool load)
 {
