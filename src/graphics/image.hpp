@@ -32,10 +32,12 @@ namespace arda
 		inline Format GetFormat()	{ return m_format;	}
 		inline int GetWidth()		{ return m_width;	}
 		inline int GetHeight()		{ return m_height;	}
+		inline uint8_t* GetBuffer()	{ return m_buffer;  }
 
-		inline bool Load(std::shared_ptr<IStream> stream);
+		bool Load(std::shared_ptr<IStream> stream);
 	private:
 		Magic GetMagic(uint8_t* memory);
+
 	private:
 		int m_bpp;
 		int m_width;

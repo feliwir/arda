@@ -8,6 +8,7 @@
 #include "../video/video.hpp"
 #include "../map/map.hpp"
 #include "../graphics/graphics.hpp"
+#include "../graphics/gl/gl_texture.hpp"
 #include "../filesystem/filesystem.hpp"
 #include "../filesystem/stream.hpp"
 #include "../ini/ini.hpp"
@@ -53,6 +54,7 @@ arda::Application::Application(const std::vector<std::string>& args)
 
 	stream = m_fs->getStream("GermanSplash.jpg");
 	Image img(stream);
+	GLTexture tex(img);
 
 	stream = m_fs->getStream("data/movies/Credits_with_alpha.vp6");
 	Video vid(stream);

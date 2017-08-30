@@ -165,9 +165,9 @@ arda::Video::Video(std::shared_ptr<IStream> stream) :
 					rgbFrame->data, rgbFrame->linesize);
 
 				// Save the frame to disk
-				if (++i <= 60)
+				/*if (++i <= 60)
 					SaveFrame(rgbFrame, codec_ctx->width,
-						codec_ctx->height, i);
+						codec_ctx->height, i);*/
 			}
 		}
 

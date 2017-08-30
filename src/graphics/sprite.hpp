@@ -14,10 +14,9 @@ namespace arda
 		~Sprite();
 
 		// Inherited via IDrawable
-		virtual void Render() override;
+		virtual void Render() = 0;
 	private:
 		std::shared_ptr<Texture> m_texture;
-
-
+		
 	};
 }

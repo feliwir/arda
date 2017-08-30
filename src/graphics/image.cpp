@@ -36,7 +36,6 @@ inline bool arda::Image::Load(std::shared_ptr<IStream> stream)
 	{
 	case JPEG:
 		{
-		JSAMPARRAY row_buffer;		/* Output row buffer */
 		int row_stride;		/* physical row width in output buffer */
 		int rc;
 		jpeg_decompress_struct cinfo;
@@ -62,8 +61,10 @@ inline bool arda::Image::Load(std::shared_ptr<IStream> stream)
 		{
 		case 3:
 			m_format = RGB;
+			break;
 		case 4:
 			m_format = RGBA;
+			break;
 		}
 
 		// JSAMPLEs per row in output buffer 

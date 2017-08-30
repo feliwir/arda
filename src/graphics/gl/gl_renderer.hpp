@@ -10,5 +10,9 @@ namespace arda
 
 		// Inherited via IRenderer
 		virtual void Render() override;
+
+		// Inherited via IRenderer
+		virtual std::shared_ptr<ITexture> CreateTexture() override;
+		virtual std::shared_ptr<ITexture> CreateTexture(Image & img) override;
 	};
 }

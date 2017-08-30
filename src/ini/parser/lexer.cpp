@@ -9,6 +9,7 @@
 #include "../ini.hpp"
 #include "../../filesystem/stream.hpp"
 namespace fs = boost::filesystem;
+using namespace std::placeholders;
 
 std::map<std::string, std::string> arda::ParsingContext::m_globalMacros;
 
@@ -23,7 +24,7 @@ std::shared_ptr<arda::ParsingContext> arda::Lexer::Lex(std::shared_ptr<IStream> 
 	context->SetTokens(tokens);
 
 	std::string line;
-	int pos;
+	size_t pos;
 	std::stringstream sourcestream;
 	std::string source = stream->readAll();
 	sourcestream << source;
@@ -89,13 +90,13 @@ arda::Lexer::Lexer(Ini & ini, FileSystem & fs) : m_ini(ini), m_fs(fs)
 {
 }
 
-std::vector<arda::Token> arda::Lexer::Tokenize(const std::string & line, std::shared_ptr<ParsingContext> context)
+std::vector<arda::Token> arda::Lexer::Tokenize(const std::string & line, std::shared_ptr<ParsingContext> context,bool tokenstream)
 {
 	std::vector<Token> tokens;
 	int pos = 0;
 	while (pos < line.size())
 	{
-		Token tok = CreateToken(line, pos, context);
+		Token tok = CreateToken(line, pos, context, tokenstream);
 		if(tok.Type!=Token::Unknown)
 			tokens.push_back(tok);
 	}
@@ -103,7 +104,7 @@ std::vector<arda::Token> arda::Lexer::Tokenize(const std::string & line, std::sh
 	return tokens;
 }
 
-arda::Token arda::Lexer::CreateToken(const std::string & line, int & pos, std::shared_ptr<ParsingContext> context)
+arda::Token arda::Lexer::CreateToken(const std::string & line, int & pos, std::shared_ptr<ParsingContext> context,bool tokenstream)
 {
 	bool parse = true;
 	Token t(Token::Unknown);
@@ -197,8 +198,19 @@ arda::Token arda::Lexer::CreateToken(const std::string & line, int & pos, std::s
 	switch (mode)
 	{
 	case STRING:
+		if (content == std::string("EMOTION_CHEER_PERFILEVOLUMESHIFT"))
+			int a = 0;
+
 		if (context && context->CheckMacro(content))
-			context->GetTokenStream()->InsertTokens(Tokenize(content,context));
+			if (tokenstream)
+				context->GetTokenStream()->InsertTokens(Tokenize(content, context));
+			else
+			{
+				std::vector<Token> toks = Tokenize(content, context, false);
+				MergeTokens(toks, 1);
+				t = toks.front();
+			}
+				
 		else
 			t = Token(content);
 		break;
@@ -273,34 +285,95 @@ void arda::Lexer::Preprocess(const std::string & str, int & pos, std::shared_ptr
 	}
 	else if (cmd=="#include")
 	{
-		std::string include = ReadQuoted(str, pos);
+		const std::string include = ReadQuoted(str, pos);
 		std::string inc_path = m_basepath + include;
 		inc_path = fs::weakly_canonical(fs::path(inc_path)).string();
 		std::replace(inc_path.begin(), inc_path.end(), '\\', '/');
 		std::transform(inc_path.begin(), inc_path.end(), inc_path.begin(), ::tolower);
 		context->Include(m_ini.GetContext(inc_path));
 	}
-	else if (cmd == "#MULTIPLY")
-	{
-		int tok_pos= 0;
-		Token tok1, tok2;
-		++pos;
-		SkipWhitespaces(str, pos);
-
-		std::string first = ReadToWs(str, pos);
-		context->CheckMacro(first);
-		tok1 = CreateToken(first, tok_pos);
-
-		SkipWhitespaces(str, pos);
-		std::string second = ReadToWs(str, pos);
-		context->CheckMacro(second);
-		tok_pos = 0;
-		tok2 = CreateToken(second, tok_pos);
-	}
 	else
 	{
-		int a = 0;
+		std::function<Token(Token&, Token&)> op;
+		bool known = true;
+		
+		if (cmd == "#MULTIPLY")
+			op = std::bind(&Lexer::TokenOperation, this, _1, _2, [](const double a, const double b) {return a*b; });
+		else if (cmd == "#ADD")
+			op = std::bind(&Lexer::TokenOperation, this, _1, _2, [](const double a, const double b) {return a+b; });
+		else if (cmd == "#DIVIDE")
+			op = std::bind(&Lexer::TokenOperation, this, _1, _2, [](const double a, const double b) {return a/b; });
+		else if (cmd == "#SUBTRACT")
+			op = std::bind(&Lexer::TokenOperation, this, _1, _2, [](const double a, const double b) {return a-b; });
+		else
+		{
+			known = false;
+			//std::cout << "UNKNOWN PREPROCESSOR FUNCTION: " << cmd << std::endl;
+		}
+			
+		if(known)
+			TokenFunc(op, str, pos, context);
 	}
+}
+
+void arda::Lexer::MergeTokens(std::vector<Token>& tokens, int max)
+{
+	if (tokens.size() > max)
+	{
+		auto it = std::begin(tokens);
+		while (it != std::end(tokens)) {
+			// Do some stuff
+			if (it->Type == Token::Minus)
+			{
+				auto after = std::next(it);
+				if (after->Type == Token::IntegerLiteral)
+					after->Value = -std::get<long long>(after->Value);
+				else if (after->Type == Token::FloatLiteral)
+					after->Value = -std::get<double>(after->Value);
+
+				it = tokens.erase(it);
+			}
+			else if (it->Type == Token::Plus)
+			{
+				auto after = std::next(it);
+				if (after->Type == Token::IntegerLiteral)
+					after->Value = +std::get<long long>(after->Value);
+				else if (after->Type == Token::FloatLiteral)
+					after->Value = +std::get<double>(after->Value);
+
+				it = tokens.erase(it);
+			}
+
+			std::advance(it, 1);
+		}
+	}
+}
+
+void arda::Lexer::TokenFunc(std::function<Token(Token&, Token&)> func, const std::string & str, int pos, std::shared_ptr<ParsingContext> context)
+{
+	Token tok1, tok2;
+	const std::string content = str.substr(pos + 1, str.find_first_of(')')-(pos+1));
+	std::vector<Token> toks = Tokenize(content, context, false);
+
+	MergeTokens(toks, 2);
+
+	context->GetTokenStream()->AddToken(func(toks[0], toks[1]));
+}
+
+arda::Token arda::Lexer::TokenOperation(const Token & a, const Token & b, std::function<double(double, double)> f)
+{
+	bool integerTok = ((a.Type == Token::IntegerLiteral) && (b.Type == Token::IntegerLiteral)) ? true : false;
+
+	double first = (a.Type == Token::IntegerLiteral) ?
+		std::get<long long>(a.Value) :
+		std::get<double>(a.Value);
+
+	double second = (b.Type == Token::IntegerLiteral) ?
+		std::get<long long>(b.Value) :
+		std::get<double>(b.Value);
+
+	double result = f(first, second);
+	return (integerTok) ? static_cast<long long>(result) : result;
 }
 
 std::string arda::Lexer::ReadToWs(const std::string & str, int & pos)
@@ -312,8 +385,7 @@ std::string arda::Lexer::ReadToWs(const std::string & str, int & pos)
 	{
 		word += c;
 		c = str[++pos];
-	}
-		
+	}	
 
 	return word;
 }
@@ -345,7 +417,6 @@ std::string arda::Lexer::ReadCmd(const std::string & str, int & pos)
 		word += c;
 		c = str[++pos];
 	}
-
 
 	return word;
 }

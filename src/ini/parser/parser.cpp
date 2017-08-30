@@ -152,7 +152,7 @@ void arda::Parser::CreateBlock(const std::string & type, const std::string & nam
 
 	if (it == m_constructors.end())
 	{
-		std::cout << "Unknown block: " << type << std::endl;
+		//std::cout << "Unknown block: " << type << std::endl;
 		return;
 	}
 		

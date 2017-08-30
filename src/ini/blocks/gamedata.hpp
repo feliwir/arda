@@ -7,5 +7,8 @@ namespace arda
 	{
 		// Inherited via Block
 		virtual void SetProperty(const std::string& name,const Property value) override;
+
+	private:
+
 	};
 }
