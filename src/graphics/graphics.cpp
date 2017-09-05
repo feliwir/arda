@@ -3,7 +3,7 @@
 
 arda::Graphics::Graphics(Config& c)
 {
-	m_renderer = std::make_unique<GLRenderer>();
+	m_renderer = std::make_unique<GLRenderer>(c);
 
 
 }

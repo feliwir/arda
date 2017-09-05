@@ -2,7 +2,7 @@ file(GLOB_RECURSE SRCS *.cpp *.c)
 file(GLOB_RECURSE HDRS *.hpp *.h)
 
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost REQUIRED filesystem iostreams regex)
+find_package(Boost REQUIRED filesystem regex date_time)
 
 find_package(FFMPEG REQUIRED)
 

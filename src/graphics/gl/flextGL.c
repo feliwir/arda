@@ -81,6 +81,21 @@ void flextLoadOpenGLFunctions(void)
     /* --- Function pointer loading --- */
 
 
+    /* GL_KHR_debug */
+
+    glpfDebugMessageCallback = (PFNGLDEBUGMESSAGECALLBACK_PROC*)get_proc("glDebugMessageCallback");
+    glpfDebugMessageControl = (PFNGLDEBUGMESSAGECONTROL_PROC*)get_proc("glDebugMessageControl");
+    glpfDebugMessageInsert = (PFNGLDEBUGMESSAGEINSERT_PROC*)get_proc("glDebugMessageInsert");
+    glpfGetDebugMessageLog = (PFNGLGETDEBUGMESSAGELOG_PROC*)get_proc("glGetDebugMessageLog");
+    glpfGetObjectLabel = (PFNGLGETOBJECTLABEL_PROC*)get_proc("glGetObjectLabel");
+    glpfGetObjectPtrLabel = (PFNGLGETOBJECTPTRLABEL_PROC*)get_proc("glGetObjectPtrLabel");
+    glpfGetPointerv = (PFNGLGETPOINTERV_PROC*)get_proc("glGetPointerv");
+    glpfObjectLabel = (PFNGLOBJECTLABEL_PROC*)get_proc("glObjectLabel");
+    glpfObjectPtrLabel = (PFNGLOBJECTPTRLABEL_PROC*)get_proc("glObjectPtrLabel");
+    glpfPopDebugGroup = (PFNGLPOPDEBUGGROUP_PROC*)get_proc("glPopDebugGroup");
+    glpfPushDebugGroup = (PFNGLPUSHDEBUGGROUP_PROC*)get_proc("glPushDebugGroup");
+
+
     /* GL_VERSION_1_2 */
 
     glpfCopyTexSubImage3D = (PFNGLCOPYTEXSUBIMAGE3D_PROC*)get_proc("glCopyTexSubImage3D");
@@ -457,8 +472,23 @@ void flextLoadOpenGLFunctions(void)
 }
 
 /* ----------------------- Extension flag definitions ---------------------- */
+int FLEXT_KHR_debug = GL_FALSE;
 
 /* ---------------------- Function pointer definitions --------------------- */
+
+/* GL_KHR_debug */
+
+PFNGLDEBUGMESSAGECALLBACK_PROC* glpfDebugMessageCallback = NULL;
+PFNGLDEBUGMESSAGECONTROL_PROC* glpfDebugMessageControl = NULL;
+PFNGLDEBUGMESSAGEINSERT_PROC* glpfDebugMessageInsert = NULL;
+PFNGLGETDEBUGMESSAGELOG_PROC* glpfGetDebugMessageLog = NULL;
+PFNGLGETOBJECTLABEL_PROC* glpfGetObjectLabel = NULL;
+PFNGLGETOBJECTPTRLABEL_PROC* glpfGetObjectPtrLabel = NULL;
+PFNGLGETPOINTERV_PROC* glpfGetPointerv = NULL;
+PFNGLOBJECTLABEL_PROC* glpfObjectLabel = NULL;
+PFNGLOBJECTPTRLABEL_PROC* glpfObjectPtrLabel = NULL;
+PFNGLPOPDEBUGGROUP_PROC* glpfPopDebugGroup = NULL;
+PFNGLPUSHDEBUGGROUP_PROC* glpfPushDebugGroup = NULL;
 
 /* GL_VERSION_1_2 */
 
@@ -826,6 +856,9 @@ PFNGLUNIFORMSUBROUTINESUIV_PROC* glpfUniformSubroutinesuiv = NULL;
 
 static void add_extension(const char* extension)
 {
+    if (strcmp("GL_KHR_debug", extension) == 0) {
+        FLEXT_KHR_debug = GL_TRUE;
+    }
 }
 
 

@@ -5,7 +5,7 @@
 
 namespace arda
 {
-	class FileStream : public IStream
+	class FileStream final : public IStream
 	{
 	public:
 		FileStream(const std::string& file);

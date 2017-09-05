@@ -7,9 +7,13 @@
 
 namespace arda
 {
+	class Config;
+
 	class IRenderer
 	{
 	public:
+		IRenderer(Config& c);
+
 		virtual void Render() = 0;
 		inline void AddDrawable(std::shared_ptr<IDrawable> drawable)
 		{

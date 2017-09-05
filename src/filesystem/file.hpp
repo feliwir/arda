@@ -6,7 +6,7 @@ namespace arda
 {
 	class IStream;
 
-	class File : public IEntry
+	class File final : public IEntry
 	{
 	public:
 		File(std::shared_ptr<IStream> stream);

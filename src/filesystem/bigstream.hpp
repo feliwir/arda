@@ -7,7 +7,7 @@ namespace arda
 {
 	class BigArchive;
 
-	class BigStream : public IStream
+	class BigStream final : public IStream
 	{
 	public:
 		BigStream(int size, int offset, BigArchive* archive);

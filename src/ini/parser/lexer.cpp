@@ -29,13 +29,11 @@ std::shared_ptr<arda::ParsingContext> arda::Lexer::Lex(std::shared_ptr<IStream> 
 	std::string source = stream->readAll();
 	sourcestream << source;
 
-	//auto start = std::chrono::high_resolution_clock::now();
-	//auto end = start;
+	auto start = std::chrono::high_resolution_clock::now();
+	auto end = start;
 
 	while (std::getline(sourcestream, line))
-	{/*
-		start = std::chrono::high_resolution_clock::now();*/
-
+	{
 		//remove all \r
 		line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
 
@@ -77,10 +75,10 @@ std::shared_ptr<arda::ParsingContext> arda::Lexer::Lex(std::shared_ptr<IStream> 
 
 		AddEol(tokens,pos);
 
-		/*end = std::chrono::high_resolution_clock::now();
-		std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() <<"ns" << std::endl;*/
-	}
 
+	}
+	end = std::chrono::high_resolution_clock::now();
+	std::cout << path << " " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()<< " " << "ms" << std::endl;
 	tokens->AddToken(Token(Token::EndOfFile));
 
 	return context;

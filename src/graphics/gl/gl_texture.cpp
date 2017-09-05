@@ -13,6 +13,14 @@ arda::GLTexture::GLTexture(Image & img) :
 	Update(img);
 }
 
+arda::GLTexture::~GLTexture()
+{
+	if (m_handle)
+	{
+		glDeleteTextures(1, &m_handle);
+	}
+}
+
 void arda::GLTexture::Update(Image& img)
 {
 	Bind();

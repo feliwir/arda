@@ -10,6 +10,7 @@ namespace arda
 	public:
 		GLTexture(int width, int height);
 		GLTexture(Image& img);
+		~GLTexture(); 
 
 		// Inherited via ITexture
 		virtual void Update(Image& img) override;

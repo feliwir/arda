@@ -10,7 +10,7 @@ namespace arda
 {
 	class IStream;
 
-	class Directory : public IEntry
+	class Directory final : public IEntry
 	{
 	public:
 		Directory(std::shared_ptr<IEntry> parent=nullptr);

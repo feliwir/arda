@@ -30,8 +30,12 @@ namespace arda
 
 		inline void setIniPreprocessor(const bool pp) { m_iniPp = pp; }
 		inline const bool getIniPreprocessor() const { return m_iniPp; }
+
+		inline void setDebugPort(const uint16_t port) { m_debugPort = port; }
+		inline uint16_t getDebugPort() const { return m_debugPort; }
 	private:
 		bool m_debug;
+		uint16_t m_debugPort;
 		std::string m_title;
 		std::string m_root;
 		std::string m_iniDir;

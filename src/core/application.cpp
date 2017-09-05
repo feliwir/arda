@@ -18,11 +18,13 @@ std::unique_ptr<arda::Global> arda::Application::s_global;
 arda::Application::Application(const std::vector<std::string>& args)
 	: m_window(nullptr)
 {
-	//Initialize global variables
-	s_global = std::make_unique<Global>();
 
 	//Load configuration first
 	m_config = std::make_unique<Config>(args);
+
+	//Initialize global variables
+	s_global = std::make_unique<Global>(*m_config);
+
 
 	auto t1 = std::chrono::high_resolution_clock::now();
 
