@@ -4,7 +4,7 @@
 
 namespace arda
 {
-	class GLRenderer : public IRenderer
+	class GLRenderer final : public IRenderer
 	{
 	public:
 		GLRenderer(Config& c);

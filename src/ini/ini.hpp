@@ -1,8 +1,9 @@
 #pragma once
 #include <string>
 #include <memory>
+#include <vector>
 #include <map>
-#include "parser/context.hpp"
+#include <mutex>
 
 namespace arda
 {
@@ -10,6 +11,7 @@ namespace arda
 	class FileSystem;
 	class IEntry;
 	class Template;
+	class ParsingContext;
 
 	class Ini
 	{
@@ -23,6 +25,7 @@ namespace arda
 		std::shared_ptr<ParsingContext> GetContext(const std::string& path,bool load=true);
 	private:
 		FileSystem& m_fs;
+		std::mutex m_access;
 		std::vector<std::string> m_globalIncludes;
 		std::map<const std::string, std::shared_ptr<Template>> m_weapons;
 		std::map<const std::string, std::shared_ptr<ParsingContext>> m_files;

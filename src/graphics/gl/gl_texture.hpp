@@ -5,7 +5,7 @@
 
 namespace arda
 {
-	class GLTexture : public ITexture
+	class GLTexture final : public ITexture
 	{
 	public:
 		GLTexture(int width, int height);

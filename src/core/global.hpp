@@ -1,6 +1,7 @@
 #pragma once
 #include <chrono>
 #include "debugger.hpp"
+#include "../threading/pool.hpp"
 
 namespace arda
 {
@@ -19,7 +20,14 @@ namespace arda
 			return std::chrono::duration_cast<T>(current_time - m_start).count();
 		}
 
+
+		concurrent::ThreadPool<8>& GetThreadPool()
+		{
+			return m_pool;
+		}
+
 	private:
+		concurrent::ThreadPool<8> m_pool;
 		clock::time_point m_start;
 		Debugger m_debugger;
 	};

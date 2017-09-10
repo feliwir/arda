@@ -34,4 +34,9 @@ namespace arda
 		std::unique_ptr<Graphics> m_graphics;
 		static std::unique_ptr<Global> s_global;
 	};
+
+	inline  Global& GetGlobal()
+	{
+		return Application::getGlobal();
+	}
 }

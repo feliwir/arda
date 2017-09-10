@@ -1,6 +1,8 @@
 #include "filesystem.hpp"
 #include "../core/config.hpp"
 #include "../core/exception.hpp"
+#include "../core/application.hpp"
+#include "../core/global.hpp"
 #include "../threading/pool.hpp"
 #include "bigarchive.hpp"
 #include "directory.hpp"
@@ -30,7 +32,7 @@ arda::FileSystem::FileSystem(Config& config)
 	std::vector<std::string> regular;
 
 	//parallelize the loading of big archives
-	concurrent::ThreadPool<4> pool;
+	auto& pool = GetGlobal().GetThreadPool();
 
 	for (iter; iter != end; ++iter)
 	{
