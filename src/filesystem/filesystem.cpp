@@ -2,6 +2,7 @@
 #include "../core/config.hpp"
 #include "../core/exception.hpp"
 #include "../core/application.hpp"
+#include "../core/debugger.hpp"
 #include "../core/global.hpp"
 #include "../threading/pool.hpp"
 #include "bigarchive.hpp"
@@ -15,11 +16,11 @@ namespace fs = boost::filesystem;
 
 arda::FileSystem::FileSystem(Config& config)
 {
-	m_root = config.getRootDir();
+	m_root = config.GetRootDir();
 
 	if (!fs::exists(m_root) || !fs::is_directory(m_root))
 	{
-		config.setRoot(".");
+		config.SetRoot(".");
 		m_root = ".";
 	}
 	
@@ -67,7 +68,7 @@ arda::FileSystem::~FileSystem()
 
 }
 
-std::shared_ptr<arda::IStream> arda::FileSystem::getStream(const std::string & path) const
+std::shared_ptr<arda::IStream> arda::FileSystem::GetStream(const std::string & path) const
 {
 	auto dir = m_vfsRoot;
 	std::shared_ptr<File> file = nullptr;
@@ -76,11 +77,11 @@ std::shared_ptr<arda::IStream> arda::FileSystem::getStream(const std::string & p
 
 	for (auto part : fs::path(p))
 	{
-		auto entry = dir->getEntry(part.string());
+		auto entry = dir->GetEntry(part.string());
 		
 		if (entry == nullptr)
 		{
-			std::cout << "Invalid path: " << path << std::endl;
+			ARDA_LOG("Invalid path: " + path);
 			return nullptr;
 		}
 			
@@ -94,10 +95,10 @@ std::shared_ptr<arda::IStream> arda::FileSystem::getStream(const std::string & p
 	if(file==nullptr)
 		throw arda::RuntimeException("Not a valid file: " + path);
 
-	return file->getStream();
+	return file->GetStream();
 }
 
-std::shared_ptr<arda::IEntry> arda::FileSystem::getEntry(const std::string & path) const
+std::shared_ptr<arda::IEntry> arda::FileSystem::GetEntry(const std::string & path) const
 {
 	auto dir = m_vfsRoot;
 	std::shared_ptr<IEntry> result = dir;
@@ -106,7 +107,7 @@ std::shared_ptr<arda::IEntry> arda::FileSystem::getEntry(const std::string & pat
 
 	for (auto part : fs::path(p))
 	{
-		auto entry = dir->getEntry(part.string());
+		auto entry = dir->GetEntry(part.string());
 		result = entry;
 		if (IEntry::isDirectory(*entry))
 		{
@@ -121,30 +122,30 @@ std::shared_ptr<arda::IEntry> arda::FileSystem::getEntry(const std::string & pat
 	return result;
 }
 
-std::map<std::string, std::shared_ptr<arda::IEntry>> arda::FileSystem::listDirectory(const std::string & path) const
+std::map<std::string, std::shared_ptr<arda::IEntry>> arda::FileSystem::ListDirectory(const std::string & path) const
 {
 	auto dir = m_vfsRoot;
 
 	for (auto part : fs::path(path))
 	{
-		auto entry = dir->getEntry(part.string());
+		auto entry = dir->GetEntry(part.string());
 		if (IEntry::isDirectory(*entry))
 			dir = std::static_pointer_cast<Directory>(entry);
 		else
 			throw arda::RuntimeException("Not a valid directory: " + path);
 	}
 	
-	return dir->getEntries();
+	return dir->GetEntries();
 }
 
 void arda::FileSystem::AddArchive(const std::string& path)
 {
 	auto big = std::make_shared<BigArchive>(path);
-	auto& entries = big->getEntries();
+	auto& entries = big->GetEntries();
 
-	for (auto& entry : big->getEntries())
+	for (auto& entry : big->GetEntries())
 	{
-		m_vfsRoot->insertFile(entry.first, entry.second);
+		m_vfsRoot->InsertFile(entry.first, entry.second);
 	}
 
 	m_archives.push_back(big);
@@ -155,5 +156,5 @@ void arda::FileSystem::AddFile(const std::string& path)
 	std::string relative = fs::relative(path, m_root).string();
 	std::replace(relative.begin(), relative.end(), '\\', '/');
 	std::transform(relative.begin(), relative.end(), relative.begin(), ::tolower);
-	m_vfsRoot->insertFile(relative, std::make_shared<FileStream>(path));
+	m_vfsRoot->InsertFile(relative, std::make_shared<FileStream>(path));
 }

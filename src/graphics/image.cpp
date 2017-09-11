@@ -24,11 +24,11 @@ arda::Image::~Image()
 
 inline bool arda::Image::Load(std::shared_ptr<IStream> stream)
 {
-	int size = stream->getSize();
+	int size = stream->GetSize();
 
 	uint8_t* buffer = new uint8_t[size];
 
-	stream->read(reinterpret_cast<char*>(buffer), size);
+	stream->Read(reinterpret_cast<char*>(buffer), size);
 	
 	Magic magic = GetMagic(buffer);
 

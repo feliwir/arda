@@ -61,8 +61,8 @@ arda::Audio::Audio(Config& config) :
 	ALboolean enumeration;
 	
 	enumeration = alcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT");
-	if (enumeration == AL_TRUE)
-		list_audio_devices(alcGetString(NULL, ALC_DEVICE_SPECIFIER));
+	/*if (enumeration == AL_TRUE)
+		list_audio_devices(alcGetString(NULL, ALC_DEVICE_SPECIFIER));*/
 
 	device = alcOpenDevice(NULL);
 	

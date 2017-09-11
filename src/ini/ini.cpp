@@ -14,7 +14,7 @@
 
 arda::Ini::Ini(Config & config, FileSystem & fs) : m_fs(fs)
 {
-	auto entry = fs.getEntry("data/ini");
+	auto entry = fs.GetEntry("data/ini");
 
 	int num = 0;
 
@@ -27,7 +27,7 @@ arda::Ini::Ini(Config & config, FileSystem & fs) : m_fs(fs)
 		if (IEntry::isRegular(*e))
 		{
 			auto file = std::static_pointer_cast<File>(e);
-			auto s = file->getStream();
+			auto s = file->GetStream();
 
 			pool.AddJob([this, path,s]() 
 			{
@@ -46,7 +46,7 @@ arda::Ini::Ini(Config & config, FileSystem & fs) : m_fs(fs)
 		else if (IEntry::isDirectory(*e))
 		{
 			auto dir = std::static_pointer_cast<Directory>(e);
-			for (auto& e : dir->getEntries())
+			for (auto& e : dir->GetEntries())
 			{
 				if (e.first == "." || e.first == "..")
 					continue;
@@ -64,7 +64,7 @@ arda::Ini::Ini(Config & config, FileSystem & fs) : m_fs(fs)
 
 	for (const auto& path : m_globalIncludes)
 	{
-		auto context = l.Lex(fs.getStream(path), path);
+		auto context = l.Lex(fs.GetStream(path), path);
 		p.Parse(context);
 
 		auto& m = context->GetMacros();
@@ -104,11 +104,9 @@ std::shared_ptr<arda::ParsingContext> arda::Ini::GetContext(const std::string & 
 	{
 		return it->second;
 	}
-
-
 	else if (load)
 	{
-		auto s = m_fs.getStream(path);
+		auto s = m_fs.GetStream(path);
 		if (s == nullptr)
 			return nullptr;	//fix this case
 

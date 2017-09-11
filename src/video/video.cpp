@@ -75,7 +75,7 @@ arda::Video::Video(std::shared_ptr<IStream> stream) :
 		throw RuntimeException("Failed retrieve stream information!");
 
 	// Dump information about file onto standard error
-	av_dump_format(m_internals->format_ctx,  0, "", 0);
+	//av_dump_format(m_internals->format_ctx,  0, "", 0);
 
 	int vid_streams = 0;
 	for (int i = 0; i < format_ctx->nb_streams; i++)
@@ -95,7 +95,6 @@ arda::Video::Video(std::shared_ptr<IStream> stream) :
 		codec_ctx_a = format_ctx->streams[1]->codec;
 	}
 		
-
 	// Find the decoder for the video stream
 	codec = avcodec_find_decoder(origCtx->codec_id);
 	if (codec == NULL)

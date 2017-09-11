@@ -23,7 +23,7 @@ namespace arda
 
 		void Run();
 
-		static inline Global& getGlobal() { return *s_global; }
+		static inline Global& GetGlobal() { return *s_global; }
 
 	private:
 		GLFWwindow* m_window;
@@ -37,6 +37,6 @@ namespace arda
 
 	inline  Global& GetGlobal()
 	{
-		return Application::getGlobal();
+		return Application::GetGlobal();
 	}
 }

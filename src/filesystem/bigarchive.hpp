@@ -19,7 +19,7 @@ namespace arda
 
 		BigArchive(const std::string& file);
 
-		inline std::map<std::string, std::shared_ptr<IStream>>& getEntries()
+		inline std::map<std::string, std::shared_ptr<IStream>>& GetEntries()
 		{
 			return m_entries;
 		}

@@ -11,8 +11,8 @@ namespace arda
 		FileStream(const std::string& file);
 
 		// Inherited via IStream
-		virtual void seek(int offset, SeekOrigin origin) override;
-		virtual unsigned int read(char * buffer, size_t numBytes) override;
+		virtual void Seek(int offset, SeekOrigin origin) override;
+		virtual unsigned int Read(char * buffer, size_t numBytes) override;
 
 		void checkOpen();
 	protected:

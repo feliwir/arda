@@ -13,23 +13,23 @@ namespace arda
 			END
 		};
 	public:
-		inline int getSize() { return m_size; }
-		inline int getPosition() { return m_position; }
+		inline int GetSize() { return m_size; }
+		inline int GetPosition() { return m_position; }
 
-		inline int get()
+		inline int Get()
 		{
 			char byte[1];
-			read(byte, 1);
+			Read(byte, 1);
 			return byte[0];
 		}
 
-		virtual void seek(int offset, SeekOrigin origin) = 0;
-		virtual unsigned int read(char* buffer,size_t numBytes) = 0;
+		virtual void Seek(int offset, SeekOrigin origin) = 0;
+		virtual unsigned int Read(char* buffer,size_t numBytes) = 0;
 
-		inline std::string readAll()
+		inline std::string ReadAll()
 		{
-			std::string buffer(getSize(), ' ');
-			read(&buffer[0], getSize());
+			std::string buffer(GetSize(), ' ');
+			Read(&buffer[0], GetSize());
 			return buffer;
 		}
 

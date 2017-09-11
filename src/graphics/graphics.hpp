@@ -11,6 +11,10 @@ namespace arda
 	{
 	public:
 		Graphics(Config&);
+
+		void Clear();
+
+		void Render();
 	private:
 		std::unique_ptr<IRenderer> m_renderer;
 	};

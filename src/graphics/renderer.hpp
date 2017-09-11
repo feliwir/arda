@@ -14,7 +14,10 @@ namespace arda
 	public:
 		IRenderer(Config& c);
 
+		virtual void Clear() = 0;
+
 		virtual void Render() = 0;
+
 		inline void AddDrawable(std::shared_ptr<IDrawable> drawable)
 		{
 			m_drawables.push_back(drawable);

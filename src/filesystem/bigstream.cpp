@@ -11,7 +11,7 @@ arda::BigStream::BigStream(int size,int offset,
 	m_position = 0;
 }
 
-void arda::BigStream::seek(int offset, SeekOrigin origin) 
+void arda::BigStream::Seek(int offset, SeekOrigin origin) 
 {
 	switch (origin)
 	{
@@ -26,10 +26,9 @@ void arda::BigStream::seek(int offset, SeekOrigin origin)
 		m_position = m_size += offset;
 		break;
 	}
-
 }
 
-unsigned int arda::BigStream::read(char * buffer, size_t numBytes)
+unsigned int arda::BigStream::Read(char * buffer, size_t numBytes)
 {
 	int bytesRead = m_archive->read(buffer, m_offset + m_position, numBytes);
 	m_position += bytesRead;

@@ -9,20 +9,20 @@ namespace arda
 	namespace util
 	{
 
-		inline uint32_t reverse(uint32_t v)
+		inline uint32_t Reverse(uint32_t v)
 		{
 			return (v << 24) | (v << 8 & 0xff0000) | (v >> 8 & 0xff00) | (v >> 24);
 		}
 
 		template <class T>
-		inline T read(std::fstream& stream)
+		inline T Read(std::fstream& stream)
 		{
 			T result;
 			stream.read(reinterpret_cast<char*>(&result), sizeof(T));
 			return result;
 		}
 
-		inline std::string readString(std::fstream& stream)
+		inline std::string ReadString(std::fstream& stream)
 		{
 			std::string buffer;
 			char c;
@@ -34,10 +34,10 @@ namespace arda
 		}
 
 		template <class T>
-		inline T read(std::shared_ptr<IStream> stream)
+		inline T Read(std::shared_ptr<IStream> stream)
 		{
 			T result;
-			stream->read(reinterpret_cast<char*>(&result), sizeof(T));
+			stream->Read(reinterpret_cast<char*>(&result), sizeof(T));
 			return result;
 		}
 	}

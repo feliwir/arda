@@ -9,6 +9,9 @@ namespace arda
 	public:
 		GLRenderer(Config& c);
 
+		// Geerbt über IRenderer
+		virtual void Clear() override;
+
 		// Inherited via IRenderer
 		virtual void Render() override;
 

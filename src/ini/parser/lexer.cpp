@@ -29,7 +29,7 @@ std::shared_ptr<arda::ParsingContext> arda::Lexer::Lex(std::shared_ptr<IStream> 
 	std::string_view line_view;
 	size_t pos;
 	std::stringstream sourcestream;
-	std::string source = stream->readAll();
+	std::string source = stream->ReadAll();
 	sourcestream << source;
 
 	auto start = std::chrono::high_resolution_clock::now();
@@ -68,7 +68,7 @@ std::shared_ptr<arda::ParsingContext> arda::Lexer::Lex(std::shared_ptr<IStream> 
 			continue;
 
 		//remove trailing whitespaces
-		line_view = trim(line_view);
+		line_view = Trim(line_view);
 
 		if (CheckEol(line_view, tokens))
 			continue;
@@ -76,13 +76,10 @@ std::shared_ptr<arda::ParsingContext> arda::Lexer::Lex(std::shared_ptr<IStream> 
 
 		tokens->InsertTokens(Tokenize(line_view, context));
 
-
 		AddEol(tokens,pos);
-
-
 	}
+
 	end = std::chrono::high_resolution_clock::now();
-	//std::cout << path << " " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()<< " " << "ms" << std::endl;
 	tokens->AddToken(Token(Token::EndOfFile));
 
 	return context;
@@ -96,11 +93,15 @@ std::vector<arda::Token> arda::Lexer::Tokenize(std::string_view line, std::share
 {
 	std::vector<Token> tokens;
 	int pos = 0;
+	Skip<' '>(line, pos);
+
 	while (pos < line.size())
 	{
 		Token tok = CreateToken(line, pos, context, tokenstream);
 		if(tok.Type!=Token::Unknown)
 			tokens.push_back(tok);
+
+		Skip<' '>(line, pos);
 	}
 
 	return tokens;
@@ -115,7 +116,6 @@ arda::Token arda::Lexer::CreateToken(std::string_view line, int & pos, std::shar
 	std::string content;
 	int col = pos;
 	char c = 0;
-	skip<' '>(line,pos);
 
 	while (parse)
 	{
@@ -269,16 +269,16 @@ void arda::Lexer::SkipWhitespaces(std::string_view str, int& pos)
 
 void arda::Lexer::Preprocess(std::string_view str, int & pos, std::shared_ptr<ParsingContext> context)
 {
-	skip<' '>(str, pos);
+	Skip<' '>(str, pos);
 
 	std::string_view cmd = ReadCmd(str, pos);
 
-	skip<' '>(str, pos);
+	Skip<' '>(str, pos);
 
 	if (cmd == "#define")
 	{
-		std::string_view name = readTill<' '>(str, pos);
-		skip<' '>(str, pos);
+		std::string_view name = ReadTill<' '>(str, pos);
+		Skip<' '>(str, pos);
 		std::string_view value = str.substr(pos, str.size());
 		pos = str.size();
 		context->AddMacro(std::string(name), std::string(value));

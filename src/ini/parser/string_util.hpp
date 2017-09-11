@@ -5,7 +5,7 @@
 namespace arda
 {
     template<char sep>
-    static inline std::string_view readTill(std::string_view str,int& pos)
+    static inline std::string_view ReadTill(std::string_view str,int& pos)
     {
         char c = str[pos];
 		int first = pos;
@@ -19,19 +19,17 @@ namespace arda
     }
 
     template<char sep>
-    static inline void skip(std::string_view str, int& pos)
+    static inline void Skip(std::string_view str, int& pos)
     {
-        while (str[pos]==sep)
-            ++pos;
+		pos = str.find_first_not_of(sep, pos);
     }
-
-
-    static inline std::string_view trim(std::string_view str)
+	
+    static inline std::string_view Trim(std::string_view str)
     {
         size_t first = str.find_first_not_of(' ');
         if (std::string::npos == first)
         {
-            return str;
+			return "";
         }
         size_t last = str.find_last_not_of(' ');
         return str.substr(first, (last - first + 1));

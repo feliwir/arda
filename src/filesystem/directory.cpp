@@ -8,7 +8,7 @@ arda::Directory::Directory(std::shared_ptr<IEntry> parent) : IEntry(DIRECTORY)
 	m_entries[".."] = parent;
 }
 
-void arda::Directory::insertSelf()
+void arda::Directory::InsertSelf()
 {
 	std::lock_guard<std::mutex> lock(m_mutex);
 	if(m_entries.find(".")==m_entries.end())
@@ -16,7 +16,7 @@ void arda::Directory::insertSelf()
 
 }
 
-void arda::Directory::insertFile(const std::string& path, std::shared_ptr<IStream> stream)
+void arda::Directory::InsertFile(const std::string& path, std::shared_ptr<IStream> stream)
 {
 	auto pos = path.find_first_of('/');
 
@@ -43,8 +43,8 @@ void arda::Directory::insertFile(const std::string& path, std::shared_ptr<IStrea
 		m_mutex.unlock();
 
 		auto dir = std::static_pointer_cast<Directory>(it->second);
-		dir->insertSelf();
+		dir->InsertSelf();
 		auto remPath = path.substr(pos+1, path.size());
-		dir->insertFile(remPath, stream);
+		dir->InsertFile(remPath, stream);
 	}
 }

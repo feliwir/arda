@@ -4,6 +4,7 @@
 #include <chrono>
 #include "config.hpp"
 #include "global.hpp"
+#include "debugger.hpp"
 #include "../audio/audio.hpp"
 #include "../video/video.hpp"
 #include "../map/map.hpp"
@@ -14,6 +15,7 @@
 #include "../ini/ini.hpp"
 
 std::unique_ptr<arda::Global> arda::Application::s_global;
+std::shared_ptr<arda::GLTexture> s_tex;
 
 arda::Application::Application(const std::vector<std::string>& args)
 	: m_window(nullptr)
@@ -25,9 +27,6 @@ arda::Application::Application(const std::vector<std::string>& args)
 	//Initialize global variables
 	s_global = std::make_unique<Global>(*m_config);
 
-
-	auto t1 = std::chrono::high_resolution_clock::now();
-
 	//Initialize audio
 	m_audio = std::make_unique<Audio>(*m_config);
 
@@ -38,9 +37,12 @@ arda::Application::Application(const std::vector<std::string>& args)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	m_window = glfwCreateWindow(m_config->getWidth(),
-		m_config->getHeight(),
-		m_config->getTitle().c_str(),
+	if(m_config->IsDebug())
+		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+		
+	m_window = glfwCreateWindow(m_config->GetWidth(),
+		m_config->GetHeight(),
+		m_config->GetTitle().c_str(),
 		0, 0);
 
 	glfwMakeContextCurrent(m_window);
@@ -48,32 +50,31 @@ arda::Application::Application(const std::vector<std::string>& args)
 	//Initialize graphics
 	m_graphics = std::make_unique<Graphics>(*m_config);
 
+	auto start = std::chrono::high_resolution_clock::now();
+
 	//Initialize virtual filesystem
 	m_fs = std::make_unique<FileSystem>(*m_config);
 
-	auto stream = m_fs->getStream("maps/map mp evendim/map mp evendim.map");
+	auto stream = m_fs->GetStream("maps/map mp evendim/map mp evendim.map");
 	Map map(stream);
 
-	stream = m_fs->getStream("GermanSplash.jpg");
+	stream = m_fs->GetStream("GermanSplash.jpg");
 	Image img(stream);
-	GLTexture tex(img);
+	s_tex = std::make_shared<GLTexture>(img);
 
-	stream = m_fs->getStream("data/movies/Credits_with_alpha.vp6");
+	stream = m_fs->GetStream("data/movies/Credits_with_alpha.vp6");
 	Video vid(stream);
 
-	auto t2 = std::chrono::high_resolution_clock::now();
-	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
-	std::cout << "Done creating FileSystem: " << duration / 1000.0 << std::endl;
-	t1 = t2;
+	auto end = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+	ARDA_LOG("Done creating FileSystem: " + std::to_string(duration / 1000.0));
+	start = end;
 
 	//Initialize ini system
 	m_ini = std::make_unique<Ini>(*m_config,*m_fs);
-	t2 = std::chrono::high_resolution_clock::now();
-	duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
-	std::cout << "Done INI parsing: " << duration / 1000.0 << std::endl;
-
-
-
+	end = std::chrono::high_resolution_clock::now();
+	duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+	ARDA_LOG("Done INI parsing: " + std::to_string(duration / 1000.0));
 
 	glfwShowWindow(m_window);
 }
@@ -88,6 +89,7 @@ void arda::Application::Run()
 {
 	while (!glfwWindowShouldClose(m_window))
 	{
+		m_graphics->Clear();
 		glfwPollEvents();
 		glfwSwapBuffers(m_window);
 	}

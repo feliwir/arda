@@ -13,26 +13,28 @@ namespace arda
 
 		void Update();
 
-		inline void setTitle(const std::string& title) { m_title = title; }
-		inline const std::string& getTitle() const { return m_title; }
+		inline void SetTitle(const std::string& title) { m_title = title; }
+		inline const std::string& GetTitle() const { return m_title; }
 
-		inline void setWidth(const uint32_t width) { m_width = width; }
-		inline const uint32_t getWidth() const { return m_width; }
+		inline void SetWidth(const uint32_t width) { m_width = width; }
+		inline const uint32_t GetWidth() const { return m_width; }
 
-		inline void setHeight(const uint32_t height) { m_height = height; }
-		inline const uint32_t getHeight() const	{ return m_height; }
+		inline void SetHeight(const uint32_t height) { m_height = height; }
+		inline const uint32_t GetHeight() const	{ return m_height; }
 
-		inline void setRoot(const std::string& root) { m_root = root; }
-		inline const std::string& getRootDir() const { return m_root; }
+		inline void SetRoot(const std::string& root) { m_root = root; }
+		inline const std::string& GetRootDir() const { return m_root; }
 
-		inline void setIniDir(const std::string& dir) { m_iniDir = dir; }
-		inline const std::string& getIniDir() const { return m_iniDir; }
+		inline void SetIniDir(const std::string& dir) { m_iniDir = dir; }
+		inline const std::string& GetIniDir() const { return m_iniDir; }
 
-		inline void setIniPreprocessor(const bool pp) { m_iniPp = pp; }
-		inline const bool getIniPreprocessor() const { return m_iniPp; }
+		inline void SetIniPreprocessor(const bool pp) { m_iniPp = pp; }
+		inline const bool GetIniPreprocessor() const { return m_iniPp; }
 
-		inline void setDebugPort(const uint16_t port) { m_debugPort = port; }
-		inline uint16_t getDebugPort() const { return m_debugPort; }
+		inline void SetDebugPort(const uint16_t port) { m_debugPort = port; }
+		inline uint16_t GetDebugPort() const { return m_debugPort; }
+
+		inline bool IsDebug() const { return m_debug; }
 	private:
 		bool m_debug;
 		uint16_t m_debugPort;

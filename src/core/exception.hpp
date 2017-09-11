@@ -10,7 +10,7 @@ namespace arda
 	public:
 		RuntimeException(std::string error) : std::runtime_error(std::string(
 			"["+
-			std::to_string(Application::getGlobal().TimeFromStart<std::chrono::milliseconds>())+
+			std::to_string(GetGlobal().TimeFromStart<std::chrono::milliseconds>())+
 			"]: "+error).c_str())
 		{
 

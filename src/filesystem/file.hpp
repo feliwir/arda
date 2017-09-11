@@ -11,7 +11,7 @@ namespace arda
 	public:
 		File(std::shared_ptr<IStream> stream);
 
-		inline std::shared_ptr<IStream> getStream() const
+		inline std::shared_ptr<IStream> GetStream() const
 		{
 			return m_stream;
 		}
