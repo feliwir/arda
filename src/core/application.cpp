@@ -30,25 +30,12 @@ arda::Application::Application(const std::vector<std::string>& args)
 	//Initialize audio
 	m_audio = std::make_unique<Audio>(*m_config);
 
-	//Initialize window
-	glfwInit();
-
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-	if(m_config->IsDebug())
-		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
-		
-	m_window = glfwCreateWindow(m_config->GetWidth(),
-		m_config->GetHeight(),
-		m_config->GetTitle().c_str(),
-		0, 0);
-
-	glfwMakeContextCurrent(m_window);
-
 	//Initialize graphics
 	m_graphics = std::make_unique<Graphics>(*m_config);
+	m_graphics->GetRenderer().SetClearColor({ 0.0, 0.0, 0.0, 1.0 });
+
+	//Get the GLFW window
+	m_window = m_graphics->GetRenderer().GetWindow();
 
 	auto start = std::chrono::high_resolution_clock::now();
 
@@ -81,8 +68,7 @@ arda::Application::Application(const std::vector<std::string>& args)
 
 arda::Application::~Application()
 {
-	if (m_window)
-		glfwDestroyWindow(m_window);
+
 }
 
 void arda::Application::Run()
@@ -90,8 +76,10 @@ void arda::Application::Run()
 	while (!glfwWindowShouldClose(m_window))
 	{
 		m_graphics->Clear();
+
 		glfwPollEvents();
-		glfwSwapBuffers(m_window);
+
+		m_graphics->Present();
 	}
 
 }

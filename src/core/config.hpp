@@ -35,8 +35,12 @@ namespace arda
 		inline uint16_t GetDebugPort() const { return m_debugPort; }
 
 		inline bool IsDebug() const { return m_debug; }
+
+		inline int SetGraphicsAPI(const int api) { m_gfxApi = api; }
+		inline int GetGraphicsAPI() const { return m_gfxApi; }
 	private:
 		bool m_debug;
+		int m_gfxApi;
 		uint16_t m_debugPort;
 		std::string m_title;
 		std::string m_root;

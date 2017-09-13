@@ -1,37 +1,36 @@
 #pragma once
 #include "../renderer.hpp"
-#include "flextGL.h"
+#include <d3d11.h>
 
 namespace arda
 {
-	class GLRenderer final : public IRenderer
+	class D3DRenderer final : public IRenderer
 	{
 	public:
-		GLRenderer(Config& c);
+		D3DRenderer(Config& c);
+		~D3DRenderer();
 
 		// Geerbt über IRenderer
 		virtual void Clear() override;
-
-		// Inherited via IRenderer
 		virtual void Render() override;
-
-		// Inherited via IRenderer
 		virtual void Present() override;
-
-		// Inherited via IRenderer
 		virtual std::shared_ptr<ITexture> CreateTexture() override;
 		virtual std::shared_ptr<ITexture> CreateTexture(Image & img) override;
-
 		// Geerbt über IRenderer
 		virtual void SetClearColor(const glm::vec4 & color) override;
+
+		// Geerbt über IRenderer
 		virtual void Resize(const int width, const int height) override;
 	private:
-		static void DebugCallback(GLenum source,
-			GLenum type,
-			GLuint id,
-			GLenum severity,
-			GLsizei length,
-			const GLchar *message,
-			const void *userParam);
+		void InitD3D(Config& c);
+		void CleanD3D();
+	private:
+		IDXGISwapChain *m_swapchain;            // the pointer to the swap chain interface
+		ID3D11Device *m_device;                 // the pointer to our Direct3D device interface
+		ID3D11DeviceContext *m_context;			// the device context
+		ID3D11RenderTargetView *m_backbuffer;
+		FLOAT m_clearColor[4];
+
+
 	};
 }

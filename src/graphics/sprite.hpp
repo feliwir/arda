@@ -4,6 +4,7 @@
 
 namespace arda
 {
+	class Buffer;
 	class Texture;
 
 	class Sprite : public IDrawable
@@ -16,6 +17,8 @@ namespace arda
 		// Inherited via IDrawable
 		virtual void Render() = 0;
 	private:
+		std::shared_ptr<Buffer> m_positions;
+		std::shared_ptr<Buffer> m_indices;
 		std::shared_ptr<Texture> m_texture;
 		
 	};
