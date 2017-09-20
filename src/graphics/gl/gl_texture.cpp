@@ -1,4 +1,7 @@
 #include "gl_texture.hpp"
+#include "../image.hpp"
+
+gli::gl arda::GLTexture::s_gl(gli::gl::PROFILE_GL33);
 
 arda::GLTexture::GLTexture(int width, int height) : 
 	ITexture(width,height), m_handle(0)
@@ -24,20 +27,23 @@ arda::GLTexture::~GLTexture()
 void arda::GLTexture::Update(Image& img)
 {
 	Bind();
-	auto fmt = img.GetFormat();
-	GLuint gl_fmt;
+	gli::texture tex = img.GetTexture();
+	gli::gl::format const gl_fmt = s_gl.translate(tex.format(),tex.swizzles());
+	GLenum target = s_gl.translate(tex.target());
 
-	switch (fmt)
+	for (std::size_t level = 0; level < tex.levels(); ++level)
 	{
-	case Image::RGB:
-		gl_fmt = GL_RGB;
-		break;
-	case Image::RGBA:
-		gl_fmt = GL_RGBA;
-		break;
-	}
-
-	glTexImage2D(GL_TEXTURE_2D, 0, gl_fmt, img.GetWidth(), img.GetHeight(), 0, gl_fmt, GL_UNSIGNED_BYTE, img.GetBuffer());
+		glm::tvec3<GLsizei> extent(tex.extent(level));
+		if (gli::is_compressed(tex.format()))
+		{
+			glCompressedTexImage2D(target, level, gl_fmt.Internal, extent.x, extent.y, 0, tex.size(level), tex.data(0, 0, level));
+		}
+		else
+		{
+			glTexImage2D(target, level, GL_RGBA, extent.x, extent.y, 0, gl_fmt.External, gl_fmt.Type, tex.data(0, 0, level));
+		}
+	}	
+	
 }
 
 void arda::GLTexture::Bind()

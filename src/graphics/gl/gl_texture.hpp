@@ -1,7 +1,7 @@
 #pragma once
 #include "../texture.hpp"
-#include "../image.hpp"
 #include "flextGL.h"
+#include <gli/gl.hpp>
 
 namespace arda
 {
@@ -19,5 +19,7 @@ namespace arda
 
 	private:
 		GLuint m_handle;
+
+		static gli::gl s_gl;
 	};
 }

@@ -48,6 +48,7 @@ target_include_directories(${PROJECT} PRIVATE
                             ${Boost_INCLUDE_DIRS} 
                             ${FFMPEG_INCLUDE_DIRS}
                             ${PROJECT_ROOT}/deps/glm
+                            ${PROJECT_ROOT}/deps/gli
                             ${PROJECT_ROOT}/deps/cxxopts/include 
                             ${PROJECT_ROOT}/deps/rapidjson/include)
 

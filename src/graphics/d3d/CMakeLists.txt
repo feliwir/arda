@@ -10,12 +10,13 @@ set(HDRS ${HDRS}
 "${DIR}/d3d_buffer.hpp" 
 "${DIR}/d3d_renderer.hpp" 
 "${DIR}/d3d_sprite.hpp" 
-"${DIR}/d3d_texture.hpp" 
+"${DIR}/d3d_texture.hpp"
+"${DIR}/d3d_util.hpp" 
 PARENT_SCOPE)
 
 set(SRCS ${SRCS}
 "${DIR}/d3d_buffer.cpp" 
 "${DIR}/d3d_renderer.cpp" 
 "${DIR}/d3d_sprite.cpp" 
-"${DIR}/d3d_texture.cpp" 
+"${DIR}/d3d_texture.cpp"
 PARENT_SCOPE)

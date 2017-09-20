@@ -2,6 +2,7 @@
 #include "../renderer.hpp"
 #include "flextGL.h"
 
+
 namespace arda
 {
 	class GLRenderer final : public IRenderer
@@ -27,11 +28,13 @@ namespace arda
 		virtual void Resize(const int width, const int height) override;
 	private:
 		static void DebugCallback(GLenum source,
-			GLenum type,
-			GLuint id,
-			GLenum severity,
-			GLsizei length,
-			const GLchar *message,
-			const void *userParam);
+								GLenum type,
+								GLuint id,
+								GLenum severity,
+								GLsizei length,
+								const GLchar *message,
+								const void *userParam);
+
+		GLuint m_vao;
 	};
 }

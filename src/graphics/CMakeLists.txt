@@ -15,7 +15,8 @@ set(HDRS ${HDRS}
 "${DIR}/drawable.hpp" 
 "${DIR}/graphics.hpp" 
 "${DIR}/image.hpp" 
-"${DIR}/renderer.hpp" 
+"${DIR}/renderer.hpp"
+"${DIR}/shader.hpp" 
 "${DIR}/sprite.hpp" 
 "${DIR}/texture.hpp" 
 PARENT_SCOPE)
@@ -25,6 +26,7 @@ set(SRCS ${SRCS}
 "${DIR}/graphics.cpp" 
 "${DIR}/image.cpp" 
 "${DIR}/renderer.cpp"
+"${DIR}/shader.cpp" 
 "${DIR}/sprite.cpp" 
 "${DIR}/texture.cpp" 
 PARENT_SCOPE)

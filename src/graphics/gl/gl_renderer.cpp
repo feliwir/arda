@@ -22,6 +22,12 @@ arda::GLRenderer::GLRenderer(Config& c) : IRenderer(c)
 
 	flextInit();
 
+	GLint major, minor;
+	glGetIntegerv(GL_MAJOR_VERSION, &major);
+	glGetIntegerv(GL_MAJOR_VERSION, &minor);
+
+	ARDA_LOG("OpenGL version supported: " + std::to_string(major) + "." + std::to_string(minor));
+
 	//register debug callback
 	if (FLEXT_KHR_debug)
 	{
@@ -31,6 +37,9 @@ arda::GLRenderer::GLRenderer(Config& c) : IRenderer(c)
 	Resize(c.GetWidth(), c.GetHeight());
 
 	RegisterCallbacks();
+
+	glGenVertexArrays(1, &m_vao);
+	glBindVertexArray(m_vao);
 }
 
 void arda::GLRenderer::Render()

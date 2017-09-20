@@ -15,7 +15,8 @@
 #include "../ini/ini.hpp"
 
 std::unique_ptr<arda::Global> arda::Application::s_global;
-std::shared_ptr<arda::GLTexture> s_tex;
+std::shared_ptr<arda::ITexture> s_tex;
+std::shared_ptr<arda::ITexture> s_tex2;
 
 arda::Application::Application(const std::vector<std::string>& args)
 	: m_window(nullptr)
@@ -45,9 +46,13 @@ arda::Application::Application(const std::vector<std::string>& args)
 	auto stream = m_fs->GetStream("maps/map mp evendim/map mp evendim.map");
 	Map map(stream);
 
-	stream = m_fs->GetStream("GermanSplash.jpg");
+	stream = m_fs->GetStream("art/compiledtextures/au/aucorshipw_update.dds");
 	Image img(stream);
-	s_tex = std::make_shared<GLTexture>(img);
+	s_tex = m_graphics->GetRenderer().CreateTexture(img);
+
+	stream = m_fs->GetStream("GermanSplash.jpg");
+	Image img2(stream);
+	s_tex2 = m_graphics->GetRenderer().CreateTexture(img2);
 
 	stream = m_fs->GetStream("data/movies/Credits_with_alpha.vp6");
 	Video vid(stream);
@@ -57,13 +62,15 @@ arda::Application::Application(const std::vector<std::string>& args)
 	ARDA_LOG("Done creating FileSystem: " + std::to_string(duration / 1000.0));
 	start = end;
 
+	glfwShowWindow(m_window);
+
 	//Initialize ini system
 	m_ini = std::make_unique<Ini>(*m_config,*m_fs);
 	end = std::chrono::high_resolution_clock::now();
 	duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 	ARDA_LOG("Done INI parsing: " + std::to_string(duration / 1000.0));
 
-	glfwShowWindow(m_window);
+	//m_graphics->SetFullscreen(true);
 }
 
 arda::Application::~Application()

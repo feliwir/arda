@@ -1,7 +1,9 @@
 #include "d3d_renderer.hpp"
 #include <GLFW/glfw3.h>
+#include <d3d11.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
+#include "d3d_texture.hpp"
 #include "../../core/config.hpp"
 
 arda::D3DRenderer::D3DRenderer(Config & c) : IRenderer(c)
@@ -42,12 +44,12 @@ void arda::D3DRenderer::Present()
 
 std::shared_ptr<arda::ITexture> arda::D3DRenderer::CreateTexture()
 {
-	return std::shared_ptr<ITexture>();
+	return std::make_shared<D3DTexture>(0,0,m_device,m_context);
 }
 
 std::shared_ptr<arda::ITexture> arda::D3DRenderer::CreateTexture(Image & img)
 {
-	return std::shared_ptr<ITexture>();
+	return std::make_shared<D3DTexture>(img,m_device, m_context);
 }
 
 void arda::D3DRenderer::InitD3D(Config& c)

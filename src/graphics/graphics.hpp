@@ -23,6 +23,8 @@ namespace arda
 		{
 			return *m_renderer;
 		}
+
+		void SetFullscreen(const bool full);
 	private:
 		std::unique_ptr<IRenderer> m_renderer;
 		glm::vec4 m_clearColor;

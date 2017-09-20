@@ -1,6 +1,10 @@
 #pragma once
 #include "../renderer.hpp"
-#include <d3d11.h>
+
+struct IDXGISwapChain;
+struct ID3D11Device;
+struct ID3D11DeviceContext;
+struct ID3D11RenderTargetView;
 
 namespace arda
 {
@@ -29,7 +33,7 @@ namespace arda
 		ID3D11Device *m_device;                 // the pointer to our Direct3D device interface
 		ID3D11DeviceContext *m_context;			// the device context
 		ID3D11RenderTargetView *m_backbuffer;
-		FLOAT m_clearColor[4];
+		float m_clearColor[4];
 
 
 	};
