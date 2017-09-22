@@ -4,7 +4,8 @@ set(HDRS ${HDRS}
 "${DIR}/flextGL.h"
 "${DIR}/gl_buffer.hpp" 
 "${DIR}/gl_renderer.hpp" 
-"${DIR}/gl_shader.hpp" 
+"${DIR}/gl_shader.hpp"
+"${DIR}/gl_shadercode.hpp" 
 "${DIR}/gl_sprite.hpp" 
 "${DIR}/gl_texture.hpp" 
 PARENT_SCOPE)

@@ -1,5 +1,7 @@
 #include "gl_renderer.hpp"
 #include "gl_texture.hpp"
+#include "gl_shader.hpp"
+#include "gl_shadercode.hpp"
 #include "../../core/debugger.hpp"
 #include "../../core/config.hpp"
 #include <GLFW/glfw3.h>
@@ -8,7 +10,8 @@ arda::GLRenderer::GLRenderer(Config& c) : IRenderer(c)
 {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // We don't want the old OpenGL 
 
 	if (c.IsDebug())
 		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
@@ -31,6 +34,8 @@ arda::GLRenderer::GLRenderer(Config& c) : IRenderer(c)
 	//register debug callback
 	if (FLEXT_KHR_debug)
 	{
+		glEnable(GL_DEBUG_OUTPUT);
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 		glDebugMessageCallback(DebugCallback, nullptr);
 	}
 
@@ -40,6 +45,11 @@ arda::GLRenderer::GLRenderer(Config& c) : IRenderer(c)
 
 	glGenVertexArrays(1, &m_vao);
 	glBindVertexArray(m_vao);
+
+	m_spriteShader = std::make_unique<GLShader>();
+	m_spriteShader->Compile(shader::sprite_vert, shader::sprite_frag);
+	m_spriteShader->Link();
+
 }
 
 void arda::GLRenderer::Render()

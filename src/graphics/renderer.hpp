@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include "drawable.hpp"
 #include "texture.hpp"
+#include "shader.hpp"
 
 struct GLFWwindow;
 
@@ -52,6 +53,9 @@ namespace arda
 		static void CallbackResize(GLFWwindow* window, int width, int height);
 	protected:
 		GLFWwindow* m_window;
+
+		std::unique_ptr<Shader> m_spriteShader;
+		std::unique_ptr<Shader> m_modelShader;
 	private:
 		std::vector<std::shared_ptr<IDrawable>> m_drawables;
 	};

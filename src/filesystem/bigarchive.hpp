@@ -3,6 +3,7 @@
 #include <fstream>
 #include <map>
 #include <memory>
+#include <mutex>
 
 namespace arda
 {
@@ -32,7 +33,7 @@ namespace arda
 		std::string m_path;
 		unsigned int m_size;
 		std::map<std::string, std::shared_ptr<IStream>> m_entries;
-
+		std::mutex m_access;
 		friend class BigStream;
 	};
 }

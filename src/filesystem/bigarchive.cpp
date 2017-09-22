@@ -50,6 +50,7 @@ arda::BigArchive::BigArchive(const std::string & file)
 
 unsigned int arda::BigArchive::read(char * buffer, int offset, size_t size)
 {
+	std::lock_guard<std::mutex> lock(m_access);
 	m_stream.seekg(offset, std::ios::beg);
 	m_stream.read(buffer, size);
 	return static_cast<unsigned int>(m_stream.gcount());
