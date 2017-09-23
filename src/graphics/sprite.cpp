@@ -3,7 +3,6 @@
 
 arda::Sprite::Sprite(IRenderer& renderer)
 {
-	
 	m_positions = renderer.CreateBuffer(Buffer::VERTEX_BUFFER,
 										Buffer::STATIC);
 
@@ -37,5 +36,6 @@ arda::Sprite::~Sprite()
 void arda::Sprite::Render(IRenderer& renderer)
 {
 	m_layout->Bind();
+	m_texture->Bind();
 	renderer.Draw(m_positions, m_indices);
 }

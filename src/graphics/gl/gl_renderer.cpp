@@ -51,12 +51,16 @@ arda::GLRenderer::GLRenderer(Config& c) : IRenderer(c)
 	m_spriteShader = std::make_unique<GLShader>();
 	m_spriteShader->Compile(shader::sprite_vert, shader::sprite_frag);
 	m_spriteShader->Link();
-
+	m_spriteShader->AddUniform("sprite_tex");
 }
 
 void arda::GLRenderer::Render()
 {
 	m_spriteShader->Bind();
+	glEnable(GL_TEXTURE_2D);
+	glActiveTexture(GL_TEXTURE0);
+	glUniform1i(m_spriteShader->GetUniform("sprite_tex"), 0);
+
 	//sort and bind the correct shader
 	for (auto& drawable : m_drawables)
 	{

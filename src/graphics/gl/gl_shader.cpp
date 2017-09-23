@@ -134,3 +134,8 @@ void arda::GLShader::Compile(ShaderType type, std::string_view src)
 		m_shaders[type] = shader;
 	}
 }
+
+void arda::GLShader::AddUniform(std::string_view name)
+{
+	m_uniforms[std::string(name)] = glGetUniformLocation(m_program, name.data());
+}

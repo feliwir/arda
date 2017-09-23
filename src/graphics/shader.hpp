@@ -26,6 +26,13 @@ namespace arda
 		virtual void Bind() = 0;
 
 		virtual void Link() = 0;
+
+		virtual void AddUniform(std::string_view name) = 0;
+
+		inline int GetUniform(std::string_view name)
+		{
+			return m_uniforms[std::string(name)];
+		}
 	protected:
 		std::map<std::string, int> m_uniforms;
 
