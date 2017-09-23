@@ -4,6 +4,8 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 #include "d3d_texture.hpp"
+#include "d3d_layout.hpp"
+#include "d3d_buffer.hpp"
 #include "../../core/config.hpp"
 
 arda::D3DRenderer::D3DRenderer(Config & c) : IRenderer(c)
@@ -106,6 +108,15 @@ void arda::D3DRenderer::CleanD3D()
 	m_backbuffer->Release();
 }
 
+std::shared_ptr<arda::Layout> arda::D3DRenderer::CreateLayout()
+{
+	return std::make_shared<D3DLayout>();
+}
+
+void arda::D3DRenderer::Draw(std::shared_ptr<Buffer> vertices, std::shared_ptr<Buffer> indices)
+{
+}
+
 void arda::D3DRenderer::Resize(const int width, const int height)
 {
 	// Set the viewport
@@ -126,4 +137,9 @@ void arda::D3DRenderer::SetClearColor(const glm::vec4 & color)
 	m_clearColor[1] = color.g;
 	m_clearColor[2] = color.b;
 	m_clearColor[3] = color.a;
+}
+
+std::shared_ptr<arda::Buffer>arda::D3DRenderer::CreateBuffer(Buffer::Type t, Buffer::Usage u)
+{
+	return std::make_shared<D3DBuffer>(t, u);
 }

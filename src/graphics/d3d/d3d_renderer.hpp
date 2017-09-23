@@ -18,13 +18,23 @@ namespace arda
 		virtual void Clear() override;
 		virtual void Render() override;
 		virtual void Present() override;
-		virtual std::shared_ptr<ITexture> CreateTexture() override;
-		virtual std::shared_ptr<ITexture> CreateTexture(Image & img) override;
+		
 		// Geerbt über IRenderer
 		virtual void SetClearColor(const glm::vec4 & color) override;
 
 		// Geerbt über IRenderer
 		virtual void Resize(const int width, const int height) override;
+
+		// Geerbt über IRenderer
+		virtual void Draw(std::shared_ptr<Buffer> vertices, std::shared_ptr<Buffer> indices) override;
+
+		// Geerbt über IRenderer
+		virtual std::shared_ptr<ITexture> CreateTexture() override;
+		virtual std::shared_ptr<ITexture> CreateTexture(Image & img) override;
+		virtual std::shared_ptr<Buffer> CreateBuffer(Buffer::Type, Buffer::Usage) override;
+
+		// Geerbt über IRenderer
+		virtual std::shared_ptr<Layout> CreateLayout() override;
 	private:
 		void InitD3D(Config& c);
 		void CleanD3D();
@@ -34,7 +44,5 @@ namespace arda
 		ID3D11DeviceContext *m_context;			// the device context
 		ID3D11RenderTargetView *m_backbuffer;
 		float m_clearColor[4];
-
-
 	};
 }

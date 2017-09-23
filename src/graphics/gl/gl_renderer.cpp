@@ -2,6 +2,8 @@
 #include "gl_texture.hpp"
 #include "gl_shader.hpp"
 #include "gl_shadercode.hpp"
+#include "gl_buffer.hpp"
+#include "gl_layout.hpp"
 #include "../../core/debugger.hpp"
 #include "../../core/config.hpp"
 #include <GLFW/glfw3.h>
@@ -54,6 +56,12 @@ arda::GLRenderer::GLRenderer(Config& c) : IRenderer(c)
 
 void arda::GLRenderer::Render()
 {
+	m_spriteShader->Bind();
+	//sort and bind the correct shader
+	for (auto& drawable : m_drawables)
+	{
+		drawable->Render(*this);
+	}
 }
 
 void arda::GLRenderer::Present()
@@ -76,6 +84,16 @@ void arda::GLRenderer::DebugCallback(GLenum source, GLenum type, GLuint id, GLen
 	ARDA_LOG(message);
 }
 
+std::shared_ptr<arda::Layout> arda::GLRenderer::CreateLayout()
+{
+	return std::make_shared<GLLayout>();
+}
+
+std::shared_ptr<arda::Buffer> arda::GLRenderer::CreateBuffer(Buffer::Type t, Buffer::Usage u)
+{
+	return std::make_shared<GLBuffer>(t,u);
+}
+
 void arda::GLRenderer::SetClearColor(const glm::vec4 & color)
 {
 	glClearColor(color.r, color.g, color.b, color.a);
@@ -84,6 +102,13 @@ void arda::GLRenderer::SetClearColor(const glm::vec4 & color)
 void arda::GLRenderer::Resize(const int width, const int height)
 {
 	glViewport(0, 0, width, height);
+}
+
+void arda::GLRenderer::Draw(std::shared_ptr<Buffer> vertices, std::shared_ptr<Buffer> indices)
+{
+	vertices->Bind();
+	indices->Bind();
+	glDrawElements(GL_TRIANGLES, indices->GetElementNumber(), GL_UNSIGNED_SHORT,NULL);
 }
 
 void arda::GLRenderer::Clear()

@@ -9,14 +9,15 @@
 #include "../video/video.hpp"
 #include "../map/map.hpp"
 #include "../graphics/graphics.hpp"
+#include "../graphics/sprite.hpp"
+#include "../graphics/image.hpp"
 #include "../graphics/gl/gl_texture.hpp"
 #include "../filesystem/filesystem.hpp"
 #include "../filesystem/stream.hpp"
 #include "../ini/ini.hpp"
 
 std::unique_ptr<arda::Global> arda::Application::s_global;
-std::shared_ptr<arda::ITexture> s_tex;
-std::shared_ptr<arda::ITexture> s_tex2;
+std::shared_ptr<arda::Sprite> s_splash;
 
 arda::Application::Application(const std::vector<std::string>& args)
 	: m_window(nullptr)
@@ -34,6 +35,7 @@ arda::Application::Application(const std::vector<std::string>& args)
 	//Initialize graphics
 	m_graphics = std::make_unique<Graphics>(*m_config);
 	m_graphics->GetRenderer().SetClearColor({ 0.0, 0.0, 0.0, 1.0 });
+	auto& ren = m_graphics->GetRenderer();
 
 	//Get the GLFW window
 	m_window = m_graphics->GetRenderer().GetWindow();
@@ -46,13 +48,10 @@ arda::Application::Application(const std::vector<std::string>& args)
 	auto stream = m_fs->GetStream("maps/map mp evendim/map mp evendim.map");
 	Map map(stream);
 
-	stream = m_fs->GetStream("art/compiledtextures/au/aucorshipw_update.dds");
-	Image img(stream);
-	s_tex = m_graphics->GetRenderer().CreateTexture(img);
-
 	stream = m_fs->GetStream("GermanSplash.jpg");
-	Image img2(stream);
-	s_tex2 = m_graphics->GetRenderer().CreateTexture(img2);
+	Image img(stream);
+	s_splash = m_graphics->CreateSprite(ren.CreateTexture(img));
+	ren.AddDrawable(s_splash);
 
 	stream = m_fs->GetStream("data/movies/Credits_with_alpha.vp6");
 	Video vid(stream);
@@ -83,6 +82,8 @@ void arda::Application::Run()
 	while (!glfwWindowShouldClose(m_window))
 	{
 		m_graphics->Clear();
+
+		m_graphics->Render();
 
 		glfwPollEvents();
 

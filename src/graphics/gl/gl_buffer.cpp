@@ -35,11 +35,11 @@ GLenum arda::GLBuffer::getTarget()
 	switch (m_type)
 	{
 	case VERTEX_BUFFER:
-		return GL_VERTEX_ARRAY;
+		return GL_ARRAY_BUFFER;
 	case INDEX_BUFFER:
 		return GL_ELEMENT_ARRAY_BUFFER;
 	default:
-		return GL_VERTEX_ARRAY;
+		return GL_ARRAY_BUFFER;
 	}
 }
 

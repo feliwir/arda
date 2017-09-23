@@ -1,4 +1,5 @@
 #include "graphics.hpp"
+#include "sprite.hpp"
 #include "gl/gl_renderer.hpp"
 #include "d3d/d3d_renderer.hpp"
 #include "../core/config.hpp"
@@ -42,8 +43,7 @@ void arda::Graphics::Clear()
 
 void arda::Graphics::Render()
 {
-
-	
+	m_renderer->Render();	
 }
 
 void arda::Graphics::Present()
@@ -74,4 +74,9 @@ void arda::Graphics::SetFullscreen(const bool full)
 	{
 		glfwSetWindowMonitor(window, NULL, 0, 0, 800, 600, 0);
 	}
+}
+
+std::shared_ptr<arda::Sprite> arda::Graphics::CreateSprite(std::shared_ptr<ITexture> tex)
+{
+	return std::make_shared<arda::Sprite>(*m_renderer,tex);
 }
