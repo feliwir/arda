@@ -21,6 +21,19 @@ arda::Image::~Image()
 {
 }
 
+void arda::Image::Create(glm::vec2 size, gli::format format, uint8_t * data)
+{
+	m_img = gli::texture(gli::TARGET_2D, format, gli::texture::extent_type(size.x, size.y, 1), 1, 1, 1);
+	uint8_t* buffer = reinterpret_cast<uint8_t*>(m_img.data(0, 0, 0));
+	std::copy(data, data + m_img.size(), buffer);
+}
+
+void arda::Image::Update(uint8_t * data)
+{
+	uint8_t* buffer = reinterpret_cast<uint8_t*>(m_img.data(0, 0, 0));
+	std::copy(data, data + m_img.size(), buffer);
+}
+
 inline bool arda::Image::Load(std::shared_ptr<IStream> stream)
 {
 	gli::target target;
