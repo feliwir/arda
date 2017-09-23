@@ -26,7 +26,7 @@ uniform sampler2D sprite_tex;
 void main()
 {
 	vec2 coords = (fragPos + vec2(1,1))/2.0;
-	fragColor = texture(sprite_tex,coords);
+	fragColor = texture(sprite_tex, vec2(coords.x, 1 - coords.y));
 })";
 
 }
