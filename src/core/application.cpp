@@ -15,6 +15,7 @@
 #include "../filesystem/filesystem.hpp"
 #include "../filesystem/stream.hpp"
 #include "../ini/ini.hpp"
+#include "../ini/blocks/ini_video.hpp"
 
 std::unique_ptr<arda::Global> arda::Application::s_global;
 std::shared_ptr<arda::Sprite> s_splash;
@@ -34,34 +35,41 @@ arda::Application::Application(const std::vector<std::string>& args)
 
 	//Initialize graphics
 	m_graphics = std::make_unique<Graphics>(*m_config);
+	m_graphics->CenterWindow();
 	m_graphics->GetRenderer().SetClearColor({ 0.0, 0.0, 0.0, 1.0 });
 	auto& ren = m_graphics->GetRenderer();
-
-	//Get the GLFW window
-	m_window = m_graphics->GetRenderer().GetWindow();
-
+	
 	auto start = std::chrono::high_resolution_clock::now();
 
 	//Initialize virtual filesystem
 	m_fs = std::make_unique<FileSystem>(*m_config);
 
-	auto stream = m_fs->GetStream("maps/map mp evendim/map mp evendim.map");
-	Map map(stream);
-
-	stream = m_fs->GetStream("GermanSplash.jpg");
+	auto stream = m_fs->GetStream("GermanSplash.jpg");
 	Image img(stream);
 	s_splash = m_graphics->CreateSprite(ren.CreateTexture(img));
 	ren.AddDrawable(s_splash);
 
+	//Get the GLFW window
+	m_window = m_graphics->GetRenderer().GetWindow();
+
+	m_graphics->Clear();
+	m_graphics->Render();
+	m_graphics->Present();
+
+	glfwShowWindow(m_window);
+
 	stream = m_fs->GetStream("data/movies/Credits_with_alpha.vp6");
 	Video vid(stream);
+
+	stream = m_fs->GetStream("maps/map mp evendim/map mp evendim.map");
+	Map map(stream);
 
 	auto end = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 	ARDA_LOG("Done creating FileSystem: " + std::to_string(duration / 1000.0));
 	start = end;
 
-	glfwShowWindow(m_window);
+
 
 	//Initialize ini system
 	m_ini = std::make_unique<Ini>(*m_config,*m_fs);
@@ -69,7 +77,10 @@ arda::Application::Application(const std::vector<std::string>& args)
 	duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 	ARDA_LOG("Done INI parsing: " + std::to_string(duration / 1000.0));
 
-	//m_graphics->SetFullscreen(true);
+	//check for an entry
+	auto inivid = m_ini->GetBlock<ini::Video>("EALogoMovie");
+
+	m_graphics->SetFullscreen(true);
 }
 
 arda::Application::~Application()

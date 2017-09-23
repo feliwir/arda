@@ -10,11 +10,11 @@
 #include <iostream>
 #include <chrono>
 
-
 const std::map<const std::string, arda::Parser::BlockConstruct> arda::Parser::m_constructors =
 {
-	{"GameData", Block::Create<GameData>},
-	{"Weapon", Block::Create<Weapon>}
+	{"GameData", Block::Create<ini::GameData>},
+	{"Video", Block::Create<ini::Video> },
+	{"Weapon", Block::Create<ini::Weapon>}
 };
 
 arda::Parser::Parser(Ini & ini) : m_ini(ini)
@@ -99,9 +99,7 @@ void arda::Parser::InBlock(std::shared_ptr<TokenStream> stream, State & s)
 				//clear
 				s = NO_BLOCK;
 				m_block = nullptr;
-
-			}
-			
+			}			
 		}
 		else
 		{
@@ -157,8 +155,8 @@ void arda::Parser::CreateBlock(const std::string & type, const std::string & nam
 		return;
 	}
 		
-
 	m_block = it->second();
+	m_ini.Register(m_block, name);
 }
 
 void arda::Parser::CreateProperty(State & state)
@@ -179,7 +177,5 @@ void arda::Parser::CreateProperty(State & state)
 	else
 	{
 		state = IN_BLOCK;
-	}
-
-	 
+	} 
 }

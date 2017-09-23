@@ -76,6 +76,25 @@ void arda::Graphics::SetFullscreen(const bool full)
 	}
 }
 
+void arda::Graphics::CenterWindow()
+{
+	auto window = m_renderer->GetWindow();
+	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+
+	//get window size
+	int width, height;
+	glfwGetWindowSize(window, &width, &height);
+
+	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+	//now calculate the position
+
+	int posx = mode->width / 2 - width / 2;
+	int posy = mode->height / 2 - height / 2;
+
+	glfwSetWindowPos(window, posx, posy);
+}
+
 std::shared_ptr<arda::Sprite> arda::Graphics::CreateSprite(std::shared_ptr<ITexture> tex)
 {
 	return std::make_shared<arda::Sprite>(*m_renderer,tex);

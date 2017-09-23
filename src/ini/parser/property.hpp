@@ -9,8 +9,9 @@ namespace arda
 	public:
 		Property(std::vector<Token>& args);
 
-		std::string GetString();
-		long long GetInteger();
+		bool GetBoolean() const;
+		std::string GetString() const;
+		long long GetInteger() const;
 	private:
 		std::vector<Token> m_args;
 	};

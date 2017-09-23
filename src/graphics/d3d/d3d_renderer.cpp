@@ -11,7 +11,8 @@
 arda::D3DRenderer::D3DRenderer(Config & c) : IRenderer(c)
 {
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-
+	glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+	
 	m_window = glfwCreateWindow(c.GetWidth(),
 		c.GetHeight(),
 		c.GetTitle().c_str(),

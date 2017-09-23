@@ -95,6 +95,11 @@ arda::Ini::~Ini()
 {
 }
 
+void arda::Ini::Register(std::shared_ptr<Block> temp, const std::string & name)
+{
+	m_videos.emplace(name, temp);
+}
+
 
 std::shared_ptr<arda::ParsingContext> arda::Ini::GetContext(const std::string & path,bool load)
 {

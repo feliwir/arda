@@ -7,10 +7,10 @@
 
 namespace arda
 {
+	class Block;
 	class Config;
 	class FileSystem;
 	class IEntry;
-	class Template;
 	class ParsingContext;
 
 	class Ini
@@ -19,7 +19,13 @@ namespace arda
 		Ini(Config& config,FileSystem& fs);
 		~Ini();
 
-		void AddTemplate(std::shared_ptr<Template> temp, const std::string& name="");
+		void Register(std::shared_ptr<Block> temp, const std::string& name="");
+
+		template<class T>
+		inline std::shared_ptr<T> GetBlock(std::string_view name)
+		{
+			return std::dynamic_pointer_cast<T>(m_videos[std::string(name)]);
+		}
 
 		inline std::vector<std::string>& GetGlobalIncludes() { return m_globalIncludes; }
 		std::shared_ptr<ParsingContext> GetContext(const std::string& path,bool load=true);
@@ -27,7 +33,7 @@ namespace arda
 		FileSystem& m_fs;
 		std::mutex m_access;
 		std::vector<std::string> m_globalIncludes;
-		std::map<const std::string, std::shared_ptr<Template>> m_weapons;
+		std::map<const std::string, std::shared_ptr<Block>> m_videos;
 		std::map<const std::string, std::shared_ptr<ParsingContext>> m_files;
 	};
 }

@@ -23,7 +23,7 @@ namespace arda
 		Image();
 		Image(std::shared_ptr<IStream> stream);
 		~Image();
-
+		
 		inline gli::texture& GetTexture()	{ return m_img;	}
 		inline int GetWidth()				{ return m_img.extent().x;	}
 		inline int GetHeight()				{ return m_img.extent().y;	}

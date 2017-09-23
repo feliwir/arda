@@ -27,6 +27,8 @@ namespace arda
 
 		void SetFullscreen(const bool full);
 
+		void CenterWindow();
+
 		std::shared_ptr<Sprite> CreateSprite(std::shared_ptr<ITexture> tex=nullptr);
 
 	private:

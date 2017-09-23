@@ -1,3 +1,4 @@
 #pragma once
-#include "gamedata.hpp"
-#include "weapon.hpp"
+#include "ini_gamedata.hpp"
+#include "ini_video.hpp"
+#include "ini_weapon.hpp"
