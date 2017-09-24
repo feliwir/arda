@@ -23,9 +23,32 @@ bool arda::Property::GetBoolean() const
 
 std::string arda::Property::GetString() const
 {
-	if (m_args.front().Type != Token::StringLiteral)
+	auto& token = m_args.front();
+
+	if (token.Type != Token::StringLiteral)
 	{
-		ARDA_LOG("Expected String Literal!");
+		
+
+		if (token.Type == Token::IntegerLiteral)
+		{
+			return std::to_string(std::get<long long>(token.Value));
+		}
+		else
+		{
+			ARDA_LOG("Cannot create String property!");
+			return "";
+		}
+			
+	}
+	else
+		return std::get<std::string>(token.Value);
+}
+
+std::string arda::Property::GetUnicode() const
+{
+	if (m_args.front().Type != Token::UnicodeLiteral)
+	{
+		ARDA_LOG("Expected Unicode Literal!");
 		return "";
 	}
 

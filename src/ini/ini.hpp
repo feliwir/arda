@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <mutex>
+#include "blocks/all.hpp"
 
 namespace arda
 {
@@ -19,12 +20,24 @@ namespace arda
 		Ini(Config& config,FileSystem& fs);
 		~Ini();
 
-		void Register(std::shared_ptr<Block> temp, const std::string& name="");
+		inline void RegisterVideo(std::shared_ptr<Block> vid, std::string_view name)
+		{
+			m_videos.emplace(std::string(name), vid);
+		}
 
 		template<class T>
-		inline std::shared_ptr<T> GetBlock(std::string_view name)
+		inline std::shared_ptr<T> GetBlock(std::string_view name = "");
+
+		template<>
+		inline std::shared_ptr<ini::Video> GetBlock(std::string_view name)
 		{
-			return std::dynamic_pointer_cast<T>(m_videos[std::string(name)]);
+			return std::dynamic_pointer_cast<ini::Video>(m_videos[std::string(name)]);
+		}
+
+		template<>
+		inline std::shared_ptr<ini::Weapon> GetBlock(std::string_view name)
+		{
+			return std::dynamic_pointer_cast<ini::Weapon>(m_videos[std::string(name)]);
 		}
 
 		inline std::vector<std::string>& GetGlobalIncludes() { return m_globalIncludes; }
@@ -33,7 +46,8 @@ namespace arda
 		FileSystem& m_fs;
 		std::mutex m_access;
 		std::vector<std::string> m_globalIncludes;
-		std::map<const std::string, std::shared_ptr<Block>> m_videos;
 		std::map<const std::string, std::shared_ptr<ParsingContext>> m_files;
+		std::map<const std::string, std::shared_ptr<Block>> m_videos;
+		std::map<const std::string, std::shared_ptr<Block>> m_weapons;
 	};
 }

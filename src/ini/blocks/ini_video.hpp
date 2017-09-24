@@ -13,6 +13,9 @@ namespace arda::ini
 
 		inline std::string& GetFilename() { return m_filename; }
 		inline unsigned int GetVolume() { return m_volume; }
+		
+		// Geerbt über Block
+		virtual void Register(Ini & ini, std::string_view name) override;
 	private:
 		std::string m_filename;
 		std::string m_comment;
@@ -20,5 +23,7 @@ namespace arda::ini
 		bool m_isDefault;
 
 		static int m_defaultVolume;
+
+
 	};
 }

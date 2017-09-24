@@ -11,6 +11,7 @@ namespace arda
 
 		bool GetBoolean() const;
 		std::string GetString() const;
+		std::string GetUnicode() const;
 		long long GetInteger() const;
 	private:
 		std::vector<Token> m_args;

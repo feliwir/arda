@@ -151,9 +151,16 @@ arda::Token arda::Lexer::CreateToken(std::string_view line, int & pos, std::shar
 				parse = false;
 			}
 
+			//we started with an int, that now turns out as a float
 			if (mode == INTEGER && c == '.')
 			{
 				mode = FLOAT;
+			}
+
+			//we started with an int, that now turns out as a string
+			if (mode == INTEGER && (isalpha(c) || c == '_'))
+			{
+				mode = STRING;
 			}
 
 			if (isspace(c))

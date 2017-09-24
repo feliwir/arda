@@ -55,7 +55,7 @@ arda::Application::Application(const std::vector<std::string>& args)
 	m_graphics->Clear();
 	m_graphics->Render();
 	m_graphics->Present();
-
+	
 	glfwShowWindow(m_window);
 
 	stream = m_fs->GetStream("data/movies/Credits_with_alpha.vp6");
@@ -68,8 +68,6 @@ arda::Application::Application(const std::vector<std::string>& args)
 	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 	ARDA_LOG("Done creating FileSystem: " + std::to_string(duration / 1000.0));
 	start = end;
-
-
 
 	//Initialize ini system
 	m_ini = std::make_unique<Ini>(*m_config,*m_fs);

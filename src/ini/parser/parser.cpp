@@ -156,7 +156,7 @@ void arda::Parser::CreateBlock(const std::string & type, const std::string & nam
 	}
 		
 	m_block = it->second();
-	m_ini.Register(m_block, name);
+	m_block->Register(m_ini, name);
 }
 
 void arda::Parser::CreateProperty(State & state)
