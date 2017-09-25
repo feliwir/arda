@@ -4,7 +4,7 @@
 
 namespace arda
 {
-	class Buffer
+	class IBuffer
 	{
 	public:
 		enum Type
@@ -20,7 +20,7 @@ namespace arda
 			STREAM
 		};
 	
-		Buffer(Type type,Usage usage);
+		IBuffer(Type type,Usage usage);
 		
 		template<class T>
 		inline void Upload(std::vector<T> buffer)

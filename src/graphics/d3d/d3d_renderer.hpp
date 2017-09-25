@@ -26,12 +26,12 @@ namespace arda
 		virtual void Resize(const int width, const int height) override;
 
 		// Geerbt über IRenderer
-		virtual void Draw(std::shared_ptr<Buffer> vertices, std::shared_ptr<Buffer> indices) override;
+		virtual void Draw(std::shared_ptr<IBuffer> vertices, std::shared_ptr<IBuffer> indices) override;
 
 		// Geerbt über IRenderer
 		virtual std::shared_ptr<ITexture> CreateTexture() override;
 		virtual std::shared_ptr<ITexture> CreateTexture(Image & img) override;
-		virtual std::shared_ptr<Buffer> CreateBuffer(Buffer::Type, Buffer::Usage) override;
+		virtual std::shared_ptr<IBuffer> CreateBuffer(IBuffer::Type, IBuffer::Usage) override;
 
 		// Geerbt über IRenderer
 		virtual std::shared_ptr<Layout> CreateLayout() override;

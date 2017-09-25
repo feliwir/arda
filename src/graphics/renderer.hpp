@@ -46,12 +46,12 @@ namespace arda
 
 		virtual void Resize(const int width, const int height) = 0;
 
-		virtual void Draw(std::shared_ptr<Buffer> vertices, std::shared_ptr<Buffer> indices) = 0;
+		virtual void Draw(std::shared_ptr<IBuffer> vertices, std::shared_ptr<IBuffer> indices) = 0;
 
 		//Create all kinds of objects
 		virtual std::shared_ptr<ITexture> CreateTexture() = 0;
 		virtual std::shared_ptr<ITexture> CreateTexture(Image& img) = 0;
-		virtual std::shared_ptr<Buffer> CreateBuffer(Buffer::Type,Buffer::Usage) = 0;
+		virtual std::shared_ptr<IBuffer> CreateBuffer(IBuffer::Type, IBuffer::Usage) = 0;
 		virtual std::shared_ptr<Layout> CreateLayout() = 0;
 	protected:
 		void RegisterCallbacks();		

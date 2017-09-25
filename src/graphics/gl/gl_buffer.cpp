@@ -1,6 +1,6 @@
 #include "gl_buffer.hpp"
 
-arda::GLBuffer::GLBuffer(Type t,Usage u) : Buffer(t,u)
+arda::GLBuffer::GLBuffer(Type t,Usage u) : IBuffer(t,u)
 	,m_handle(0)
 	,m_target(getTarget())
 	,m_usageFlag(getUsage())

@@ -24,6 +24,8 @@ namespace arda
 		void Run();
 
 		static inline Global& GetGlobal() { return *s_global; }
+	private:
+		void ShowSplash();
 
 	private:
 		GLFWwindow* m_window;

@@ -1,6 +1,6 @@
 #include "d3d_buffer.hpp"
 
-arda::D3DBuffer::D3DBuffer(Type t, Usage u) : Buffer(t,u)
+arda::D3DBuffer::D3DBuffer(Type t, Usage u) : IBuffer(t,u)
 {
 }
 

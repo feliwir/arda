@@ -23,15 +23,15 @@ namespace arda
 		virtual void SetClearColor(const glm::vec4 & color) override;
 		virtual void Resize(const int width, const int height) override;
 
-		virtual void Draw(std::shared_ptr<Buffer> vertices, std::shared_ptr<Buffer> indices) override;
+		virtual void Draw(std::shared_ptr<IBuffer> vertices, std::shared_ptr<IBuffer> indices) override;
 
 		// Inherited via IRenderer
 		virtual std::shared_ptr<ITexture> CreateTexture() override;
 		virtual std::shared_ptr<ITexture> CreateTexture(Image & img) override;
 
 		// Geerbt über IRenderer
-		virtual std::shared_ptr<Buffer> CreateBuffer(Buffer::Type=Buffer::VERTEX_BUFFER, 
-													 Buffer::Usage=Buffer::STATIC) override;
+		virtual std::shared_ptr<IBuffer> CreateBuffer(IBuffer::Type= IBuffer::VERTEX_BUFFER,
+													  IBuffer::Usage= IBuffer::STATIC) override;
 
 		// Geerbt über IRenderer
 		virtual std::shared_ptr<Layout> CreateLayout() override;

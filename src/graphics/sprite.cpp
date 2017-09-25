@@ -3,16 +3,16 @@
 
 arda::Sprite::Sprite(IRenderer& renderer)
 {
-	m_positions = renderer.CreateBuffer(Buffer::VERTEX_BUFFER,
-										Buffer::STATIC);
+	m_positions = renderer.CreateBuffer(IBuffer::VERTEX_BUFFER,
+										IBuffer::STATIC);
 
 	std::vector<Vertex> positions = { { {-1.0,-1.0} },{ { 1.0,-1.0 } }
 									 ,{ {-1.0, 1.0} },{ { 1.0, 1.0 } } };
 
 	m_positions->Upload(positions);
 
-	m_indices = renderer.CreateBuffer(Buffer::INDEX_BUFFER,
-									  Buffer::STATIC);
+	m_indices = renderer.CreateBuffer(IBuffer::INDEX_BUFFER,
+									  IBuffer::STATIC);
 
 	std::vector<uint16_t> indices = { 0,1,2,3,1,2 };
 	m_indices->Upload(indices);

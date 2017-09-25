@@ -4,7 +4,7 @@
 
 namespace arda
 {
-	class GLBuffer final : public Buffer
+	class GLBuffer final : public IBuffer
 	{
 	public:
 		GLBuffer(Type t,Usage u);
