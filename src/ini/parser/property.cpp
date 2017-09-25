@@ -24,6 +24,8 @@ bool arda::Property::GetBoolean() const
 std::string arda::Property::GetString() const
 {
 	auto& token = m_args.front();
+	if (std::empty(m_args))
+		return "";
 
 	if (token.Type != Token::StringLiteral)
 	{
@@ -57,5 +59,7 @@ std::string arda::Property::GetUnicode() const
 
 long long arda::Property::GetInteger() const
 {
+	if (std::empty(m_args))
+		return 0;
 	return std::get<long long>(m_args.front().Value);
 }
