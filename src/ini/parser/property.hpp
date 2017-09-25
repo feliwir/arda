@@ -13,6 +13,8 @@ namespace arda
 		std::string GetString() const;
 		std::string GetUnicode() const;
 		long long GetInteger() const;
+
+		bool CheckArgs() const;
 	private:
 		std::vector<Token> m_args;
 	};

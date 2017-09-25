@@ -7,6 +7,9 @@ arda::Property::Property(std::vector<Token>& args) : m_args(args)
 
 bool arda::Property::GetBoolean() const
 {
+	if (!CheckArgs())
+		return false;
+
 	bool result = false;
 
 	std::string str = std::get<std::string>(m_args.front().Value);
@@ -23,9 +26,10 @@ bool arda::Property::GetBoolean() const
 
 std::string arda::Property::GetString() const
 {
-	auto& token = m_args.front();
-	if (std::empty(m_args))
+	if (!CheckArgs())
 		return "";
+
+	auto& token = m_args.front();
 
 	if (token.Type != Token::StringLiteral)
 	{
@@ -48,6 +52,9 @@ std::string arda::Property::GetString() const
 
 std::string arda::Property::GetUnicode() const
 {
+	if (!CheckArgs())
+		return "";
+
 	if (m_args.front().Type != Token::UnicodeLiteral)
 	{
 		ARDA_LOG("Expected Unicode Literal!");
@@ -59,7 +66,19 @@ std::string arda::Property::GetUnicode() const
 
 long long arda::Property::GetInteger() const
 {
-	if (std::empty(m_args))
+	if (!CheckArgs())
 		return 0;
+
 	return std::get<long long>(m_args.front().Value);
+}
+
+bool arda::Property::CheckArgs() const
+{
+	if (std::empty(m_args))
+	{
+		ARDA_LOG("Missing arguments for property");
+		return false;
+	}
+
+	return true;
 }

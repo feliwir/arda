@@ -97,7 +97,7 @@ std::vector<arda::Token> arda::Lexer::Tokenize(std::string_view line, std::share
 
 	while (pos < line.size())
 	{
-		Token tok = CreateToken(line, pos, context, tokenstream);
+		Token tok = CreateToken(line, pos,tokens, context, tokenstream);
 		if(tok.Type!=Token::Unknown)
 			tokens.push_back(tok);
 
@@ -107,7 +107,7 @@ std::vector<arda::Token> arda::Lexer::Tokenize(std::string_view line, std::share
 	return tokens;
 }
 
-arda::Token arda::Lexer::CreateToken(std::string_view line, int & pos, std::shared_ptr<ParsingContext> context,bool tokenstream)
+arda::Token arda::Lexer::CreateToken(std::string_view line, int & pos, std::vector<Token>& toks, std::shared_ptr<ParsingContext> context,bool tokenstream)
 {
 	bool parse = true;
 	Token t(Token::Unknown);
@@ -207,10 +207,17 @@ arda::Token arda::Lexer::CreateToken(std::string_view line, int & pos, std::shar
 	switch (mode)
 	{
 	case STRING:
+		if (content == "WOTR_Tutorial001")
+		{
+			int a = 0;
+		}
 
 		if (context && context->CheckMacro(content))
 			if (tokenstream)
-				context->GetTokenStream()->InsertTokens(Tokenize(content, context));
+			{
+				auto& macro_toks = Tokenize(content, context);
+				toks.insert(toks.end(), macro_toks.begin(), macro_toks.end());
+			}
 			else
 			{
 				std::vector<Token> toks = Tokenize(content, context, false);
@@ -285,6 +292,11 @@ void arda::Lexer::Preprocess(std::string_view str, int & pos, std::shared_ptr<Pa
 	if (cmd == "#define")
 	{
 		std::string_view name = ReadTill<' '>(str, pos);
+		if (name == "TUTORIAL_WOTR_VOLUME")
+		{
+			int a = 0;
+		}
+
 		Skip<' '>(str, pos);
 		std::string_view value = str.substr(pos, str.size());
 		pos = str.size();

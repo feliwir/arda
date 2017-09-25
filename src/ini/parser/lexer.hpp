@@ -31,7 +31,7 @@ namespace arda
 												const std::string& filename);
 	private:
 		std::vector<Token> Tokenize(std::string_view, std::shared_ptr<ParsingContext> context = nullptr,bool tokenstream=true);
-		Token CreateToken(std::string_view line, int& pos, std::shared_ptr<ParsingContext> context=nullptr,bool tokenstream=true);
+		Token CreateToken(std::string_view line, int& pos, std::vector<Token>& toks,std::shared_ptr<ParsingContext> context=nullptr,bool tokenstream=true);
 		void AddEol(std::shared_ptr<TokenStream> stream,int col);
 		bool CheckEol(std::string_view line, std::shared_ptr<TokenStream> stream);
 		void SkipWhitespaces(std::string_view str, int& pos);
