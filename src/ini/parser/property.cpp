@@ -72,6 +72,13 @@ long long arda::Property::GetInteger() const
 	return std::get<long long>(m_args.front().Value);
 }
 
+double arda::Property::GetDouble() const
+{
+	if (!CheckArgs())
+		return 0;
+	return std::get<double>(m_args.front().Value);
+}
+
 bool arda::Property::CheckArgs() const
 {
 	if (std::empty(m_args))

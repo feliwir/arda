@@ -25,6 +25,11 @@ namespace arda
 			m_speeches.emplace(std::string(name), speech);
 		}
 
+		inline void RegisterMusic(std::shared_ptr<Block> music, std::string_view name)
+		{
+			m_music.emplace(std::string(name), music);
+		}
+
 		inline void RegisterVideo(std::shared_ptr<Block> vid, std::string_view name)
 		{
 			m_videos.emplace(std::string(name), vid);
@@ -60,6 +65,7 @@ namespace arda
 		std::map<const std::string, std::shared_ptr<ParsingContext>> m_files;
 		std::map<const std::string, std::shared_ptr<Block>> m_videos;
 		std::map<const std::string, std::shared_ptr<Block>> m_speeches;
+		std::map<const std::string, std::shared_ptr<Block>> m_music;
 		std::map<const std::string, std::shared_ptr<Block>> m_weapons;
 	};
 }

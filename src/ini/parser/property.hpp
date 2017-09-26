@@ -13,6 +13,7 @@ namespace arda
 		std::string GetString() const;
 		std::string GetUnicode() const;
 		long long GetInteger() const;
+		double GetDouble() const;
 
 		bool CheckArgs() const;
 	private:
