@@ -2,7 +2,7 @@
 #include <vector>
 #include <string>
 #include <memory>
-
+#include <mutex>
 struct GLFWwindow;
 
 namespace arda
@@ -23,7 +23,12 @@ namespace arda
 
 		void Run();
 
-		static inline Global& GetGlobal() { return *s_global; }
+		static inline Global& GetGlobal() 
+		{ 
+			s_globalLock.lock();
+			s_globalLock.unlock();
+			return *s_global; 
+		}
 	private:
 		void ShowSplash();
 
@@ -34,6 +39,7 @@ namespace arda
 		std::unique_ptr<Config> m_config;
 		std::unique_ptr<FileSystem> m_fs;
 		std::unique_ptr<Graphics> m_graphics;
+		static std::mutex s_globalLock;
 		static std::unique_ptr<Global> s_global;
 	};
 

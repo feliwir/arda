@@ -6,10 +6,17 @@
 #include "../core/debugger.hpp"
 #include <GLFW/glfw3.h>
 
+void glfw_error(int error, const char* description)
+{
+	ARDA_LOG(description);
+}
+
 arda::Graphics::Graphics(Config& c)
 {
 	//Initialize glfw
 	glfwInit();
+
+	glfwSetErrorCallback(glfw_error);
 
 	m_clearColor = { 0.0,0.2,0.0,1.0 };
 

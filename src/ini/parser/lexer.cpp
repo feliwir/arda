@@ -207,15 +207,10 @@ arda::Token arda::Lexer::CreateToken(std::string_view line, int & pos, std::vect
 	switch (mode)
 	{
 	case STRING:
-		if (content == "WOTR_Tutorial001")
-		{
-			int a = 0;
-		}
-
 		if (context && context->CheckMacro(content))
 			if (tokenstream)
 			{
-				auto& macro_toks = Tokenize(content, context);
+				auto macro_toks = Tokenize(content, context);
 				toks.insert(toks.end(), macro_toks.begin(), macro_toks.end());
 			}
 			else

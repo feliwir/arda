@@ -18,18 +18,21 @@
 #include "../ini/ini.hpp"
 #include "../ini/blocks/ini_video.hpp"
 
+std::mutex arda::Application::s_globalLock;
 std::unique_ptr<arda::Global> arda::Application::s_global;
 std::shared_ptr<arda::Sprite> s_splash;
 
 arda::Application::Application(const std::vector<std::string>& args)
 	: m_window(nullptr)
 {
+	s_globalLock.lock();
 
 	//Load configuration first
 	m_config = std::make_unique<Config>(args);
 
 	//Initialize global variables
 	s_global = std::make_unique<Global>(*m_config);
+	s_globalLock.unlock();
 
 	//Initialize audio
 	m_audio = std::make_unique<Audio>(*m_config);

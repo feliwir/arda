@@ -30,9 +30,9 @@ namespace arda
 		ip::tcp::socket m_socket;
 		ip::tcp::acceptor m_acceptor;
 	};
+}
 
-	inline void ARDA_LOG(std::string_view msg)
-	{
-		GetGlobal().GetDebugger()->Log(msg);
-	}
+inline void ARDA_LOG(std::string_view msg)
+{
+	arda::GetGlobal().GetDebugger()->Log(msg);
 }

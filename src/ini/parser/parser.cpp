@@ -1,5 +1,5 @@
 #include "parser.hpp"
-#include "../core/exception.hpp"
+#include "../../core/exception.hpp"
 #include "../ini.hpp"
 #include "../blocks/all.hpp"
 #include "token.hpp"

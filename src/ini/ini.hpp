@@ -38,24 +38,6 @@ namespace arda
 		template<class T>
 		inline std::shared_ptr<T> GetBlock(std::string_view name = "");
 
-		template<>
-		inline std::shared_ptr<ini::Speech> GetBlock(std::string_view name)
-		{
-			return std::dynamic_pointer_cast<ini::Speech>(m_speeches[std::string(name)]);
-		}
-
-		template<>
-		inline std::shared_ptr<ini::Video> GetBlock(std::string_view name)
-		{
-			return std::dynamic_pointer_cast<ini::Video>(m_videos[std::string(name)]);
-		}
-
-		template<>
-		inline std::shared_ptr<ini::Weapon> GetBlock(std::string_view name)
-		{
-			return std::dynamic_pointer_cast<ini::Weapon>(m_weapons[std::string(name)]);
-		}
-
 		inline std::vector<std::string>& GetGlobalIncludes() { return m_globalIncludes; }
 		std::shared_ptr<ParsingContext> GetContext(const std::string& path,bool load=true);
 	private:
@@ -68,4 +50,23 @@ namespace arda
 		std::map<const std::string, std::shared_ptr<Block>> m_music;
 		std::map<const std::string, std::shared_ptr<Block>> m_weapons;
 	};
+
+	template<>
+	inline std::shared_ptr<ini::Speech> Ini::GetBlock(std::string_view name)
+	{
+		return std::dynamic_pointer_cast<ini::Speech>(m_speeches[std::string(name)]);
+	}
+
+	template<>
+	inline std::shared_ptr<ini::Video> Ini::GetBlock(std::string_view name)
+	{
+		return std::dynamic_pointer_cast<ini::Video>(m_videos[std::string(name)]);
+	}
+
+	template<>
+	inline std::shared_ptr<ini::Weapon> Ini::GetBlock(std::string_view name)
+	{
+		return std::dynamic_pointer_cast<ini::Weapon>(m_weapons[std::string(name)]);
+	}
+
 }
