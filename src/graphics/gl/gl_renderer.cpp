@@ -93,7 +93,7 @@ std::shared_ptr<arda::Layout> arda::GLRenderer::CreateLayout()
 	return std::make_shared<GLLayout>();
 }
 
-std::shared_ptr<arda::Buffer> arda::GLRenderer::CreateBuffer(Buffer::Type t, Buffer::Usage u)
+std::shared_ptr<arda::IBuffer> arda::GLRenderer::CreateBuffer(IBuffer::Type t, IBuffer::Usage u)
 {
 	return std::make_shared<GLBuffer>(t,u);
 }
@@ -108,7 +108,7 @@ void arda::GLRenderer::Resize(const int width, const int height)
 	glViewport(0, 0, width, height);
 }
 
-void arda::GLRenderer::Draw(std::shared_ptr<Buffer> vertices, std::shared_ptr<Buffer> indices)
+void arda::GLRenderer::Draw(std::shared_ptr<IBuffer> vertices, std::shared_ptr<IBuffer> indices)
 {
 	vertices->Bind();
 	indices->Bind();

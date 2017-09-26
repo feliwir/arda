@@ -5,7 +5,7 @@
 
 namespace arda
 {
-	class Buffer;
+	class IBuffer;
 	class ITexture;
 	class IRenderer;
 	class Layout;
@@ -31,8 +31,8 @@ namespace arda
 			m_texture = tex;
 		}
 	private:
-		std::shared_ptr<Buffer> m_positions;
-		std::shared_ptr<Buffer> m_indices;
+		std::shared_ptr<IBuffer> m_positions;
+		std::shared_ptr<IBuffer> m_indices;
 		std::shared_ptr<ITexture> m_texture;
 		std::shared_ptr<Layout> m_layout;
 		

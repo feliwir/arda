@@ -14,6 +14,7 @@
 #include "../graphics/gl/gl_texture.hpp"
 #include "../filesystem/filesystem.hpp"
 #include "../filesystem/stream.hpp"
+#include "../filesystem/filestream.hpp"
 #include "../ini/ini.hpp"
 #include "../ini/blocks/ini_video.hpp"
 
@@ -39,32 +40,26 @@ arda::Application::Application(const std::vector<std::string>& args)
 	m_graphics->GetRenderer().SetClearColor({ 0.0, 0.0, 0.0, 1.0 });
 	auto& ren = m_graphics->GetRenderer();
 	
-	auto start = std::chrono::high_resolution_clock::now();
-
-	//Initialize virtual filesystem
-	m_fs = std::make_unique<FileSystem>(*m_config);
-
-	auto stream = m_fs->GetStream("GermanSplash.jpg");
-	Image img(stream);
-	s_splash = m_graphics->CreateSprite(ren.CreateTexture(img));
-	ren.AddDrawable(s_splash);
+	ShowSplash();
 
 	//Get the GLFW window
 	m_window = m_graphics->GetRenderer().GetWindow();
 
-	m_graphics->Clear();
-	m_graphics->Render();
-	m_graphics->Present();
-	
 	glfwShowWindow(m_window);
 
-	stream = m_fs->GetStream("data/movies/Credits_with_alpha.vp6");
+	auto start = std::chrono::high_resolution_clock::now();
+	//Initialize virtual filesystem
+	m_fs = std::make_unique<FileSystem>(*m_config);
+
+	auto end = std::chrono::high_resolution_clock::now();
+
+	auto stream = m_fs->GetStream("data/movies/Credits_with_alpha.vp6");
 	Video vid(stream);
 
 	stream = m_fs->GetStream("maps/map mp evendim/map mp evendim.map");
 	Map map(stream);
 
-	auto end = std::chrono::high_resolution_clock::now();
+	
 	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 	ARDA_LOG("Done creating FileSystem: " + std::to_string(duration / 1000.0));
 	start = end;
@@ -98,5 +93,19 @@ void arda::Application::Run()
 
 		m_graphics->Present();
 	}
+
+}
+
+void arda::Application::ShowSplash()
+{
+	auto& ren = m_graphics->GetRenderer();
+
+	std::shared_ptr<IStream> stream = std::make_shared<FileStream>(m_config->GetRootDir()+"/GermanSplash.jpg");
+	Image img(stream);
+	s_splash = m_graphics->CreateSprite(ren.CreateTexture(img));
+	ren.AddDrawable(s_splash);
+	m_graphics->Clear();
+	m_graphics->Render();
+	m_graphics->Present();
 
 }

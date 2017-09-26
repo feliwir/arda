@@ -114,7 +114,7 @@ std::shared_ptr<arda::Layout> arda::D3DRenderer::CreateLayout()
 	return std::make_shared<D3DLayout>();
 }
 
-void arda::D3DRenderer::Draw(std::shared_ptr<Buffer> vertices, std::shared_ptr<Buffer> indices)
+void arda::D3DRenderer::Draw(std::shared_ptr<IBuffer> vertices, std::shared_ptr<IBuffer> indices)
 {
 }
 
@@ -140,7 +140,7 @@ void arda::D3DRenderer::SetClearColor(const glm::vec4 & color)
 	m_clearColor[3] = color.a;
 }
 
-std::shared_ptr<arda::Buffer>arda::D3DRenderer::CreateBuffer(Buffer::Type t, Buffer::Usage u)
+std::shared_ptr<arda::IBuffer>arda::D3DRenderer::CreateBuffer(IBuffer::Type t, IBuffer::Usage u)
 {
 	return std::make_shared<D3DBuffer>(t, u);
 }

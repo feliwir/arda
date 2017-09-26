@@ -20,8 +20,13 @@ namespace arda
 		AVFormatContext* format_ctx;
 		AVFrame* m_rgbFrame;
 		AVFrame* m_alphaFrame;
-		AVFrame* m_tmpFrame;
 		uint8_t* m_rgbBuffer;
+		AVFrame* m_tmpFrame;
+
+	private:
+		void UpdateImage(Image& img, AVFrame* frame)
+		{
+		}
 	};
 }
 
@@ -49,7 +54,13 @@ void SaveFrame(AVFrame *pFrame, int width, int height, int iFrame) {
 
 arda::Video::Video(std::shared_ptr<IStream> stream) :
 	m_internals(std::make_unique<VideoInternals>()),
-	m_hasAlpha(false)
+	m_hasAlpha(false),
+	m_width(0),
+	m_height(0),
+	m_curFrame(0),
+	m_fps(0.0),
+	m_position(0.0),
+	m_frameTime(0.0)
 {
 	av_register_all();
 	auto& format_ctx = m_internals->format_ctx;
@@ -62,28 +73,33 @@ arda::Video::Video(std::shared_ptr<IStream> stream) :
 	auto& alphaFrame = m_internals->m_alphaFrame;
 	auto& rgbBuffer = m_internals->m_rgbBuffer;
 
-
 	avstream = std::make_unique<AvStream>(stream);
 	format_ctx = avformat_alloc_context();
 	avstream->Attach(m_internals->format_ctx);
 
 	if (avformat_open_input(&format_ctx, "", 0, 0) != 0)
 		throw RuntimeException("Failed to open video file!");
-
+	
 	// Retrieve stream information
 	if (avformat_find_stream_info(format_ctx, NULL)<0)
 		throw RuntimeException("Failed retrieve stream information!");
 
-	// Dump information about file onto standard error
-	//av_dump_format(m_internals->format_ctx,  0, "", 0);
-
+	m_duration = format_ctx->duration / static_cast<double>(AV_TIME_BASE);
+	
 	int vid_streams = 0;
 	for (int i = 0; i < format_ctx->nb_streams; i++)
 	{
 		if (format_ctx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO)
+		{
 			vid_streams++;
+			AVRational fps = format_ctx->streams[i]->avg_frame_rate;
+			m_fps = fps.num / fps.den;
+			m_numFrames = format_ctx->streams[i]->nb_frames;
+			m_frameTime = 1.0 / m_fps;
+		}
+			
 	}
-	
+
 	if(vid_streams<1)
 		throw RuntimeException("No video stream contained!");
 
@@ -135,7 +151,7 @@ arda::Video::Video(std::shared_ptr<IStream> stream) :
 	struct SwsContext *sws_ctx = NULL;
 	int frameFinished;
 	AVPacket packet;
-
+	
 	// initialize SWS context for software scaling
 	sws_ctx = sws_getContext(codec_ctx->width,
 		codec_ctx->height,
@@ -155,9 +171,12 @@ arda::Video::Video(std::shared_ptr<IStream> stream) :
 		if (packet.stream_index == 0) {
 			// Decode video frame
 			avcodec_decode_video2(codec_ctx, tmpFrame, &frameFinished, &packet);
-
+			
 			// Did we get a video frame?
 			if (frameFinished) {
+				
+				double pts = packet.pts*m_frameTime;
+
 				// Convert the image from its native format to RGB
 				sws_scale(sws_ctx, (uint8_t const * const *)tmpFrame->data,
 					tmpFrame->linesize, 0, codec_ctx->height,
@@ -194,8 +213,24 @@ arda::Video::~Video()
 	av_free(tmpFrame);
 	av_free(rgbFrame);
 
-
 	avcodec_close(codec_ctx);
 	avcodec_close(codec_ctx_a);
 	avformat_close_input(&format_ctx);
+}
+
+void arda::Video::Start()
+{
+}
+
+void arda::Video::Pause()
+{
+}
+
+void arda::Video::Stop()
+{
+}
+
+double arda::Video::GetPosition()
+{
+	return 0.0;
 }

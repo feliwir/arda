@@ -3,7 +3,7 @@
 
 namespace arda
 {
-	class D3DBuffer : public Buffer
+	class D3DBuffer : public IBuffer
 	{
 	public:
 		D3DBuffer(Type t, Usage u);
