@@ -3,6 +3,7 @@
 #include <fstream>
 #include <map>
 #include <memory>
+#include <mutex>
 
 namespace arda
 {
@@ -19,7 +20,7 @@ namespace arda
 
 		BigArchive(const std::string& file);
 
-		inline std::map<std::string, std::shared_ptr<IStream>>& getEntries()
+		inline std::map<std::string, std::shared_ptr<IStream>>& GetEntries()
 		{
 			return m_entries;
 		}
@@ -32,7 +33,7 @@ namespace arda
 		std::string m_path;
 		unsigned int m_size;
 		std::map<std::string, std::shared_ptr<IStream>> m_entries;
-
+		std::mutex m_access;
 		friend class BigStream;
 	};
 }

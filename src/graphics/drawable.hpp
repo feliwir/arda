@@ -1,10 +1,13 @@
 #pragma once
+#include <memory>
 
 namespace arda
 {
+	class IRenderer;
+
 	class IDrawable
 	{
 	public:
-		virtual void Render() = 0;
+		virtual void Render(IRenderer& renderer) = 0;
 	};
 }

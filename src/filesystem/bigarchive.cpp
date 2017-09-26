@@ -28,20 +28,20 @@ arda::BigArchive::BigArchive(const std::string & file)
 	else
 		throw RuntimeException("Invalid BigArchive - unknown magic: "+magic+". File: " + file);
 
-	int size = util::read<uint32_t>(m_stream);
+	int size = util::Read<uint32_t>(m_stream);
 	if(size!=m_size)
 		throw RuntimeException("BigArchve internal size doesn't match real size. File: " + file);
 
-	int numEntries = util::reverse(util::read<uint32_t>(m_stream));
-	uint32_t first = util::reverse(util::read<uint32_t>(m_stream));
+	int numEntries = util::Reverse(util::Read<uint32_t>(m_stream));
+	uint32_t first = util::Reverse(util::Read<uint32_t>(m_stream));
 
 	for (auto i = 0; i < numEntries; i++)
 	{
-		uint32_t off = util::reverse(util::read<uint32_t>(m_stream));
-		uint32_t size = util::reverse(util::read<uint32_t>(m_stream));
+		uint32_t off = util::Reverse(util::Read<uint32_t>(m_stream));
+		uint32_t size = util::Reverse(util::Read<uint32_t>(m_stream));
 		auto stream = std::make_shared<BigStream>(size,off,this);
 
-		auto name = util::readString(m_stream);
+		auto name = util::ReadString(m_stream);
 		std::replace(name.begin(), name.end(), '\\', '/');
 		std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 		m_entries[name] = stream;
@@ -50,6 +50,7 @@ arda::BigArchive::BigArchive(const std::string & file)
 
 unsigned int arda::BigArchive::read(char * buffer, int offset, size_t size)
 {
+	std::lock_guard<std::mutex> lock(m_access);
 	m_stream.seekg(offset, std::ios::beg);
 	m_stream.read(buffer, size);
 	return static_cast<unsigned int>(m_stream.gcount());

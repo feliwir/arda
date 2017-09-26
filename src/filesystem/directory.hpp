@@ -10,19 +10,19 @@ namespace arda
 {
 	class IStream;
 
-	class Directory : public IEntry
+	class Directory final : public IEntry
 	{
 	public:
 		Directory(std::shared_ptr<IEntry> parent=nullptr);
 
-		void insertSelf();
+		void InsertSelf();
 
-		inline const std::map<std::string, std::shared_ptr<IEntry>>& getEntries()
+		inline const std::map<std::string, std::shared_ptr<IEntry>>& GetEntries()
 		{
 			return m_entries;
 		}
 
-		inline std::shared_ptr<IEntry> getEntry(const std::string& path)
+		inline std::shared_ptr<IEntry> GetEntry(const std::string& path)
 		{
 			auto it = m_entries.find(path);
 			if (it == m_entries.end())
@@ -31,7 +31,7 @@ namespace arda
 				return it->second;
 		}
 
-		void insertFile(const std::string& path,std::shared_ptr<IStream> stream);
+		void InsertFile(const std::string& path,std::shared_ptr<IStream> stream);
 
 	protected:
 		std::mutex m_mutex;

@@ -1,37 +1,52 @@
 #include "ini.hpp"
 #include "../filesystem/filesystem.hpp"
+#include "../core/application.hpp"
 #include "../core/config.hpp"
 #include "../filesystem/directory.hpp"
 #include "../filesystem/file.hpp"
 #include "../filesystem/stream.hpp"
+#include "../core/global.hpp"
+#include "parser/context.hpp"
 #include "parser/lexer.hpp"
 #include "parser/parser.hpp"
+#include "../threading/pool.hpp"
 #include <iostream>
 
 arda::Ini::Ini(Config & config, FileSystem & fs) : m_fs(fs)
 {
-	auto entry = fs.getEntry("data/ini");
+	auto entry = fs.GetEntry("data/ini");
 
 	int num = 0;
-	Parser p(*this);
-	Lexer l(*this, m_fs);
+
+	auto& pool = GetGlobal().GetThreadPool();
 
 	//walk down the directory recursively
 	std::function<void(std::shared_ptr<IEntry>,const std::string& path)> recurse;
-	recurse = [this,&p,&recurse,&num,&l](std::shared_ptr<IEntry> e,const std::string& path)
+	recurse = [this,&recurse,&num,&pool](std::shared_ptr<IEntry> e,const std::string& path)
 	{
 		if (IEntry::isRegular(*e))
 		{
 			auto file = std::static_pointer_cast<File>(e);
-			auto s = file->getStream();
+			auto s = file->GetStream();
 
-			m_files.emplace(path, l.Lex(s, path));
+			pool.AddJob([this, path,s]() 
+			{
+				Lexer l(*this, m_fs);
+				auto ctx = l.Lex(s, path);
+
+				m_access.lock();
+				auto it = m_files.emplace(path, ctx);
+				m_access.unlock();
+
+				Parser p(*this);
+				p.Parse(it.first->second);
+			});
 			++num;
 		}
 		else if (IEntry::isDirectory(*e))
 		{
 			auto dir = std::static_pointer_cast<Directory>(e);
-			for (auto& e : dir->getEntries())
+			for (auto& e : dir->GetEntries())
 			{
 				if (e.first == "." || e.first == "..")
 					continue;
@@ -44,10 +59,12 @@ arda::Ini::Ini(Config & config, FileSystem & fs) : m_fs(fs)
 	m_globalIncludes = { "data/ini/gamedata.ini" };
 
 	auto& macros = ParsingContext::GetGlobalMacros();
+	Parser p(*this);
+	Lexer l(*this, m_fs);
 
 	for (const auto& path : m_globalIncludes)
 	{
-		auto context = l.Lex(fs.getStream(path), path);
+		auto context = l.Lex(fs.GetStream(path), path);
 		p.Parse(context);
 
 		auto& m = context->GetMacros();
@@ -58,15 +75,17 @@ arda::Ini::Ini(Config & config, FileSystem & fs) : m_fs(fs)
 
 	recurse(entry,"data/ini");
 
+	pool.WaitAll();
+
 	//clear macro cache
 	for (const auto& f : m_files)
 	{
 		auto& context = f.second;
 
 		context->GetMacros().clear();
-		p.Parse(context);
 		context->GetTokenStream()->Clear();
 	}
+
 	macros.clear();
 
 	std::cout << num << std::endl;
@@ -76,18 +95,26 @@ arda::Ini::~Ini()
 {
 }
 
-
 std::shared_ptr<arda::ParsingContext> arda::Ini::GetContext(const std::string & path,bool load)
 {
 	auto it = m_files.find(path);
+
 	if (it != m_files.end())
+	{
 		return it->second;
+	}
 	else if (load)
 	{
-		auto s = m_fs.getStream(path);
+		auto s = m_fs.GetStream(path);
+		if (s == nullptr)
+			return nullptr;	//fix this case
+
 		Lexer l(*this, m_fs);
-		m_files.emplace(path, l.Lex(s, path));
-		return m_files[path];
+		auto ctx = l.Lex(s, path);
+
+		auto it = m_files.emplace(path, ctx);
+
+		return it.first->second;
 	}
 	else
 		return nullptr;

@@ -8,13 +8,16 @@ arda::Config::Config(const std::vector<std::string>& args) :
 	m_height(600),
 	m_debug(false),
 	m_root("."),
-	m_iniDir("data/ini")
+	m_gfxApi(0),
+	m_iniDir("data/ini"),
+	m_debugPort(2017)
 {
 	cxxopts::Options options("Arda Engine", "A modern reimplementation of the SAGE engine");
 	options.add_options()
 		("d,debug", "Enable debugging")
-		("r,root", "Set the root directory of the original game", cxxopts::value<std::string>());
-
+		("r,root", "Set the root directory of the original game", cxxopts::value<std::string>())
+		("g,gfx-api", "Set the graphics api (0=OpenGL,1=Direct3D 11)",cxxopts::value<int>())
+		("port", "Set the debug port", cxxopts::value<uint16_t>());
 
 	//get back argc and argv from our argument vector
 	int argc = args.size();
@@ -27,6 +30,12 @@ arda::Config::Config(const std::vector<std::string>& args) :
 
 	if (options["root"].count() > 0)
 		m_root = options["root"].as<std::string>();
+	if (options["debug"].count() > 0)
+		m_debug = options["debug"].as<bool>();
+	if (options["gfx-api"].count() > 0)
+		m_gfxApi = options["gfx-api"].as<int>();
+	if (options["port"].count() > 0)
+		m_debugPort = options["port"].as<uint16_t>();
 }
 
 arda::Config::~Config()

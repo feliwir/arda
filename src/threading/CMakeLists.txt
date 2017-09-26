@@ -1,0 +1,5 @@
+set(DIR ${CMAKE_CURRENT_SOURCE_DIR})
+
+set(HDRS ${HDRS}
+"${DIR}/pool.hpp" 
+PARENT_SCOPE)

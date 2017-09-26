@@ -7,16 +7,16 @@ namespace arda
 {
 	class BigArchive;
 
-	class BigStream : public IStream
+	class BigStream final : public IStream
 	{
 	public:
 		BigStream(int size, int offset, BigArchive* archive);
 
 		// Inherited via IStream
-		virtual void seek(int offset, SeekOrigin origin) override;
-		virtual unsigned int read(char * buffer, size_t numBytes) override;
+		virtual void Seek(int offset, SeekOrigin origin) override;
+		virtual unsigned int Read(char * buffer, size_t numBytes) override;
 
-		inline int getOffset() { return m_offset; }
+		inline int GetOffset() { return m_offset; }
 	protected:
 		BigArchive* m_archive;
 		int m_offset;

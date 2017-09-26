@@ -2,6 +2,7 @@
 #include <string>
 #include <memory>
 #include <stdint.h>
+#include <gli/gli.hpp>
 
 namespace arda
 {
@@ -17,33 +18,24 @@ namespace arda
 			DDS		= 2,
 			
 		};
-	public:
-		enum Format
-		{
-			RGBA		= 0,
-			RGB			= 1,
-			COMPRESSED	= 2
-		};
+
 	public:
 		Image();
 		Image(std::shared_ptr<IStream> stream);
 		~Image();
+		
+		void Create(glm::vec2 size, gli::format format, uint8_t* data);
+		void Update(uint8_t* data);
 
-		inline Format GetFormat()	{ return m_format;	}
-		inline int GetWidth()		{ return m_width;	}
-		inline int GetHeight()		{ return m_height;	}
-		inline uint8_t* GetBuffer()	{ return m_buffer;  }
+		inline gli::texture& GetTexture()	{ return m_img;	}
+		inline int GetWidth()				{ return m_img.extent().x;	}
+		inline int GetHeight()				{ return m_img.extent().y;	}
+		inline uint8_t* GetBuffer()			{ return static_cast<uint8_t*>(m_img.data());  }
 
 		bool Load(std::shared_ptr<IStream> stream);
 	private:
 		Magic GetMagic(uint8_t* memory);
-
 	private:
-		int m_bpp;
-		int m_width;
-		int m_height;
-		int m_size;
-		Format m_format;
-		uint8_t* m_buffer;
+		gli::texture m_img;
 	};
 }

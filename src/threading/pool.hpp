@@ -19,7 +19,7 @@ namespace arda
 		*
 		*  This class requires a number of c++11 features be present in your compiler.
 		*/
-		template <unsigned ThreadCount = 10>
+		template <unsigned ThreadCount = 8>
 		class ThreadPool {
 
 			std::array<std::thread, ThreadCount> threads;

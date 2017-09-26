@@ -1,12 +1,14 @@
 #include "image.hpp"
 #include "../filesystem/stream.hpp"
+#include "../filesystem/util.hpp"
+#include "../core/debugger.hpp"
 #include <jpeglib.h>
+#include <gli/target.hpp>
+#include <gli/format.hpp>
+#include <gli/core/storage_linear.hpp>
+#include <glm/glm.hpp>
 
-arda::Image::Image() :
-m_width(0),
-m_height(0),
-m_format(RGBA),
-m_buffer(nullptr)
+arda::Image::Image()
 {
 }
 
@@ -17,18 +19,33 @@ arda::Image::Image(std::shared_ptr<IStream> stream) : Image()
 
 arda::Image::~Image()
 {
-	m_width = m_height = 0;
-	if (m_buffer)
-		delete[] m_buffer;
+}
+
+void arda::Image::Create(glm::vec2 size, gli::format format, uint8_t * data)
+{
+	m_img = gli::texture(gli::TARGET_2D, format, gli::texture::extent_type(size.x, size.y, 1), 1, 1, 1);
+	uint8_t* buffer = reinterpret_cast<uint8_t*>(m_img.data(0, 0, 0));
+	std::copy(data, data + m_img.size(), buffer);
+}
+
+void arda::Image::Update(uint8_t * data)
+{
+	uint8_t* buffer = reinterpret_cast<uint8_t*>(m_img.data(0, 0, 0));
+	std::copy(data, data + m_img.size(), buffer);
 }
 
 inline bool arda::Image::Load(std::shared_ptr<IStream> stream)
 {
-	int size = stream->getSize();
+	gli::target target;
+	gli::format format;
+
+	int width, height, bpp;
+
+	int size = stream->GetSize();
 
 	uint8_t* buffer = new uint8_t[size];
 
-	stream->read(reinterpret_cast<char*>(buffer), size);
+	stream->Read(reinterpret_cast<char*>(buffer), size);
 	
 	Magic magic = GetMagic(buffer);
 
@@ -36,7 +53,10 @@ inline bool arda::Image::Load(std::shared_ptr<IStream> stream)
 	{
 	case JPEG:
 		{
-		int row_stride;		/* physical row width in output buffer */
+		//2D texture for sure
+		target = gli::TARGET_2D;
+
+		int row_stride;
 		int rc;
 		jpeg_decompress_struct cinfo;
 		jpeg_error_mgr jerr;
@@ -51,21 +71,24 @@ inline bool arda::Image::Load(std::shared_ptr<IStream> stream)
 		//start decompression
 		jpeg_start_decompress(&cinfo);
 
-		m_width = cinfo.output_width;
-		m_height = cinfo.output_height;
-		m_bpp = cinfo.output_components*8;
-		m_size = m_width*m_height*cinfo.output_components;
-		m_buffer = new uint8_t[m_size];
-
+		width = cinfo.output_width;
+		height = cinfo.output_height;
+		bpp = cinfo.output_components*8;
+		size = width*height*cinfo.output_components;
+		
 		switch (cinfo.output_components)
 		{
 		case 3:
-			m_format = RGB;
+			format = gli::FORMAT_RGB8_UNORM_PACK8;
 			break;
 		case 4:
-			m_format = RGBA;
+			format = gli::FORMAT_RGBA8_UNORM_PACK8;
 			break;
 		}
+
+		m_img = gli::texture(target, format ,gli::texture::extent_type(width, height, 1), 1, 1, 1);
+
+		uint8_t* buffer = reinterpret_cast<uint8_t*>(m_img.data(0, 0, 0));
 
 		// JSAMPLEs per row in output buffer 
 		row_stride = cinfo.output_width * cinfo.output_components;
@@ -73,7 +96,7 @@ inline bool arda::Image::Load(std::shared_ptr<IStream> stream)
 		
 		while (cinfo.output_scanline < cinfo.output_height) {
 			unsigned char *buffer_array[1];
-			buffer_array[0] = m_buffer + \
+			buffer_array[0] = buffer + \
 				(cinfo.output_scanline) * row_stride;
 
 			/* jpeg_read_scanlines expects an array of pointers to scanlines.
@@ -94,8 +117,14 @@ inline bool arda::Image::Load(std::shared_ptr<IStream> stream)
 		/* Step 8: Release JPEG decompression object */
 
 		/* This is an important step since it will release a good deal of memory. */
-		jpeg_destroy_decompress(&cinfo);
+		jpeg_destroy_decompress(&cinfo);	
 		}
+		break;
+	case DDS:
+		m_img = gli::load(reinterpret_cast<const char*>(buffer), size);
+		break;
+	default:
+		ARDA_LOG("Unknown texture format!");
 		break;
 	}
 	
@@ -106,8 +135,12 @@ inline bool arda::Image::Load(std::shared_ptr<IStream> stream)
 arda::Image::Magic arda::Image::GetMagic(uint8_t * m)
 {
 	//JPEG magic
-	if ((m[0] == 0xFF) | (m[1] == 0xD8) | (m[2] == 0xFF))
+	if (util::CheckFourCC<uint8_t, 3>(m, { { 0xFF, 0xD8,0xFF} }))
 		return JPEG;
+
+	//DDS magic
+	if (util::CheckFourCC<char>(m, { { 'D','D','S',' '} }))
+		return DDS;
 
 	return Magic();
 }

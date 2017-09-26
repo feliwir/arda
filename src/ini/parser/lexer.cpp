@@ -6,14 +6,16 @@
 #include <chrono>
 #include <boost/filesystem.hpp>
 #include <iostream>
+#include "string_util.hpp"
 #include "../ini.hpp"
 #include "../../filesystem/stream.hpp"
+
 namespace fs = boost::filesystem;
 using namespace std::placeholders;
 
 std::map<std::string, std::string> arda::ParsingContext::m_globalMacros;
 
-std::shared_ptr<arda::ParsingContext> arda::Lexer::Lex(std::shared_ptr<IStream> stream, const std::string & path)
+std::shared_ptr<arda::ParsingContext> arda::Lexer::Lex(std::shared_ptr<IStream> stream,const std::string& path)
 {
 	auto context = std::make_shared<ParsingContext>();
 	m_path = path;
@@ -24,63 +26,60 @@ std::shared_ptr<arda::ParsingContext> arda::Lexer::Lex(std::shared_ptr<IStream> 
 	context->SetTokens(tokens);
 
 	std::string line;
+	std::string_view line_view;
 	size_t pos;
 	std::stringstream sourcestream;
-	std::string source = stream->readAll();
+	std::string source = stream->ReadAll();
 	sourcestream << source;
 
-	//auto start = std::chrono::high_resolution_clock::now();
-	//auto end = start;
+	auto start = std::chrono::high_resolution_clock::now();
+	auto end = start;
 
 	while (std::getline(sourcestream, line))
-	{/*
-		start = std::chrono::high_resolution_clock::now();*/
-
+	{
 		//remove all \r
 		line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
 
 		//replace tabs with spaces
 		std::replace(line.begin(), line.end(), '\t', ' ');
 
-		if (CheckEol(line, tokens))
+		line_view = line;
+
+		if (CheckEol(line_view, tokens))
 			continue;
 			
 		//remove comments
-		pos = line.find(';');
+		pos = line_view.find(';');
 		if (pos != std::string::npos)
 		{
-			line = line.substr(0, pos);
+			line_view = line_view.substr(0, pos);
 		}
 
-		if (CheckEol(line, tokens))
+		if (CheckEol(line_view, tokens))
 			continue;
 
-		pos = line.find("//");
+		pos = line_view.find("//");
 		if (pos != std::string::npos)
 		{
-			line = line.substr(0, pos);
+			line_view = line_view.substr(0, pos);
 		}
 
-		if (CheckEol(line, tokens))
+		if (CheckEol(line_view, tokens))
 			continue;
 
 		//remove trailing whitespaces
-		line = trim(line);
+		line_view = Trim(line_view);
 
-		if (CheckEol(line, tokens))
+		if (CheckEol(line_view, tokens))
 			continue;
 
 
-
-		tokens->InsertTokens(Tokenize(line, context));
-
+		tokens->InsertTokens(Tokenize(line_view, context));
 
 		AddEol(tokens,pos);
-
-		/*end = std::chrono::high_resolution_clock::now();
-		std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() <<"ns" << std::endl;*/
 	}
 
+	end = std::chrono::high_resolution_clock::now();
 	tokens->AddToken(Token(Token::EndOfFile));
 
 	return context;
@@ -90,21 +89,25 @@ arda::Lexer::Lexer(Ini & ini, FileSystem & fs) : m_ini(ini), m_fs(fs)
 {
 }
 
-std::vector<arda::Token> arda::Lexer::Tokenize(const std::string & line, std::shared_ptr<ParsingContext> context,bool tokenstream)
+std::vector<arda::Token> arda::Lexer::Tokenize(std::string_view line, std::shared_ptr<ParsingContext> context,bool tokenstream)
 {
 	std::vector<Token> tokens;
 	int pos = 0;
+	Skip<' '>(line, pos);
+
 	while (pos < line.size())
 	{
-		Token tok = CreateToken(line, pos, context, tokenstream);
+		Token tok = CreateToken(line, pos,tokens, context, tokenstream);
 		if(tok.Type!=Token::Unknown)
 			tokens.push_back(tok);
+
+		Skip<' '>(line, pos);
 	}
 
 	return tokens;
 }
 
-arda::Token arda::Lexer::CreateToken(const std::string & line, int & pos, std::shared_ptr<ParsingContext> context,bool tokenstream)
+arda::Token arda::Lexer::CreateToken(std::string_view line, int & pos, std::vector<Token>& toks, std::shared_ptr<ParsingContext> context,bool tokenstream)
 {
 	bool parse = true;
 	Token t(Token::Unknown);
@@ -113,7 +116,6 @@ arda::Token arda::Lexer::CreateToken(const std::string & line, int & pos, std::s
 	std::string content;
 	int col = pos;
 	char c = 0;
-	SkipWhitespaces(line,pos);
 
 	while (parse)
 	{
@@ -149,9 +151,16 @@ arda::Token arda::Lexer::CreateToken(const std::string & line, int & pos, std::s
 				parse = false;
 			}
 
+			//we started with an int, that now turns out as a float
 			if (mode == INTEGER && c == '.')
 			{
 				mode = FLOAT;
+			}
+
+			//we started with an int, that now turns out as a string
+			if (mode == INTEGER && (isalpha(c) || c == '_'))
+			{
+				mode = STRING;
 			}
 
 			if (isspace(c))
@@ -198,12 +207,17 @@ arda::Token arda::Lexer::CreateToken(const std::string & line, int & pos, std::s
 	switch (mode)
 	{
 	case STRING:
-		if (content == std::string("EMOTION_CHEER_PERFILEVOLUMESHIFT"))
+		if (content == "WOTR_Tutorial001")
+		{
 			int a = 0;
+		}
 
 		if (context && context->CheckMacro(content))
 			if (tokenstream)
-				context->GetTokenStream()->InsertTokens(Tokenize(content, context));
+			{
+				auto& macro_toks = Tokenize(content, context);
+				toks.insert(toks.end(), macro_toks.begin(), macro_toks.end());
+			}
 			else
 			{
 				std::vector<Token> toks = Tokenize(content, context, false);
@@ -250,7 +264,7 @@ void arda::Lexer::AddEol(std::shared_ptr<TokenStream> stream,int col)
 	++m_line;
 }
 
-bool arda::Lexer::CheckEol(const std::string & line, std::shared_ptr<TokenStream> stream)
+bool arda::Lexer::CheckEol(std::string_view line, std::shared_ptr<TokenStream> stream)
 {
 	if (line.size() == 0)
 	{
@@ -261,32 +275,37 @@ bool arda::Lexer::CheckEol(const std::string & line, std::shared_ptr<TokenStream
 	return false;
 }
 
-void arda::Lexer::SkipWhitespaces(const std::string & str, int& pos)
+void arda::Lexer::SkipWhitespaces(std::string_view str, int& pos)
 {
 	while (isspace(str[pos]))
 		++pos;
 }
 
-void arda::Lexer::Preprocess(const std::string & str, int & pos, std::shared_ptr<ParsingContext> context)
+void arda::Lexer::Preprocess(std::string_view str, int & pos, std::shared_ptr<ParsingContext> context)
 {
-	SkipWhitespaces(str, pos);
+	Skip<' '>(str, pos);
 
-	std::string cmd = ReadCmd(str, pos);
+	std::string_view cmd = ReadCmd(str, pos);
 
-	SkipWhitespaces(str, pos);
+	Skip<' '>(str, pos);
 
 	if (cmd == "#define")
 	{
-		std::string name = ReadToWs(str, pos);
-		SkipWhitespaces(str, pos);
-		std::string value = str.substr(pos, str.size());
+		std::string_view name = ReadTill<' '>(str, pos);
+		if (name == "TUTORIAL_WOTR_VOLUME")
+		{
+			int a = 0;
+		}
+
+		Skip<' '>(str, pos);
+		std::string_view value = str.substr(pos, str.size());
 		pos = str.size();
-		context->AddMacro(name, value);
+		context->AddMacro(std::string(name), std::string(value));
 	}
 	else if (cmd=="#include")
 	{
-		const std::string include = ReadQuoted(str, pos);
-		std::string inc_path = m_basepath + include;
+		std::string_view include = ReadQuoted(str, pos);
+		std::string inc_path = m_basepath + std::string(include);
 		inc_path = fs::weakly_canonical(fs::path(inc_path)).string();
 		std::replace(inc_path.begin(), inc_path.end(), '\\', '/');
 		std::transform(inc_path.begin(), inc_path.end(), inc_path.begin(), ::tolower);
@@ -349,10 +368,10 @@ void arda::Lexer::MergeTokens(std::vector<Token>& tokens, int max)
 	}
 }
 
-void arda::Lexer::TokenFunc(std::function<Token(Token&, Token&)> func, const std::string & str, int pos, std::shared_ptr<ParsingContext> context)
+void arda::Lexer::TokenFunc(std::function<Token(Token&, Token&)> func, std::string_view str, int pos, std::shared_ptr<ParsingContext> context)
 {
 	Token tok1, tok2;
-	const std::string content = str.substr(pos + 1, str.find_first_of(')')-(pos+1));
+	std::string_view content = str.substr(pos + 1, str.find_first_of(')')-(pos+1));
 	std::vector<Token> toks = Tokenize(content, context, false);
 
 	MergeTokens(toks, 2);
@@ -376,47 +395,29 @@ arda::Token arda::Lexer::TokenOperation(const Token & a, const Token & b, std::f
 	return (integerTok) ? static_cast<long long>(result) : result;
 }
 
-std::string arda::Lexer::ReadToWs(const std::string & str, int & pos)
+std::string_view arda::Lexer::ReadQuoted(std::string_view str, int & pos)
 {
-	std::string word;
-	char c = str[pos];
-	
-	while (c != ' ' && pos < str.size())
-	{
-		word += c;
-		c = str[++pos];
-	}	
-
-	return word;
-}
-
-std::string arda::Lexer::ReadQuoted(const std::string & str, int & pos)
-{
-	std::string out;
-
 	while (str[pos] != '\"' && pos < str.size()) ++pos;
+		++pos;
 
-	++pos;
+	int first = pos;
 
 	while (str[pos] != '\"' && pos < str.size())
-	{
-		out += str[pos];
 		++pos;
-	}
-
-	return out;
+	
+	int last = pos;
+	
+	return str.substr(first, last - first);
 }
 
-std::string arda::Lexer::ReadCmd(const std::string & str, int & pos)
+std::string_view arda::Lexer::ReadCmd(std::string_view  str, int & pos)
 {
-	std::string word;
 	char c = str[pos];
+	int first = pos;
 
 	while (c != ' '&&c!='(' && pos < str.size())
-	{
-		word += c;
 		c = str[++pos];
-	}
-
-	return word;
+	
+	int last = pos;
+	return str.substr(first,last-first);
 }

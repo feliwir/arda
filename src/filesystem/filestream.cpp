@@ -19,7 +19,7 @@ void arda::FileStream::checkOpen()
 	}
 }
 
-void arda::FileStream::seek(int offset, SeekOrigin origin)
+void arda::FileStream::Seek(int offset, SeekOrigin origin)
 {
 	checkOpen();
 
@@ -43,7 +43,7 @@ void arda::FileStream::seek(int offset, SeekOrigin origin)
 	m_stream.seekg(offset, way);
 }
 
-unsigned int arda::FileStream::read(char * buffer, size_t numBytes)
+unsigned int arda::FileStream::Read(char * buffer, size_t numBytes)
 {
 	checkOpen();
 	m_stream.read(buffer, numBytes);

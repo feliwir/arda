@@ -15,16 +15,16 @@ namespace arda
 		inline IEntry(Type t) : m_type(t)
 		{}
 
-		inline Type getType() const { return m_type; }
+		inline Type GetType() const { return m_type; }
 
 		inline static bool isRegular(const IEntry& e)
 		{
-			return e.getType() == REGULAR;
+			return e.GetType() == REGULAR;
 		}
 
 		inline static bool isDirectory(const IEntry& e)
 		{
-			return e.getType() == DIRECTORY;
+			return e.GetType() == DIRECTORY;
 		}
 	protected:
 		Type m_type;

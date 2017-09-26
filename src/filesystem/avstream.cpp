@@ -42,7 +42,7 @@ int arda::AvStream::ReadFunc(void* ptr, uint8_t* buf, int buf_size)
 	auto stream = reinterpret_cast<IStream*>(ptr);
 	int bytesRead = 0;
 
-	bytesRead = stream->read(reinterpret_cast<char*>(buf), buf_size);
+	bytesRead = stream->Read(reinterpret_cast<char*>(buf), buf_size);
 	return bytesRead;
 }
 
@@ -55,8 +55,8 @@ void arda::AvStream::Attach(AVFormatContext * ctx)
 	std::memset(m_buffer, 0, m_bufSize);
 	int readBytes = 0;
 	int size = m_bufSize - AVPROBE_PADDING_SIZE;
-	readBytes = m_stream->read(reinterpret_cast<char*>(m_buffer), size);
-	m_stream->seek(0, IStream::BEGIN);
+	readBytes = m_stream->Read(reinterpret_cast<char*>(m_buffer), size);
+	m_stream->Seek(0, IStream::BEGIN);
 
 	// Now we set the ProbeData-structure for av_probe_input_format:
 	AVProbeData probeData;
@@ -80,7 +80,7 @@ int64_t arda::AvStream::SeekFunc(void* ptr, int64_t pos, int whence)
 	switch (whence)
 	{
 	case AVSEEK_SIZE:
-		return stream->getSize();
+		return stream->GetSize();
 		break;
 	default:
 	case SEEK_SET:
@@ -94,8 +94,8 @@ int64_t arda::AvStream::SeekFunc(void* ptr, int64_t pos, int whence)
 		break;
 	}
 
-	stream->seek(pos, origin);
+	stream->Seek(pos, origin);
 
 	// Return the new position:
-	return stream->getPosition();
+	return stream->GetPosition();
 }

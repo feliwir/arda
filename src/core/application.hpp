@@ -23,7 +23,9 @@ namespace arda
 
 		void Run();
 
-		static inline Global& getGlobal() { return *s_global; }
+		static inline Global& GetGlobal() { return *s_global; }
+	private:
+		void ShowSplash();
 
 	private:
 		GLFWwindow* m_window;
@@ -34,4 +36,9 @@ namespace arda
 		std::unique_ptr<Graphics> m_graphics;
 		static std::unique_ptr<Global> s_global;
 	};
+
+	inline  Global& GetGlobal()
+	{
+		return Application::GetGlobal();
+	}
 }
