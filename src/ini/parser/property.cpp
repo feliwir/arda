@@ -69,14 +69,31 @@ long long arda::Property::GetInteger() const
 	if (!CheckArgs())
 		return 0;
 
-	return std::get<long long>(m_args.front().Value);
+	auto& token = m_args.front();
+
+	//cast into an int
+	if (token.Type == Token::FloatLiteral)
+	{
+		return static_cast<long long>(std::get<double>(token.Value));
+	}
+
+	return std::get<long long>(token.Value);
 }
 
 double arda::Property::GetDouble() const
 {
 	if (!CheckArgs())
 		return 0;
-	return std::get<double>(m_args.front().Value);
+
+	auto& token = m_args.front();
+
+	//cast into a double
+	if (token.Type == Token::IntegerLiteral)
+	{
+		return static_cast<double>(std::get<long long>(token.Value));
+	}
+
+	return std::get<double>(token.Value);
 }
 
 bool arda::Property::CheckArgs() const
