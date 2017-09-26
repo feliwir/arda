@@ -22,7 +22,13 @@ namespace arda
 		{
 			return m_duration;
 		}
+
+		inline State GetState()
+		{
+			return m_state;
+		}
 	protected:
+		State m_state;
 		double m_duration;
 	};
 }

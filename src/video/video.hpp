@@ -27,11 +27,23 @@ namespace arda
 		inline int GetCurrentFrame() { return m_curFrame; }
 		inline int GetFrameCount() { return m_numFrames; }
 
+		inline Image& GetColorImage() { return m_rgbImage; }
+		inline Image& GetAlphaImage() { return m_alphaImage; }
+	private:
+		enum StreamIndex
+		{
+			COLOR = 0,
+			ALPHA = 1
+		};
+
+		//will get a new color and a new alpha frame (when alpha is present)
+		void GetFrames();
 	private:
 		std::unique_ptr<VideoInternals> m_internals;
 		bool m_hasAlpha;
 		double m_fps;
-		double m_frameTime;
+		//in microseconds
+		int m_frameTime;
 		double m_position;
 		int m_numFrames;
 		int m_curFrame;

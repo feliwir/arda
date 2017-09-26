@@ -24,7 +24,7 @@ namespace arda
 		Image(std::shared_ptr<IStream> stream);
 		~Image();
 		
-		void Create(glm::vec2 size, gli::format format, uint8_t* data);
+		void Create(glm::ivec2 size, gli::format format, uint8_t* data);
 		void Update(uint8_t* data);
 
 		inline gli::texture& GetTexture()	{ return m_img;	}

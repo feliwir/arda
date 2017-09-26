@@ -1,6 +1,8 @@
 #include "video.hpp"
 #include "../filesystem/avstream.hpp"
 #include "../core/exception.hpp"
+#include <chrono>
+
 extern "C"
 {
 #include <libavcodec/avcodec.h>
@@ -21,7 +23,9 @@ namespace arda
 		AVFrame* m_rgbFrame;
 		AVFrame* m_alphaFrame;
 		uint8_t* m_rgbBuffer;
+		uint8_t* m_alphaBuffer;
 		AVFrame* m_tmpFrame;
+		SwsContext* m_swsContext;
 
 	private:
 		void UpdateImage(Image& img, AVFrame* frame)
@@ -60,9 +64,8 @@ arda::Video::Video(std::shared_ptr<IStream> stream) :
 	m_curFrame(0),
 	m_fps(0.0),
 	m_position(0.0),
-	m_frameTime(0.0)
+	m_frameTime(0)
 {
-	av_register_all();
 	auto& format_ctx = m_internals->format_ctx;
 	auto& avstream = m_internals->avstream;
 	auto& codec_ctx = m_internals->codec_ctx;
@@ -72,6 +75,8 @@ arda::Video::Video(std::shared_ptr<IStream> stream) :
 	auto& rgbFrame = m_internals->m_rgbFrame;
 	auto& alphaFrame = m_internals->m_alphaFrame;
 	auto& rgbBuffer = m_internals->m_rgbBuffer;
+	auto& alphaBuffer = m_internals->m_alphaBuffer;
+	auto& swsContext = m_internals->m_swsContext;
 
 	avstream = std::make_unique<AvStream>(stream);
 	format_ctx = avformat_alloc_context();
@@ -95,20 +100,25 @@ arda::Video::Video(std::shared_ptr<IStream> stream) :
 			AVRational fps = format_ctx->streams[i]->avg_frame_rate;
 			m_fps = fps.num / fps.den;
 			m_numFrames = format_ctx->streams[i]->nb_frames;
-			m_frameTime = 1.0 / m_fps;
-		}
-			
+			m_frameTime = (1.0 / m_fps) * 1000000;
+		}			
 	}
 
 	if(vid_streams<1)
 		throw RuntimeException("No video stream contained!");
 
-	auto origCtx = format_ctx->streams[0]->codec;
+	auto origCtx = format_ctx->streams[COLOR]->codec;
+
+	m_rgbImage.Create(glm::ivec2(origCtx->width, origCtx->height),
+								 gli::format::FORMAT_RGB8_UNORM_PACK8, nullptr);
 
 	if (vid_streams > 1)
 	{
 		m_hasAlpha = true;
-		codec_ctx_a = format_ctx->streams[1]->codec;
+		codec_ctx_a = format_ctx->streams[ALPHA]->codec;
+
+		m_alphaImage.Create(glm::ivec2(codec_ctx_a->width, codec_ctx_a->height),
+							gli::format::FORMAT_RGB8_UNORM_PACK8, nullptr);
 	}
 		
 	// Find the decoder for the video stream
@@ -148,12 +158,16 @@ arda::Video::Video(std::shared_ptr<IStream> stream) :
 	avpicture_fill((AVPicture *)rgbFrame, rgbBuffer, AV_PIX_FMT_RGB24,
 		codec_ctx->width, codec_ctx->height);
 
-	struct SwsContext *sws_ctx = NULL;
-	int frameFinished;
-	AVPacket packet;
-	
+	alphaBuffer = (uint8_t *)av_malloc(numBytes * sizeof(uint8_t));
+
+	// Assign appropriate parts of buffer to image planes in pFrameRGB
+	// Note that pFrameRGB is an AVFrame, but AVFrame is a superset
+	// of AVPicture
+	avpicture_fill((AVPicture *)alphaFrame, alphaBuffer, AV_PIX_FMT_RGB24,
+		codec_ctx->width, codec_ctx->height);
+
 	// initialize SWS context for software scaling
-	sws_ctx = sws_getContext(codec_ctx->width,
+	swsContext = sws_getContext(codec_ctx->width,
 		codec_ctx->height,
 		codec_ctx->pix_fmt,
 		codec_ctx->width,
@@ -165,36 +179,7 @@ arda::Video::Video(std::shared_ptr<IStream> stream) :
 		NULL
 	);
 
-	int i = 0;
-	while (av_read_frame(format_ctx, &packet) >= 0) {
-		// Is this a packet from the video stream?
-		if (packet.stream_index == 0) {
-			// Decode video frame
-			avcodec_decode_video2(codec_ctx, tmpFrame, &frameFinished, &packet);
-			
-			// Did we get a video frame?
-			if (frameFinished) {
-				
-				double pts = packet.pts*m_frameTime;
-
-				// Convert the image from its native format to RGB
-				sws_scale(sws_ctx, (uint8_t const * const *)tmpFrame->data,
-					tmpFrame->linesize, 0, codec_ctx->height,
-					rgbFrame->data, rgbFrame->linesize);
-
-				// Save the frame to disk
-				/*if (++i <= 60)
-					SaveFrame(rgbFrame, codec_ctx->width,
-						codec_ctx->height, i);*/
-			}
-		}
-
-		// Free the packet that was allocated by av_read_frame
-		av_free_packet(&packet);
-	}
-
 	avcodec_close(origCtx);
-
 }
 
 arda::Video::~Video()
@@ -208,7 +193,9 @@ arda::Video::~Video()
 	auto& rgbFrame = m_internals->m_rgbFrame;
 	auto& alphaFrame = m_internals->m_alphaFrame;
 	auto& rgbBuffer = m_internals->m_rgbBuffer;
+	auto& alphaBuffer = m_internals->m_alphaBuffer;
 
+	av_free(alphaBuffer);
 	av_free(rgbBuffer);
 	av_free(tmpFrame);
 	av_free(rgbFrame);
@@ -220,17 +207,88 @@ arda::Video::~Video()
 
 void arda::Video::Start()
 {
+	//get the thread pool
+	auto& pool = GetGlobal().GetThreadPool();
+
+	m_state = PLAYING;
+
+	pool.AddJob([this]()
+	{
+		auto last = std::chrono::high_resolution_clock::now();
+		while (m_state == PLAYING)
+		{
+			GetFrames();
+			std::this_thread::sleep_until(last+std::chrono::microseconds(m_frameTime));
+			last = last + std::chrono::microseconds(m_frameTime);
+		}
+
+	});
 }
 
 void arda::Video::Pause()
 {
+	m_state = PAUSED;
 }
 
 void arda::Video::Stop()
 {
+	m_state = STOPPED;
 }
 
 double arda::Video::GetPosition()
 {
 	return 0.0;
+}
+
+void arda::Video::GetFrames()
+{
+	auto& format_ctx = m_internals->format_ctx;
+	auto& avstream = m_internals->avstream;
+	auto& codec_ctx = m_internals->codec_ctx;
+	auto& codec_ctx_a = m_internals->codec_ctx_a;
+	auto& codec = m_internals->codec;
+	auto& tmpFrame = m_internals->m_tmpFrame;
+	auto& rgbFrame = m_internals->m_rgbFrame;
+	auto& alphaFrame = m_internals->m_alphaFrame;
+	auto& rgbBuffer = m_internals->m_rgbBuffer;
+	auto& swsContext = m_internals->m_swsContext;
+
+	int frameFinished ;
+	AVPacket packet;
+	bool updatedColor = false, updatedAlpha = false;
+
+	while (av_read_frame(format_ctx, &packet) >= 0)
+	{
+		AVCodecContext* codec = (packet.stream_index==COLOR) ?
+								codec_ctx : codec_ctx_a;
+		AVFrame* tgtFrame = (packet.stream_index == COLOR) ?
+								rgbFrame : alphaFrame;
+		Image& tgtImage = (packet.stream_index == COLOR) ?
+							m_rgbImage : m_alphaImage;
+
+		// Decode video frame
+		avcodec_decode_video2(codec, tmpFrame, &frameFinished, &packet);
+		double pts = packet.pts*m_frameTime;
+
+		if (frameFinished)
+		{
+			// Convert the image from its native format to RGB
+			sws_scale(swsContext, (uint8_t const * const *)tmpFrame->data,
+				tmpFrame->linesize, 0, codec->height,
+				tgtFrame->data, tgtFrame->linesize);
+
+			tgtImage.Update(tgtFrame->data[0]);
+
+			if (packet.stream_index == COLOR)
+				updatedColor = true;			
+			else if (packet.stream_index == ALPHA)
+				updatedAlpha = true;
+		}
+
+		// Free the packet that was allocated by av_read_frame
+		av_free_packet(&packet);
+
+		if (updatedColor && (updatedAlpha || !m_hasAlpha))
+			break;
+	}
 }

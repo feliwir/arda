@@ -56,12 +56,8 @@ arda::Application::Application(const std::vector<std::string>& args)
 
 	auto end = std::chrono::high_resolution_clock::now();
 
-	auto stream = m_fs->GetStream("data/movies/Credits_with_alpha.vp6");
-	Video vid(stream);
-
-	stream = m_fs->GetStream("maps/map mp evendim/map mp evendim.map");
+	auto stream = m_fs->GetStream("maps/map mp evendim/map mp evendim.map");
 	Map map(stream);
-
 	
 	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 	ARDA_LOG("Done creating FileSystem: " + std::to_string(duration / 1000.0));
@@ -86,6 +82,15 @@ arda::Application::~Application()
 
 void arda::Application::Run()
 {
+	auto stream = m_fs->GetStream("data/movies/Credits_with_alpha.vp6");  
+	Video vid(stream);
+	vid.Start();
+	auto& ren = m_graphics->GetRenderer();
+	auto tex = ren.CreateTexture();
+	auto spr = m_graphics->CreateSprite(tex);
+	ren.RemoveDrawable(s_splash);
+	ren.AddDrawable(spr);
+
 	while (!glfwWindowShouldClose(m_window))
 	{
 		m_graphics->Clear();
@@ -93,6 +98,8 @@ void arda::Application::Run()
 		m_graphics->Render();
 
 		glfwPollEvents();
+
+		tex->Update(vid.GetColorImage());
 
 		m_graphics->Present();
 	}
