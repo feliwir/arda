@@ -128,7 +128,8 @@ arda::Video::Video(std::shared_ptr<IStream> stream) :
 
 	// Copy context
 	codec_ctx = avcodec_alloc_context3(codec);
-	if (avcodec_copy_context(codec_ctx, origCtx) != 0) {
+	if (avcodec_copy_context(codec_ctx, origCtx) != 0) 
+	{
 		fprintf(stderr, "Couldn't copy codec context");
 		throw RuntimeException("Couldn't copy codec ctx!");
 	}
@@ -269,7 +270,7 @@ void arda::Video::GetFrames()
 		// Decode video frame
 		avcodec_decode_video2(codec, tmpFrame, &frameFinished, &packet);
 		double pts = packet.pts*m_frameTime;
-
+		int64_t check = av_frame_get_best_effort_timestamp(tmpFrame);
 		if (frameFinished)
 		{
 			// Convert the image from its native format to RGB

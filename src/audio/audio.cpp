@@ -2,8 +2,8 @@
 #include "../core/config.hpp"
 #include <iostream>
 #include <al.h>
-#include <cstring>
 #include <alc.h>
+#include <cstring>
 #include "../core/exception.hpp"
 
 namespace arda

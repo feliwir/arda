@@ -11,6 +11,13 @@ find_package(JPEG REQUIRED)
 
 add_executable(${PROJECT} "core/main.cpp")
 
+string(TOLOWER ${PROJECT} PROJECT_DEST)
+
+install(TARGETS ${PROJECT}
+        RUNTIME DESTINATION bin COMPONENT binaries
+        LIBRARY DESTINATION lib${LIB_SUFFIX} COMPONENT binaries
+        ARCHIVE DESTINATION lib${LIB_SUFFIX} COMPONENT libraries)
+
 set(SRCS)
 set(HDRS)
 

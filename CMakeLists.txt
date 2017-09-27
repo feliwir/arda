@@ -13,3 +13,21 @@ set(PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_subdirectory(deps)
 add_subdirectory(src)
+
+set(CPACK_GENERATOR "ZIP")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Arda project")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/util/License.txt")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/util/ReadMe.txt")
+
+set(CPACK_PACKAGE_VERSION_MAJOR "2")
+set(CPACK_PACKAGE_VERSION_MINOR "0")
+set(CPACK_PACKAGE_VERSION_PATCH "0")
+set(CPACK_PACKAGE_NAME "${PROJECT}-${CMAKE_BUILD_TYPE}")
+
+if (NOT WINDOWS)
+	set(CPACK_SET_DESTDIR TRUE)
+endif()
+
+set(CPACK_COMPONENTS_ALL doxygen binaries libraries resources)
+
+include(CPack)

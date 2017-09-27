@@ -6,6 +6,7 @@
 #include "global.hpp"
 #include "debugger.hpp"
 #include "../audio/audio.hpp"
+#include "../audio/audiostream.hpp"
 #include "../video/video.hpp"
 #include "../map/map.hpp"
 #include "../graphics/graphics.hpp"
@@ -56,7 +57,11 @@ arda::Application::Application(const std::vector<std::string>& args)
 
 	auto end = std::chrono::high_resolution_clock::now();
 
-	auto stream = m_fs->GetStream("maps/map mp evendim/map mp evendim.map");
+	auto stream = m_fs->GetStream("data/audio/speech/mgdefea_gala001.mp3");
+	AudioStream aud(stream);
+	aud.Start();
+
+	stream = m_fs->GetStream("maps/map mp evendim/map mp evendim.map");
 	Map map(stream);
 	
 	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
@@ -72,7 +77,7 @@ arda::Application::Application(const std::vector<std::string>& args)
 	//check for an entry
 	auto inivid = m_ini->GetBlock<ini::Video>("EALogoMovie");
 
-	m_graphics->SetFullscreen(true);
+	//m_graphics->SetFullscreen(true);
 }
 
 arda::Application::~Application()
