@@ -11,6 +11,8 @@ namespace arda
 		~AudioBuffer();
 
 		void Upload(uint8_t* data, int size);
+
+		inline ALuint GetHandle() { return m_handle; }
 	private:
 		ALuint m_handle;
 		ALenum m_format;

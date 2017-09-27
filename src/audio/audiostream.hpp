@@ -13,13 +13,13 @@ namespace arda
 		AudioStream(std::shared_ptr<IStream> stream);
 		~AudioStream();
 
-		// Geerbt über IPlayable
+		// Geerbt ï¿½ber IPlayable
 		virtual void Start() override;
 		virtual void Pause() override;
 		virtual void Stop() override;
 		virtual double GetPosition() override;
 	private:
-		void UpdateBuffers();
+		bool UpdateBuffers();
 	private:
 		std::unique_ptr<AudioStreamInternals> m_internals;
 		int m_bitrate;

@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <sstream>
+#include <mutex>
 
 namespace arda
 {
@@ -30,6 +31,7 @@ namespace arda
 
 		std::string m_root;
 		std::shared_ptr<Directory> m_vfsRoot;
+		std::mutex m_access;;
 		std::vector<std::shared_ptr<BigArchive>> m_archives;
 	};
 }

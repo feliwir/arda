@@ -1,6 +1,7 @@
 #include "audiostream.hpp"
 #include "audiobuffer.hpp"
 #include "../filesystem/avstream.hpp"
+#include "../core/debugger.hpp"
 #include "../core/exception.hpp"
 #include <chrono>
 
@@ -21,6 +22,7 @@ namespace arda
 		AVFrame* audioFrame;
 		AVCodecContext* codec_ctx;
 		AVFormatContext* format_ctx;
+		ALuint source;
 		std::unique_ptr<AudioBuffer> frontBuffer;
 		std::unique_ptr<AudioBuffer> backBuffer;
 	};
@@ -38,7 +40,8 @@ arda::AudioStream::AudioStream(std::shared_ptr<IStream> stream) :
 	auto& frame = m_internals->audioFrame;
 	auto& fbuffer = m_internals->frontBuffer;
 	auto& bbuffer = m_internals->backBuffer;
-
+	auto& source = m_internals->source;
+	
 	avstream = std::make_unique<AvStream>(stream);
 	format_ctx = avformat_alloc_context();
 	avstream->Attach(m_internals->format_ctx);
@@ -99,6 +102,10 @@ arda::AudioStream::AudioStream(std::shared_ptr<IStream> stream) :
 
 	fbuffer = std::make_unique<AudioBuffer>(m_frequency, fmt);
 	bbuffer = std::make_unique<AudioBuffer>(m_frequency, fmt);
+
+	alGenSources(1,&source);
+	alSourcei(source, AL_LOOPING, AL_TRUE);
+
 }
 
 arda::AudioStream::~AudioStream()
@@ -116,19 +123,27 @@ void arda::AudioStream::Start()
 {
 	//get the thread pool
 	auto& pool = GetGlobal().GetThreadPool();
+	auto& source = m_internals->source;
 
 	m_state = PLAYING;
 
-	pool.AddJob([this]()
+	pool.AddJob([this,&source]()
 	{
-		auto last = std::chrono::high_resolution_clock::now();
-		while (m_state == PLAYING)
+		while(UpdateBuffers())
 		{
-			UpdateBuffers();
-			std::this_thread::sleep_for(std::chrono::microseconds(100));
+			while(true)
+			{
+				int queued = 0;
+				alGetSourcei(source,AL_BUFFERS_QUEUED,&queued);
+				if(queued>2)
+					std::this_thread::sleep_for(std::chrono::microseconds(100));
+				else
+					break;
+			}
 		}
-
 	});
+
+	alSourcePlay(source);
 }
 
 void arda::AudioStream::Pause()
@@ -144,7 +159,7 @@ double arda::AudioStream::GetPosition()
 	return 0.0;
 }
 
-void arda::AudioStream::UpdateBuffers()
+bool arda::AudioStream::UpdateBuffers()
 {
 	auto& format_ctx = m_internals->format_ctx;
 	auto& avstream = m_internals->avstream;
@@ -158,19 +173,38 @@ void arda::AudioStream::UpdateBuffers()
 	AVPacket packet;
 	bool updatedColor = false, updatedAlpha = false;
 
+	ARDA_LOG("Update buffers");
+
 	while (av_read_frame(format_ctx, &packet) >= 0)
 	{
-		// Decode video frame
-		avcodec_decode_audio4(codec_ctx, frame, &frameFinished, &packet);
+		AVPacket decodingPacket = packet;
+
+		while(decodingPacket.size > 0)
+		{
+		// Decode audio frame
+		int consumed = avcodec_decode_audio4(codec_ctx, frame, &frameFinished, &packet);
 		double pts = packet.pts;
 		double duration = frame->pkt_duration / static_cast<double>(AV_TIME_BASE);
 		
 		int data_size = av_samples_get_buffer_size(NULL, codec_ctx->channels,frame->nb_samples, codec_ctx->sample_fmt, 1);
 
-		if (frameFinished)
+
+		if (consumed>=0 && frameFinished)
 		{
+			decodingPacket.size -= consumed;
+			decodingPacket.data += consumed;
+			//got a finished frame here
 			fbuffer->Upload(frame->data[0], data_size);
 			bbuffer->Upload(frame->data[1], data_size);
 		}
+		else
+		{
+			return false;
+		}
+		}
+
+		return true;
 	}
+
+	return false;
 }

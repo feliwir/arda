@@ -61,8 +61,8 @@ arda::Application::Application(const std::vector<std::string>& args)
 	AudioStream aud(stream);
 	aud.Start();
 
-	stream = m_fs->GetStream("maps/map mp evendim/map mp evendim.map");
-	Map map(stream);
+	// stream = m_fs->GetStream("maps/map mp evendim/map mp evendim.map");
+	// Map map(stream);
 	
 	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 	ARDA_LOG("Done creating FileSystem: " + std::to_string(duration / 1000.0));

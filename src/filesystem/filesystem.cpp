@@ -148,7 +148,9 @@ void arda::FileSystem::AddArchive(const std::string& path)
 		m_vfsRoot->InsertFile(entry.first, entry.second);
 	}
 
+	m_access.lock();
 	m_archives.push_back(big);
+	m_access.unlock();
 }
 
 void arda::FileSystem::AddFile(const std::string& path)
