@@ -19,6 +19,7 @@ namespace arda
 	class AudioStreamInternals
 	{
 	public:
+		static const int chainsize = 3;
 		std::unique_ptr<AvStream> avstream;
 		AVCodec* codec = nullptr;
 		AVFrame* audioFrame = nullptr;
@@ -30,7 +31,7 @@ namespace arda
 		bool needsResample = false;
 		uint8_t** resampleData = nullptr;
 		int resampleLinesize = 0;
-		std::array<std::shared_ptr<AudioBuffer>, 3> bufferchain;
+		std::array<std::shared_ptr<AudioBuffer>, chainsize> bufferchain;
 		int cbuffer = 0;
 	};
 }
@@ -193,14 +194,23 @@ void arda::AudioStream::Start()
 	{
 		while(m_state == PLAYING)
 		{
+			//get all processed buffers:
+			int processed = 0;
+			alGetSourcei(source, AL_BUFFERS_PROCESSED, &processed);
+			ALuint freed=0;
+			alSourceUnqueueBuffers(source, processed, &freed);
+			Audio::checkErrorAl("Cannot unqueue the buffers");
+
 			//check if until we actually need new buffers
 			int queued = 0;
 			alGetSourcei(source,AL_BUFFERS_QUEUED,&queued);
-			if(queued>1)
-				std::this_thread::sleep_for(std::chrono::milliseconds(5));
-			//we need new buffers
-			else
-				UpdateBuffers();		
+			Audio::checkErrorAl("Cannot get queued buffers");
+
+			//q until we are back to 3
+			for (int i = 0; AudioStreamInternals::chainsize - queued; ++i)
+				UpdateBuffers();
+
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		}
 	});
 
@@ -242,7 +252,7 @@ bool arda::AudioStream::UpdateBuffers()
 	auto& out_fmt = m_internals->out_fmt;
 	auto& cbuffer = m_internals->cbuffer;
 
-	int frameFinished;
+	bool frameFinished = false;
 	AVPacket packet;
 	bool updatedColor = false, updatedAlpha = false;
 
@@ -250,22 +260,19 @@ bool arda::AudioStream::UpdateBuffers()
 
 	while (av_read_frame(format_ctx, &packet) >= 0)
 	{
-		AVPacket decodingPacket = packet;
-
-		while(decodingPacket.size > 0)
-		{
 		// Decode audio frame
-		int consumed = avcodec_decode_audio4(codec_ctx, frame, &frameFinished, &packet);
+		int res = avcodec_send_packet(codec_ctx, &packet);
+		if (avcodec_receive_frame(codec_ctx, frame) == 0)
+			frameFinished = true;
+
+		//int consumed = avcodec_decode_audio4(codec_ctx, frame, &frameFinished, &packet);
 		double pts = packet.pts;
 		double duration = frame->pkt_duration / static_cast<double>(AV_TIME_BASE);
 		
 		int data_size = av_samples_get_buffer_size(NULL, codec_ctx->channels,frame->nb_samples, codec_ctx->sample_fmt, 1);
 
-
-		if (consumed>=0 && frameFinished)
+		if (frameFinished)
 		{
-			decodingPacket.size -= consumed;
-			decodingPacket.data += consumed;
 
 			uint8_t* data;
 			int linesize = 0;
@@ -287,13 +294,6 @@ bool arda::AudioStream::UpdateBuffers()
 			auto& buffer = bufferchain[cbuffer];
 			ALuint handle = buffer->GetHandle();
 
-			//unqueue the buffer
-			ALuint freed = 0;
-			ALint processed;
-			alGetSourcei(source, AL_BUFFERS_PROCESSED, &processed);
-
-			alSourceUnqueueBuffers(source, processed, &freed);
-			Audio::checkErrorAl("Cannot unqueue the buffer");
 
 			//got a finished frame here
 			buffer->Upload(data, data_size);
@@ -305,20 +305,14 @@ bool arda::AudioStream::UpdateBuffers()
 				//av_freep(&data);
 			}
 
-
 			alSourceQueueBuffers(source, 1, &handle);
 			Audio::checkErrorAl("Failed to query buffer to source");
 
 			++cbuffer;
 			cbuffer %= 3;
-		}
-		else
-		{
-			return false;
-		}
+			return true;
 		}
 
-		return true;
 	}
 
 	return false;
