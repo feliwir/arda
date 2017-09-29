@@ -72,11 +72,12 @@ ENDMACRO(FFMPEG_FIND)
 
 SET(FFMPEG_ROOT "$ENV{FFMPEG_DIR}" CACHE PATH "Location of FFMPEG")
 
-FFMPEG_FIND(LIBAVFORMAT avformat avformat.h)
-FFMPEG_FIND(LIBAVDEVICE avdevice avdevice.h)
-FFMPEG_FIND(LIBAVCODEC  avcodec  avcodec.h)
-FFMPEG_FIND(LIBAVUTIL   avutil   avutil.h)
-FFMPEG_FIND(LIBSWSCALE  swscale  swscale.h)  # not sure about the header to look for here.
+FFMPEG_FIND(LIBAVFORMAT     avformat    avformat.h)
+FFMPEG_FIND(LIBAVDEVICE     avdevice    avdevice.h)
+FFMPEG_FIND(LIBAVCODEC      avcodec     avcodec.h)
+FFMPEG_FIND(LIBAVUTIL       avutil      avutil.h)
+FFMPEG_FIND(LIBSWSCALE      swscale     swscale.h)  # not sure about the header to look for here.
+FFMPEG_FIND(LIBSWRESAMPLE   swresample  swresample.h) 
 
 SET(FFMPEG_FOUND "NO")
 
@@ -101,7 +102,8 @@ IF (FFMPEG_LIBAVFORMAT_FOUND AND FFMPEG_LIBAVCODEC_FOUND)
         ${FFMPEG_LIBAVDEVICE_LIBRARIES}
         ${FFMPEG_LIBAVCODEC_LIBRARIES}
         ${FFMPEG_LIBAVUTIL_LIBRARIES}
-        ${FFMPEG_LIBSWSCALE_LIBRARIES})
+        ${FFMPEG_LIBSWSCALE_LIBRARIES}
+        ${FFMPEG_LIBSWRESAMPLE_LIBRARIES})
 
     mark_as_advanced(FFMPEG_INCLUDE_DIRS FFMPEG_LIBRARY_DIRS FFMPEG_LIBRARIES)
 ENDIF()

@@ -12,8 +12,9 @@ namespace arda
 	public:
 		Audio(Config& config);
 		~Audio();
+	public:
+		static void checkErrorAl(const std::string& msg);
 	private:
-		void checkErrorAl(const std::string& msg);
 		void checkErrorAlc(const std::string& msg);
 	private:
 		std::unique_ptr<AudioInternals> m_internals;

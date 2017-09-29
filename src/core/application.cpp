@@ -57,9 +57,7 @@ arda::Application::Application(const std::vector<std::string>& args)
 
 	auto end = std::chrono::high_resolution_clock::now();
 
-	auto stream = m_fs->GetStream("data/audio/speech/mgdefea_gala001.mp3");
-	AudioStream aud(stream);
-	aud.Start();
+
 
 	// stream = m_fs->GetStream("maps/map mp evendim/map mp evendim.map");
 	// Map map(stream);
@@ -87,9 +85,14 @@ arda::Application::~Application()
 
 void arda::Application::Run()
 {
-	auto stream = m_fs->GetStream("data/movies/Credits_with_alpha.vp6");  
-	Video vid(stream);
+	auto stream = m_fs->GetStream("data/audio/speech/mgdefea_gala001.mp3");
+	AudioStream aud(stream);
+
+	auto stream2 = m_fs->GetStream("data/movies/Credits_with_alpha.vp6");  
+	Video vid(stream2);
 	vid.Start();
+	aud.Start();
+
 	auto& ren = m_graphics->GetRenderer();
 	auto tex = ren.CreateTexture();
 	auto spr = m_graphics->CreateSprite(tex);

@@ -2,6 +2,7 @@
 #include "stream.hpp"
 #include <functional>
 #include <cstring>
+#include "../core/exception.hpp"
 
 extern "C"
 {
@@ -14,7 +15,10 @@ arda::AvStream::AvStream(std::shared_ptr<IStream> stream)
 	  m_stream(stream),
 	  m_buffer(nullptr)
 {
-	m_buffer = new uint8_t[m_bufSize];
+	m_buffer = (uint8_t*)av_malloc(m_bufSize);
+	if (m_buffer == nullptr)
+		throw RuntimeException("Cannot malloc memory!");
+
 	m_ctx = avio_alloc_context(m_buffer,
 								m_bufSize, 0,
 								m_stream.get(),
@@ -33,7 +37,8 @@ arda::AvStream::~AvStream()
 
 	if (m_buffer)
 	{
-		delete[] m_buffer;
+		av_free(m_buffer);
+		m_buffer = nullptr;
 	}
 }
 

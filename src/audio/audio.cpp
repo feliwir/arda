@@ -20,6 +20,7 @@ void arda::Audio::checkErrorAl(const std::string& message)
 {
 	ALenum error;
 	error = alGetError();
+
 	if (error != AL_NO_ERROR)
 	{
 		throw RuntimeException(message);
@@ -76,6 +77,8 @@ arda::Audio::Audio(Config& config) :
 		
 	if (!alcMakeContextCurrent(context))
 		checkErrorAlc("Failed to make context current");
+
+	checkErrorAl("OpenAL init error");
 }
 
 arda::Audio::~Audio()

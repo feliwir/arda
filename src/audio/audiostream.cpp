@@ -1,15 +1,17 @@
 #include "audiostream.hpp"
 #include "audiobuffer.hpp"
+#include "audio.hpp"
 #include "../filesystem/avstream.hpp"
 #include "../core/debugger.hpp"
 #include "../core/exception.hpp"
 #include <chrono>
+#include <array>
 
 extern "C"
 {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
-#include <libswscale/swscale.h>
+#include <libswresample/swresample.h>
 }
 
 namespace arda
@@ -18,13 +20,18 @@ namespace arda
 	{
 	public:
 		std::unique_ptr<AvStream> avstream;
-		AVCodec* codec;
-		AVFrame* audioFrame;
-		AVCodecContext* codec_ctx;
-		AVFormatContext* format_ctx;
-		ALuint source;
-		std::unique_ptr<AudioBuffer> frontBuffer;
-		std::unique_ptr<AudioBuffer> backBuffer;
+		AVCodec* codec = nullptr;
+		AVFrame* audioFrame = nullptr;
+		AVCodecContext* codec_ctx = nullptr;
+		AVFormatContext* format_ctx = nullptr;
+		AVSampleFormat out_fmt;
+		ALuint source = 0;
+		SwrContext* resampler = nullptr;
+		bool needsResample = false;
+		uint8_t** resampleData = nullptr;
+		int resampleLinesize = 0;
+		std::array<std::shared_ptr<AudioBuffer>, 3> bufferchain;
+		int cbuffer = 0;
 	};
 }
 
@@ -38,10 +45,14 @@ arda::AudioStream::AudioStream(std::shared_ptr<IStream> stream) :
 	auto& codec_ctx = m_internals->codec_ctx;
 	auto& codec = m_internals->codec;
 	auto& frame = m_internals->audioFrame;
-	auto& fbuffer = m_internals->frontBuffer;
-	auto& bbuffer = m_internals->backBuffer;
+	auto& bufferchain = m_internals->bufferchain;
 	auto& source = m_internals->source;
-	
+	auto& resampler = m_internals->resampler;
+	auto& needsResample = m_internals->needsResample;
+	auto& out_fmt = m_internals->out_fmt;
+	auto& resampleData = m_internals->resampleData;
+	auto& resampleLinesize = m_internals->resampleLinesize;
+
 	avstream = std::make_unique<AvStream>(stream);
 	format_ctx = avformat_alloc_context();
 	avstream->Attach(m_internals->format_ctx);
@@ -87,25 +98,75 @@ arda::AudioStream::AudioStream(std::shared_ptr<IStream> stream) :
 	AVSampleFormat sample_fmt = codec_ctx->sample_fmt;
 
 	ALenum fmt = AL_FORMAT_MONO8;
-		
+
+	//setup sampler and set OpenAL input format
+	uint64_t in_layout;
+
 	switch (sample_fmt)
 	{
 	case AV_SAMPLE_FMT_S16P:
+		in_layout = codec_ctx->channel_layout;
+		out_fmt = AV_SAMPLE_FMT_S16;
+		needsResample = true;
 	case AV_SAMPLE_FMT_S16:
-		(m_channels == 2) ? AL_FORMAT_STEREO16 : AL_FORMAT_MONO16;
+		if (m_channels == 2)
+		{
+			fmt = AL_FORMAT_STEREO16;
+		}
+		else
+		{
+			fmt = AL_FORMAT_MONO16;
+		}
 		break;
-	case AV_SAMPLE_FMT_U8:
 	case AV_SAMPLE_FMT_U8P:
-		(m_channels == 2) ? AL_FORMAT_STEREO8 : AL_FORMAT_MONO8;
+		in_layout = codec_ctx->channel_layout;
+		out_fmt = AV_SAMPLE_FMT_U8;
+		needsResample = true;
+	case AV_SAMPLE_FMT_U8:
+		if (m_channels == 2)
+		{
+			fmt = AL_FORMAT_STEREO8;
+		}
+		else
+		{
+			fmt = AL_FORMAT_MONO8;
+		}
+		break;
+	default:
+		in_layout = codec_ctx->channel_layout;
+		out_fmt = AV_SAMPLE_FMT_S16;
+		needsResample = true;
 		break;
 	}
 
-	fbuffer = std::make_unique<AudioBuffer>(m_frequency, fmt);
-	bbuffer = std::make_unique<AudioBuffer>(m_frequency, fmt);
+	//setup our resampler
+	if (needsResample)
+	{
+		resampler = swr_alloc_set_opts(NULL,
+			in_layout,		//Out layout should be identical to input layout
+			out_fmt,
+			m_frequency,	//Out frequency should be identical to input frequency
+			in_layout,
+			sample_fmt,
+			m_frequency,
+			0, NULL);		//No logging
+
+		if (swr_init(resampler) != 0)
+			throw RuntimeException("Could not init resampler!");
+	}
+
+	for (int i=0;i<bufferchain.size();++i)
+	{
+		bufferchain[i] = std::make_shared<AudioBuffer>(m_frequency, fmt);
+	}
+
 
 	alGenSources(1,&source);
-	alSourcei(source, AL_LOOPING, AL_TRUE);
+	Audio::checkErrorAl("Failed to create AL source!");
 
+	
+	
+	//UpdateBuffers();
 }
 
 arda::AudioStream::~AudioStream()
@@ -129,21 +190,28 @@ void arda::AudioStream::Start()
 
 	pool.AddJob([this,&source]()
 	{
-		while(UpdateBuffers())
+		while(m_state == PLAYING)
 		{
-			while(true)
-			{
-				int queued = 0;
-				alGetSourcei(source,AL_BUFFERS_QUEUED,&queued);
-				if(queued>2)
-					std::this_thread::sleep_for(std::chrono::microseconds(100));
-				else
-					break;
-			}
+			//check if until we actually need new buffers
+			int queued = 0;
+			alGetSourcei(source,AL_BUFFERS_QUEUED,&queued);
+			if(queued>1)
+				std::this_thread::sleep_for(std::chrono::milliseconds(5));
+			//we need new buffers
+			else
+				UpdateBuffers();		
 		}
 	});
 
 	alSourcePlay(source);
+	Audio::checkErrorAl("Can't start the source playback");
+
+	ALint state;
+	alGetSourcei(source, AL_SOURCE_STATE, &state);
+
+	if(state!= AL_PLAYING)
+		Audio::checkErrorAl("Source didn't start playing");
+
 }
 
 void arda::AudioStream::Pause()
@@ -166,8 +234,12 @@ bool arda::AudioStream::UpdateBuffers()
 	auto& codec_ctx = m_internals->codec_ctx;
 	auto& codec = m_internals->codec;
 	auto& frame = m_internals->audioFrame;
-	auto& fbuffer = m_internals->frontBuffer;
-	auto& bbuffer = m_internals->backBuffer;
+	auto& bufferchain = m_internals->bufferchain;
+	auto& source = m_internals->source;
+	auto& needsResample = m_internals->needsResample;
+	auto& resampler = m_internals->resampler;
+	auto& out_fmt = m_internals->out_fmt;
+	auto& cbuffer = m_internals->cbuffer;
 
 	int frameFinished;
 	AVPacket packet;
@@ -193,9 +265,41 @@ bool arda::AudioStream::UpdateBuffers()
 		{
 			decodingPacket.size -= consumed;
 			decodingPacket.data += consumed;
+
+			uint8_t* data;
+			int linesize = 0;
+
+			//check if we must resample:
+			if (needsResample)
+			{				
+				av_samples_alloc(&data,NULL, 1, frame->nb_samples, out_fmt, 0);
+				int frame_count = swr_convert(resampler, &data, frame->nb_samples, (const uint8_t**)frame->data, frame->nb_samples);
+
+				data_size = av_samples_get_buffer_size(&linesize, m_channels, frame->nb_samples, out_fmt, 0);
+
+			}
+			else
+			{
+				data = frame->data[0];
+			}
+
+
 			//got a finished frame here
-			fbuffer->Upload(frame->data[0], data_size);
-			bbuffer->Upload(frame->data[1], data_size);
+			auto& buffer = bufferchain[cbuffer];
+			buffer->Upload(data, data_size);
+
+			if (needsResample)
+			{
+				//Crash here, data is a valid pointer at that time
+				av_freep(&data);
+			}
+
+			ALuint handle = buffer->GetHandle();
+			alSourceQueueBuffers(source, 1, &handle);
+			Audio::checkErrorAl("Failed to query buffer to source");
+
+			++cbuffer;
+			cbuffer %= 3;
 		}
 		else
 		{

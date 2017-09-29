@@ -26,11 +26,6 @@ namespace arda
 		uint8_t* m_alphaBuffer;
 		AVFrame* m_tmpFrame;
 		SwsContext* m_swsContext;
-
-	private:
-		void UpdateImage(Image& img, AVFrame* frame)
-		{
-		}
 	};
 }
 
