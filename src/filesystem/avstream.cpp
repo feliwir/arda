@@ -87,7 +87,6 @@ int64_t arda::AvStream::SeekFunc(void* ptr, int64_t pos, int whence)
 	case AVSEEK_SIZE:
 		return stream->GetSize();
 		break;
-	default:
 	case SEEK_SET:
 		origin = IStream::BEGIN;
 		break;
@@ -97,6 +96,8 @@ int64_t arda::AvStream::SeekFunc(void* ptr, int64_t pos, int whence)
 	case SEEK_END:
 		origin = IStream::END;
 		break;
+	default:
+		throw RuntimeException("Not implemented!");
 	}
 
 	stream->Seek(pos, origin);

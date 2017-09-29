@@ -26,6 +26,7 @@ namespace arda
 		AVCodecContext* codec_ctx = nullptr;
 		AVFormatContext* format_ctx = nullptr;
 		AVSampleFormat out_fmt;
+		AVPacket* packet;
 		ALuint source = 0;
 		SwrContext* resampler = nullptr;
 		bool needsResample = false;
@@ -53,6 +54,7 @@ arda::AudioStream::AudioStream(std::shared_ptr<IStream> stream) :
 	auto& out_fmt = m_internals->out_fmt;
 	auto& resampleData = m_internals->resampleData;
 	auto& resampleLinesize = m_internals->resampleLinesize;
+	auto& packet = m_internals->packet;
 
 	avstream = std::make_unique<AvStream>(stream);
 	format_ctx = avformat_alloc_context();
@@ -166,7 +168,7 @@ arda::AudioStream::AudioStream(std::shared_ptr<IStream> stream) :
 	alGenSources(1,&source);
 	Audio::checkErrorAl("Failed to create AL source!");
 
-	
+	packet = av_packet_alloc();
 	
 	//UpdateBuffers();
 }
@@ -207,7 +209,7 @@ void arda::AudioStream::Start()
 			Audio::checkErrorAl("Cannot get queued buffers");
 
 			//q until we are back to 3
-			for (int i = 0; AudioStreamInternals::chainsize - queued; ++i)
+			for (; queued<AudioStreamInternals::chainsize;++queued)
 				UpdateBuffers();
 
 			std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -251,29 +253,28 @@ bool arda::AudioStream::UpdateBuffers()
 	auto& resampler = m_internals->resampler;
 	auto& out_fmt = m_internals->out_fmt;
 	auto& cbuffer = m_internals->cbuffer;
+	auto& packet = m_internals->packet;
 
 	bool frameFinished = false;
-	AVPacket packet;
 	bool updatedColor = false, updatedAlpha = false;
 
 	ARDA_LOG("Update buffers");
 
-	while (av_read_frame(format_ctx, &packet) >= 0)
+	while (av_read_frame(format_ctx, packet) >= 0)
 	{
 		// Decode audio frame
-		int res = avcodec_send_packet(codec_ctx, &packet);
+		int res = avcodec_send_packet(codec_ctx,packet);
 		if (avcodec_receive_frame(codec_ctx, frame) == 0)
 			frameFinished = true;
 
 		//int consumed = avcodec_decode_audio4(codec_ctx, frame, &frameFinished, &packet);
-		double pts = packet.pts;
+		double pts = packet->pts;
 		double duration = frame->pkt_duration / static_cast<double>(AV_TIME_BASE);
 		
 		int data_size = av_samples_get_buffer_size(NULL, codec_ctx->channels,frame->nb_samples, codec_ctx->sample_fmt, 1);
 
 		if (frameFinished)
 		{
-
 			uint8_t* data;
 			int linesize = 0;
 

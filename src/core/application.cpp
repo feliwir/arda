@@ -88,8 +88,8 @@ void arda::Application::Run()
 	auto stream = m_fs->GetStream("data/audio/speech/mgdefea_gala001.mp3");
 	AudioStream aud(stream);
 
-	auto stream2 = m_fs->GetStream("data/movies/Credits_with_alpha.vp6");  
-	Video vid(stream2);
+	//auto stream2 = m_fs->GetStream("data/movies/Credits_with_alpha.vp6");  
+	//Video vid(stream2);
 	//vid.Start();
 	aud.Start();
 
@@ -107,7 +107,7 @@ void arda::Application::Run()
 
 		glfwPollEvents();
 
-		tex->Update(vid.GetColorImage());
+		//tex->Update(vid.GetColorImage());
 
 		m_graphics->Present();
 	}

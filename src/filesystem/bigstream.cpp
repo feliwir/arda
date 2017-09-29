@@ -30,7 +30,8 @@ void arda::BigStream::Seek(int offset, SeekOrigin origin)
 
 unsigned int arda::BigStream::Read(char * buffer, size_t numBytes)
 {
-	int bytesRead = m_archive->read(buffer, m_offset + m_position, numBytes);
+	int shouldRead = (numBytes + m_position > m_size) ? m_size - m_position : numBytes;
+	int bytesRead = m_archive->read(buffer, m_offset + m_position, shouldRead);
 	m_position += bytesRead;
 	return bytesRead;
 }
