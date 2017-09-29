@@ -90,7 +90,7 @@ void arda::Application::Run()
 
 	auto stream2 = m_fs->GetStream("data/movies/Credits_with_alpha.vp6");  
 	Video vid(stream2);
-	vid.Start();
+	//vid.Start();
 	aud.Start();
 
 	auto& ren = m_graphics->GetRenderer();

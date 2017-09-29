@@ -134,6 +134,7 @@ arda::AudioStream::AudioStream(std::shared_ptr<IStream> stream) :
 		break;
 	default:
 		in_layout = codec_ctx->channel_layout;
+		fmt = AL_FORMAT_STEREO16;
 		out_fmt = AV_SAMPLE_FMT_S16;
 		needsResample = true;
 		break;
@@ -283,18 +284,28 @@ bool arda::AudioStream::UpdateBuffers()
 				data = frame->data[0];
 			}
 
+			auto& buffer = bufferchain[cbuffer];
+			ALuint handle = buffer->GetHandle();
+
+			//unqueue the buffer
+			ALuint freed = 0;
+			ALint processed;
+			alGetSourcei(source, AL_BUFFERS_PROCESSED, &processed);
+
+			alSourceUnqueueBuffers(source, processed, &freed);
+			Audio::checkErrorAl("Cannot unqueue the buffer");
 
 			//got a finished frame here
-			auto& buffer = bufferchain[cbuffer];
 			buffer->Upload(data, data_size);
 
+			//investigate more
 			if (needsResample)
 			{
 				//Crash here, data is a valid pointer at that time
-				av_freep(&data);
+				//av_freep(&data);
 			}
 
-			ALuint handle = buffer->GetHandle();
+
 			alSourceQueueBuffers(source, 1, &handle);
 			Audio::checkErrorAl("Failed to query buffer to source");
 
