@@ -13,7 +13,12 @@ arda::AudioBuffer::AudioBuffer(int freq,ALenum fmt) :
 arda::AudioBuffer::~AudioBuffer()
 {
 	if (m_handle)
+	{
 		alDeleteBuffers(1, &m_handle);
+		Audio::checkErrorAl("Failed to delete AL buffer!");
+		m_handle = 0;
+	}
+		
 }
 
 void arda::AudioBuffer::Upload(uint8_t * data, int size)

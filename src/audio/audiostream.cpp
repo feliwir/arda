@@ -185,6 +185,17 @@ arda::AudioStream::AudioStream(std::shared_ptr<IStream> stream) :
 
 arda::AudioStream::~AudioStream()
 {
+	auto& source = m_internals->source;
+
+	//make sure all buffers are unqueued:
+	int processed = 0;
+	alGetSourcei(source, AL_BUFFERS_PROCESSED, &processed);
+	ALuint freed = 0;
+	alSourceUnqueueBuffers(source, processed, &freed);
+	Audio::checkErrorAl("Cannot unqueue the buffers");
+
+	alDeleteSources(1, &source);
+
 	auto& format_ctx = m_internals->format_ctx;
 	auto& avstream = m_internals->avstream;
 	auto& codec_ctx = m_internals->codec_ctx;

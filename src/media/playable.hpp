@@ -27,6 +27,21 @@ namespace arda
 		{
 			return m_state;
 		}
+
+		inline bool IsStopped()
+		{
+			return m_state == STOPPED;
+		}
+
+		inline bool IsPlaying()
+		{
+			return m_state == PLAYING;
+		}
+
+		inline bool IsPaused()
+		{
+			return m_state == PAUSED;
+		}
 	protected:
 		State m_state;
 		double m_duration;

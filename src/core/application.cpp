@@ -9,6 +9,7 @@
 #include "../audio/audiostream.hpp"
 #include "../video/video.hpp"
 #include "../map/map.hpp"
+#include "../game/game.hpp"
 #include "../graphics/graphics.hpp"
 #include "../graphics/sprite.hpp"
 #include "../graphics/image.hpp"
@@ -57,8 +58,6 @@ arda::Application::Application(const std::vector<std::string>& args)
 
 	auto end = std::chrono::high_resolution_clock::now();
 
-
-
 	// stream = m_fs->GetStream("maps/map mp evendim/map mp evendim.map");
 	// Map map(stream);
 	
@@ -76,6 +75,10 @@ arda::Application::Application(const std::vector<std::string>& args)
 	auto inivid = m_ini->GetBlock<ini::Video>("EALogoMovie");
 
 	//m_graphics->SetFullscreen(true);
+
+	m_game = std::make_unique<Game>(*m_config, *m_graphics, *m_ini,*m_fs);
+
+	ren.RemoveDrawable(s_splash);
 }
 
 arda::Application::~Application()
@@ -85,35 +88,17 @@ arda::Application::~Application()
 
 void arda::Application::Run()
 {
-	glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-	auto stream = m_fs->GetStream("data/audio/speech/CS11.mp3");
-	AudioStream aud(stream);
-
-	auto stream2 = m_fs->GetStream("data/movies/CS11.vp6");  
-	Video vid(stream2);
-	vid.Start();
-	aud.Start();
-
-	auto& ren = m_graphics->GetRenderer();
-	auto tex = ren.CreateTexture();
-	auto spr = m_graphics->CreateSprite(tex);
-	ren.RemoveDrawable(s_splash);
-	ren.AddDrawable(spr);
-
 	while (!glfwWindowShouldClose(m_window))
 	{
 		m_graphics->Clear();
+
+		m_game->Update();
 
 		m_graphics->Render();
 
 		glfwPollEvents();
 
-		tex->Update(vid.GetColorImage());
-
 		m_graphics->Present();
-
-		ARDA_LOG("Video position: "+ std::to_string(vid.GetPosition()));
-		ARDA_LOG("Audio position: " + std::to_string(aud.GetPosition()));
 	}
 
 }

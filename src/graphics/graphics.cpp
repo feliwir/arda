@@ -102,6 +102,18 @@ void arda::Graphics::CenterWindow()
 	glfwSetWindowPos(window, posx, posy);
 }
 
+void arda::Graphics::HideCursor()
+{
+	GLFWwindow* window = m_renderer->GetWindow();
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+}
+
+void arda::Graphics::ShowCursor()
+{
+	GLFWwindow* window = m_renderer->GetWindow();
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+}
+
 std::shared_ptr<arda::Sprite> arda::Graphics::CreateSprite(std::shared_ptr<ITexture> tex)
 {
 	return std::make_shared<arda::Sprite>(*m_renderer,tex);

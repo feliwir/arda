@@ -1,6 +1,7 @@
 #include "video.hpp"
 #include "../filesystem/avstream.hpp"
 #include "../core/exception.hpp"
+#include "../core/debugger.hpp"
 #include <chrono>
 
 extern "C"
@@ -52,28 +53,6 @@ namespace arda
 		}
 
 	};
-}
-
-void SaveFrame(AVFrame *pFrame, int width, int height, int iFrame) {
-	FILE *pFile;
-	char szFilename[32];
-	int  y;
-
-	// Open file
-	sprintf(szFilename, "frame%d.ppm", iFrame);
-	pFile = fopen(szFilename, "wb");
-	if (pFile == NULL)
-		return;
-
-	// Write header
-	fprintf(pFile, "P6\n%d %d\n255\n", width, height);
-
-	// Write pixel data
-	for (y = 0; y<height; y++)
-		fwrite(pFrame->data[0] + y*pFrame->linesize[0], 1, width * 3, pFile);
-
-	// Close file
-	fclose(pFile);
 }
 
 arda::Video::Video(std::shared_ptr<IStream> stream) :
@@ -202,11 +181,12 @@ arda::Video::Video(std::shared_ptr<IStream> stream) :
 	);
 
 	avcodec_close(origCtx);
-
+	
 	packet = av_packet_alloc();
+	av_init_packet(packet);
 
 	//read the first 2 frames already
-	GetFrames();
+	//GetFrames();
 	if (m_hasAlpha)
 		GetFrames();
 }
@@ -249,7 +229,11 @@ void arda::Video::Start()
 		auto last = std::chrono::high_resolution_clock::now();
 		while (m_state == PLAYING)
 		{
-			GetFrames();
+			if (!GetFrames())
+			{
+				m_state = STOPPED;
+				break;
+			}
 			std::this_thread::sleep_until(last+std::chrono::microseconds(m_frameTime));
 			last = last + std::chrono::microseconds(m_frameTime);
 		}
@@ -273,7 +257,7 @@ double arda::Video::GetPosition()
 }
 
 
-void arda::Video::GetFrames()
+bool arda::Video::GetFrames()
 {
 	auto& format_ctx = m_internals->format_ctx;
 	auto& avstream = m_internals->avstream;
@@ -289,9 +273,21 @@ void arda::Video::GetFrames()
 
 	int gotFrame =0;
 	bool updatedColor = false, updatedAlpha = false;
+	bool keepGoing = false;
+
+	if (packet == nullptr)
+		throw RuntimeException("Packet is null!");
 
 	while (av_read_frame(format_ctx, packet) >= 0)
 	{
+		if (packet == NULL)
+		{
+			ARDA_LOG("Empty packet");
+			continue;
+		}
+			
+
+		keepGoing = true;
 		AVCodecContext* codec = (packet->stream_index==COLOR) ?
 								codec_ctx : codec_ctx_a;
 		AVFrame* tgtFrame = (packet->stream_index == COLOR) ?
@@ -326,4 +322,6 @@ void arda::Video::GetFrames()
 		if (updatedColor && (updatedAlpha || !m_hasAlpha))
 			break;
 	}
+
+	return keepGoing;
 }

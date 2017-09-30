@@ -13,6 +13,7 @@ namespace arda
 	class Global;
 	class Graphics;
 	class Ini;
+	class Game;
 
 	class Application
 	{
@@ -39,6 +40,8 @@ namespace arda
 		std::unique_ptr<Config> m_config;
 		std::unique_ptr<FileSystem> m_fs;
 		std::unique_ptr<Graphics> m_graphics;
+		std::unique_ptr<Game> m_game;
+
 		static std::mutex s_globalLock;
 		static std::unique_ptr<Global> s_global;
 	};

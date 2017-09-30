@@ -29,6 +29,9 @@ namespace arda
 
 		void CenterWindow();
 
+		void HideCursor();
+		void ShowCursor();
+
 		std::shared_ptr<Sprite> CreateSprite(std::shared_ptr<ITexture> tex=nullptr);
 
 	private:

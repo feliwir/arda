@@ -37,7 +37,7 @@ namespace arda
 		};
 
 		//will get a new color and a new alpha frame (when alpha is present)
-		void GetFrames();
+		bool GetFrames();
 	private:
 		std::unique_ptr<VideoInternals> m_internals;
 		bool m_hasAlpha;
