@@ -100,7 +100,6 @@ void arda::Application::Run()
 
 		m_graphics->Present();
 	}
-
 }
 
 void arda::Application::ShowSplash()

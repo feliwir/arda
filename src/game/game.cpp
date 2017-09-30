@@ -7,8 +7,8 @@
 #include "../filesystem/filesystem.hpp"
 #include "../audio/audiostream.hpp"
 #include "../video/video.hpp"
-#include "state.hpp"
-#include "cutscene.hpp"
+#include "states/state.hpp"
+#include "states/cutscene.hpp"
 
 arda::Game::Game(Config & c, Graphics & g, Ini & i,FileSystem& fs) :
 	m_config(c), m_graphics(g),m_ini(i), m_currentState(0),m_fs(fs)
@@ -85,10 +85,14 @@ std::shared_ptr<arda::State> arda::Game::CreateCutscene(std::string_view name)
 			audio_stream = std::make_shared<AudioStream>(stream);
 			audio_stream->SetVolume(video_ini->GetVolume());
 		}
-
 	}
 	
 	auto cs = std::make_shared<Cutscene>(video, audio_stream,m_graphics);
 
 	return cs;
+}
+
+std::shared_ptr<arda::State> arda::Game::CreateTitlescreen()
+{
+	return std::shared_ptr<State>();
 }
