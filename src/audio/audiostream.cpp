@@ -277,6 +277,13 @@ double arda::AudioStream::GetPosition()
 	return m_position;
 }
 
+void arda::AudioStream::SetVolume(int volume)
+{
+	auto& source = m_internals->source;
+	float gain = volume / 100.0;
+	alSourcef(source, AL_GAIN, gain);
+}
+
 bool arda::AudioStream::UpdateBuffers()
 {
 	auto& format_ctx = m_internals->format_ctx;

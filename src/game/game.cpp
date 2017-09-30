@@ -81,7 +81,10 @@ std::shared_ptr<arda::State> arda::Game::CreateCutscene(std::string_view name)
 		stream = m_fs.GetStream("data/audio/speech/" + audio_ini->GetFilename());
 
 		if (stream != nullptr)
+		{
 			audio_stream = std::make_shared<AudioStream>(stream);
+			audio_stream->SetVolume(video_ini->GetVolume());
+		}
 
 	}
 	
