@@ -30,11 +30,16 @@ namespace arda
 		{
 			m_texture = tex;
 		}
+
+		inline void SetOpacity(float opacity)
+		{
+			m_opacity = opacity;
+		}
 	private:
 		std::shared_ptr<IBuffer> m_positions;
 		std::shared_ptr<IBuffer> m_indices;
 		std::shared_ptr<ITexture> m_texture;
 		std::shared_ptr<Layout> m_layout;
-		
+		float m_opacity;
 	};
 }

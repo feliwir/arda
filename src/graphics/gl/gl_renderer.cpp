@@ -57,7 +57,7 @@ arda::GLRenderer::GLRenderer(Config& c) : IRenderer(c)
 
 void arda::GLRenderer::Render()
 {
-	m_spriteShader->Bind();
+	ActivateShader(m_spriteShader);
 	glActiveTexture(GL_TEXTURE0);
 	glUniform1i(m_spriteShader->GetUniform("sprite_tex"), 0);
 

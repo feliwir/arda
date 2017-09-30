@@ -9,6 +9,7 @@
 #include "../video/video.hpp"
 #include "states/state.hpp"
 #include "states/cutscene.hpp"
+#include "states/titlescreen.hpp"
 
 arda::Game::Game(Config & c, Graphics & g, Ini & i,FileSystem& fs) :
 	m_config(c), m_graphics(g),m_ini(i), m_currentState(0),m_fs(fs)
@@ -21,7 +22,8 @@ arda::Game::Game(Config & c, Graphics & g, Ini & i,FileSystem& fs) :
 	m_constructors.push_back(std::bind(&Game::CreateCutscene, this, "EALogoMovie"));
 	m_constructors.push_back(std::bind(&Game::CreateCutscene, this, "NewLineMovie"));
 	m_constructors.push_back(std::bind(&Game::CreateCutscene, this, "TolkienLogo"));
-	m_constructors.push_back(std::bind(&Game::CreateCutscene, this, "Overall_Game_Intro"));
+	//m_constructors.push_back(std::bind(&Game::CreateCutscene, this, "Overall_Game_Intro"));
+	m_constructors.push_back(std::bind(&Game::CreateTitlescreen, this));
 }
 
 bool arda::Game::Update()
@@ -94,5 +96,7 @@ std::shared_ptr<arda::State> arda::Game::CreateCutscene(std::string_view name)
 
 std::shared_ptr<arda::State> arda::Game::CreateTitlescreen()
 {
-	return std::shared_ptr<State>();
+	auto title = std::make_shared<TitleScreen>(m_fs,m_graphics);
+
+	return title;
 }
