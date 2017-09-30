@@ -85,12 +85,13 @@ arda::Application::~Application()
 
 void arda::Application::Run()
 {
-	auto stream = m_fs->GetStream("data/audio/speech/mgdefea_gala001.mp3");
+	glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+	auto stream = m_fs->GetStream("data/audio/speech/CS11.mp3");
 	AudioStream aud(stream);
 
-	//auto stream2 = m_fs->GetStream("data/movies/Credits_with_alpha.vp6");  
-	//Video vid(stream2);
-	//vid.Start();
+	auto stream2 = m_fs->GetStream("data/movies/CS11.vp6");  
+	Video vid(stream2);
+	vid.Start();
 	aud.Start();
 
 	auto& ren = m_graphics->GetRenderer();
@@ -107,9 +108,12 @@ void arda::Application::Run()
 
 		glfwPollEvents();
 
-		//tex->Update(vid.GetColorImage());
+		tex->Update(vid.GetColorImage());
 
 		m_graphics->Present();
+
+		ARDA_LOG("Video position: "+ std::to_string(vid.GetPosition()));
+		ARDA_LOG("Audio position: " + std::to_string(aud.GetPosition()));
 	}
 
 }

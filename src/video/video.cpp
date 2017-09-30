@@ -20,12 +20,37 @@ namespace arda
 		AVCodecContext* codec_ctx;
 		AVCodecContext* codec_ctx_a;
 		AVFormatContext* format_ctx;
-		AVFrame* m_rgbFrame;
-		AVFrame* m_alphaFrame;
-		uint8_t* m_rgbBuffer;
-		uint8_t* m_alphaBuffer;
-		AVFrame* m_tmpFrame;
-		SwsContext* m_swsContext;
+		AVFrame* rgbFrame;
+		AVFrame* alphaFrame;
+		uint8_t* rgbBuffer;
+		uint8_t* alphaBuffer;
+		AVFrame* tmpFrame;
+		SwsContext* swsContext;
+		AVPacket* packet;
+
+		int decode(AVCodecContext *avctx, AVFrame *frame, int *got_frame, AVPacket *pkt)
+		{
+			int ret;
+
+			*got_frame = 0;
+
+			if (pkt) {
+				ret = avcodec_send_packet(avctx, pkt);
+				// In particular, we don't expect AVERROR(EAGAIN), because we read all
+				// decoded frames with avcodec_receive_frame() until done.
+				if (ret < 0)
+					return ret == AVERROR_EOF ? 0 : ret;
+			}
+
+			ret = avcodec_receive_frame(avctx, frame);
+			if (ret < 0 && ret != AVERROR(EAGAIN) && ret != AVERROR_EOF)
+				return ret;
+			if (ret >= 0)
+				*got_frame = 1;
+
+			return 0;
+		}
+
 	};
 }
 
@@ -66,12 +91,13 @@ arda::Video::Video(std::shared_ptr<IStream> stream) :
 	auto& codec_ctx = m_internals->codec_ctx;
 	auto& codec_ctx_a = m_internals->codec_ctx_a;
 	auto& codec = m_internals->codec;
-	auto& tmpFrame = m_internals->m_tmpFrame;
-	auto& rgbFrame = m_internals->m_rgbFrame;
-	auto& alphaFrame = m_internals->m_alphaFrame;
-	auto& rgbBuffer = m_internals->m_rgbBuffer;
-	auto& alphaBuffer = m_internals->m_alphaBuffer;
-	auto& swsContext = m_internals->m_swsContext;
+	auto& tmpFrame = m_internals->tmpFrame;
+	auto& rgbFrame = m_internals->rgbFrame;
+	auto& alphaFrame = m_internals->alphaFrame;
+	auto& rgbBuffer = m_internals->rgbBuffer;
+	auto& alphaBuffer = m_internals->alphaBuffer;
+	auto& swsContext = m_internals->swsContext;
+	auto& packet = m_internals->packet;
 
 	avstream = std::make_unique<AvStream>(stream);
 	format_ctx = avformat_alloc_context();
@@ -176,6 +202,13 @@ arda::Video::Video(std::shared_ptr<IStream> stream) :
 	);
 
 	avcodec_close(origCtx);
+
+	packet = av_packet_alloc();
+
+	//read the first 2 frames already
+	GetFrames();
+	if (m_hasAlpha)
+		GetFrames();
 }
 
 arda::Video::~Video()
@@ -185,16 +218,19 @@ arda::Video::~Video()
 	auto& codec_ctx = m_internals->codec_ctx;
 	auto& codec_ctx_a = m_internals->codec_ctx_a;
 	auto& codec = m_internals->codec;
-	auto& tmpFrame = m_internals->m_tmpFrame;
-	auto& rgbFrame = m_internals->m_rgbFrame;
-	auto& alphaFrame = m_internals->m_alphaFrame;
-	auto& rgbBuffer = m_internals->m_rgbBuffer;
-	auto& alphaBuffer = m_internals->m_alphaBuffer;
+	auto& tmpFrame = m_internals->tmpFrame;
+	auto& rgbFrame = m_internals->rgbFrame;
+	auto& alphaFrame = m_internals->alphaFrame;
+	auto& rgbBuffer = m_internals->rgbBuffer;
+	auto& alphaBuffer = m_internals->alphaBuffer;
+	auto& packet = m_internals->packet;
 
 	av_free(alphaBuffer);
 	av_free(rgbBuffer);
 	av_free(tmpFrame);
 	av_free(rgbFrame);
+
+	av_packet_free(&packet);
 
 	avcodec_close(codec_ctx);
 	avcodec_close(codec_ctx_a);
@@ -233,8 +269,9 @@ void arda::Video::Stop()
 
 double arda::Video::GetPosition()
 {
-	return 0.0;
+	return m_position;
 }
+
 
 void arda::Video::GetFrames()
 {
@@ -243,30 +280,34 @@ void arda::Video::GetFrames()
 	auto& codec_ctx = m_internals->codec_ctx;
 	auto& codec_ctx_a = m_internals->codec_ctx_a;
 	auto& codec = m_internals->codec;
-	auto& tmpFrame = m_internals->m_tmpFrame;
-	auto& rgbFrame = m_internals->m_rgbFrame;
-	auto& alphaFrame = m_internals->m_alphaFrame;
-	auto& rgbBuffer = m_internals->m_rgbBuffer;
-	auto& swsContext = m_internals->m_swsContext;
+	auto& tmpFrame = m_internals->tmpFrame;
+	auto& rgbFrame = m_internals->rgbFrame;
+	auto& alphaFrame = m_internals->alphaFrame;
+	auto& rgbBuffer = m_internals->rgbBuffer;
+	auto& swsContext = m_internals->swsContext;
+	auto& packet = m_internals->packet;
 
-	int frameFinished ;
-	AVPacket packet;
+	int gotFrame =0;
 	bool updatedColor = false, updatedAlpha = false;
 
-	while (av_read_frame(format_ctx, &packet) >= 0)
+	while (av_read_frame(format_ctx, packet) >= 0)
 	{
-		AVCodecContext* codec = (packet.stream_index==COLOR) ?
+		AVCodecContext* codec = (packet->stream_index==COLOR) ?
 								codec_ctx : codec_ctx_a;
-		AVFrame* tgtFrame = (packet.stream_index == COLOR) ?
+		AVFrame* tgtFrame = (packet->stream_index == COLOR) ?
 								rgbFrame : alphaFrame;
-		Image& tgtImage = (packet.stream_index == COLOR) ?
+		Image& tgtImage = (packet->stream_index == COLOR) ?
 							m_rgbImage : m_alphaImage;
 
+
 		// Decode video frame
-		avcodec_decode_video2(codec, tmpFrame, &frameFinished, &packet);
-		double pts = packet.pts*m_frameTime;
-		int64_t check = av_frame_get_best_effort_timestamp(tmpFrame);
-		if (frameFinished)
+		m_internals->decode(codec, tmpFrame, &gotFrame, packet);
+
+		double pts = av_frame_get_best_effort_timestamp(tmpFrame);
+		pts *= av_q2d(codec->time_base);
+		m_position = pts;
+
+		if (gotFrame)
 		{
 			// Convert the image from its native format to RGB
 			sws_scale(swsContext, (uint8_t const * const *)tmpFrame->data,
@@ -275,14 +316,12 @@ void arda::Video::GetFrames()
 
 			tgtImage.Update(tgtFrame->data[0]);
 
-			if (packet.stream_index == COLOR)
+			if (packet->stream_index == COLOR)
 				updatedColor = true;			
-			else if (packet.stream_index == ALPHA)
+			else if (packet->stream_index == ALPHA)
 				updatedAlpha = true;
 		}
 
-		// Free the packet that was allocated by av_read_frame
-		av_free_packet(&packet);
 
 		if (updatedColor && (updatedAlpha || !m_hasAlpha))
 			break;

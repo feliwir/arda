@@ -12,6 +12,7 @@ extern "C"
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libswresample/swresample.h>
+#include <libavutil/avutil.h>
 }
 
 namespace arda
@@ -19,10 +20,11 @@ namespace arda
 	class AudioStreamInternals
 	{
 	public:
-		static const int chainsize = 3;
+		static const int chainsize = 5;
 		std::unique_ptr<AvStream> avstream;
 		AVCodec* codec = nullptr;
 		AVFrame* audioFrame = nullptr;
+		AVFrame* resampledFrame = nullptr;
 		AVCodecContext* codec_ctx = nullptr;
 		AVFormatContext* format_ctx = nullptr;
 		AVSampleFormat out_fmt;
@@ -34,6 +36,7 @@ namespace arda
 		int resampleLinesize = 0;
 		std::array<std::shared_ptr<AudioBuffer>, chainsize> bufferchain;
 		int cbuffer = 0;
+		std::chrono::high_resolution_clock::time_point last;
 	};
 }
 
@@ -54,6 +57,7 @@ arda::AudioStream::AudioStream(std::shared_ptr<IStream> stream) :
 	auto& out_fmt = m_internals->out_fmt;
 	auto& resampleData = m_internals->resampleData;
 	auto& resampleLinesize = m_internals->resampleLinesize;
+	auto& resampledFrame = m_internals->resampledFrame;
 	auto& packet = m_internals->packet;
 
 	avstream = std::make_unique<AvStream>(stream);
@@ -146,6 +150,11 @@ arda::AudioStream::AudioStream(std::shared_ptr<IStream> stream) :
 	//setup our resampler
 	if (needsResample)
 	{
+		resampledFrame = av_frame_alloc();
+		resampledFrame->channel_layout = in_layout;
+		resampledFrame->sample_rate = m_frequency;
+		resampledFrame->format = out_fmt;
+
 		resampler = swr_alloc_set_opts(NULL,
 			in_layout,		//Out layout should be identical to input layout
 			out_fmt,
@@ -170,7 +179,8 @@ arda::AudioStream::AudioStream(std::shared_ptr<IStream> stream) :
 
 	packet = av_packet_alloc();
 	
-	//UpdateBuffers();
+	for(int i=0;i<AudioStreamInternals::chainsize;++i)
+		UpdateBuffers();
 }
 
 arda::AudioStream::~AudioStream()
@@ -189,10 +199,11 @@ void arda::AudioStream::Start()
 	//get the thread pool
 	auto& pool = GetGlobal().GetThreadPool();
 	auto& source = m_internals->source;
+	auto& last = m_internals->last;
 
 	m_state = PLAYING;
 
-	pool.AddJob([this,&source]()
+	pool.AddJob([this,&source,&last]()
 	{
 		while(m_state == PLAYING)
 		{
@@ -209,14 +220,23 @@ void arda::AudioStream::Start()
 			Audio::checkErrorAl("Cannot get queued buffers");
 
 			//q until we are back to 3
-			for (; queued<AudioStreamInternals::chainsize;++queued)
-				UpdateBuffers();
+			for (; queued < AudioStreamInternals::chainsize; ++queued)
+			{
+				if (!UpdateBuffers())
+				{
+					m_state = STOPPED;
+					break;
+				}
+			}
+				
+			m_position = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - last).count()/1000.0;
 
 			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		}
 	});
 
 	alSourcePlay(source);
+	last = std::chrono::high_resolution_clock::now();
 	Audio::checkErrorAl("Can't start the source playback");
 
 	ALint state;
@@ -229,15 +249,21 @@ void arda::AudioStream::Start()
 
 void arda::AudioStream::Pause()
 {
+	auto& source = m_internals->source;
+	m_state = PAUSED;
+	alSourcePause(source);
 }
 
 void arda::AudioStream::Stop()
 {
+	auto& source = m_internals->source;
+	m_state = STOPPED;
+	alSourceStop(source);
 }
 
 double arda::AudioStream::GetPosition()
 {
-	return 0.0;
+	return m_position;
 }
 
 bool arda::AudioStream::UpdateBuffers()
@@ -254,11 +280,10 @@ bool arda::AudioStream::UpdateBuffers()
 	auto& out_fmt = m_internals->out_fmt;
 	auto& cbuffer = m_internals->cbuffer;
 	auto& packet = m_internals->packet;
+	auto& resampledFrame = m_internals->resampledFrame;
 
 	bool frameFinished = false;
 	bool updatedColor = false, updatedAlpha = false;
-
-	ARDA_LOG("Update buffers");
 
 	while (av_read_frame(format_ctx, packet) >= 0)
 	{
@@ -268,9 +293,10 @@ bool arda::AudioStream::UpdateBuffers()
 			frameFinished = true;
 
 		//int consumed = avcodec_decode_audio4(codec_ctx, frame, &frameFinished, &packet);
-		double pts = packet->pts;
-		double duration = frame->pkt_duration / static_cast<double>(AV_TIME_BASE);
-		
+		double pts = av_frame_get_best_effort_timestamp(frame);
+		pts *= av_q2d(codec_ctx->time_base);
+		//can't use this pts as position since we are prebuffering :-/
+
 		int data_size = av_samples_get_buffer_size(NULL, codec_ctx->channels,frame->nb_samples, codec_ctx->sample_fmt, 1);
 
 		if (frameFinished)
@@ -278,14 +304,14 @@ bool arda::AudioStream::UpdateBuffers()
 			uint8_t* data;
 			int linesize = 0;
 
+			m_position = packet->pts / static_cast<double>(AV_TIME_BASE);
+
 			//check if we must resample:
 			if (needsResample)
 			{				
-				av_samples_alloc(&data,NULL, 1, frame->nb_samples, out_fmt, 0);
-				int frame_count = swr_convert(resampler, &data, frame->nb_samples, (const uint8_t**)frame->data, frame->nb_samples);
-
+				swr_convert_frame(resampler, resampledFrame, frame);
 				data_size = av_samples_get_buffer_size(&linesize, m_channels, frame->nb_samples, out_fmt, 0);
-
+				data = resampledFrame->data[0];
 			}
 			else
 			{
@@ -310,7 +336,7 @@ bool arda::AudioStream::UpdateBuffers()
 			Audio::checkErrorAl("Failed to query buffer to source");
 
 			++cbuffer;
-			cbuffer %= 3;
+			cbuffer %= AudioStreamInternals::chainsize;
 			return true;
 		}
 
