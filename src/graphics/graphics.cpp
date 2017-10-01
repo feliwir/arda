@@ -1,12 +1,15 @@
 #include "graphics.hpp"
 #include "sprite.hpp"
 #include "image.hpp"
+#include "mappedimage.hpp"
 #include "gl/gl_renderer.hpp"
 #include "d3d/d3d_renderer.hpp"
 #include "../core/config.hpp"
 #include "../core/debugger.hpp"
 #include "../filesystem/filesystem.hpp"
+#include "../ini/ini.hpp"
 #include <GLFW/glfw3.h>
+#include <boost/filesystem.hpp>
 
 void glfw_error(int error, const char* description)
 {
@@ -18,7 +21,7 @@ arda::Graphics::Graphics(Config& c) :
 	, m_compiledFolder("compiledtextures/")
 	, m_regularFolder("textures/")
 	, m_texFolders({ m_compiledFolder,m_regularFolder })
-	, m_texExtensions({ ".dds",".tga",".jpg" })
+	, m_texExtensions({".jpg",".dds",".tga"})
 {
 	//Initialize glfw
 	glfwInit();
@@ -121,10 +124,25 @@ void arda::Graphics::ShowCursor()
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
 
-std::shared_ptr<arda::Sprite> arda::Graphics::CreateSprite(std::shared_ptr<ITexture> tex)
+std::shared_ptr<arda::Sprite> arda::Graphics::CreateSprite(std::vector<glm::vec2> pos)
 {
-	return std::make_shared<arda::Sprite>(*m_renderer, tex);
+	return std::make_shared<arda::Sprite>(*m_renderer, nullptr, pos);
 }
+
+std::shared_ptr<arda::Sprite> arda::Graphics::CreateSprite(std::shared_ptr<ITexture> tex, std::vector<glm::vec2> pos)
+{
+	return std::make_shared<arda::Sprite>(*m_renderer, tex, pos);
+}
+
+std::shared_ptr<arda::Sprite> arda::Graphics::CreateSprite(std::shared_ptr<MappedImage> mapped, std::vector<glm::vec2> pos)
+{
+	auto tex = mapped->GetTexture();
+	auto mask = mapped->GetMask();
+	auto coords = mapped->GetCoords();
+
+	return std::make_shared<arda::Sprite>(*m_renderer, tex,pos,coords,mask);
+}
+
 
 std::shared_ptr<arda::ITexture> arda::Graphics::GetTexture(std::string_view name,FileSystem& fs)
 {
@@ -133,7 +151,6 @@ std::shared_ptr<arda::ITexture> arda::Graphics::GetTexture(std::string_view name
 
 	if (it != m_textures.end())
 		return it->second;
-
 
 	std::shared_ptr<ITexture> result;
 
@@ -150,15 +167,36 @@ std::shared_ptr<arda::ITexture> arda::Graphics::GetTexture(std::string_view name
 
 			Image img(stream);
 			result = m_renderer->CreateTexture(img);
+			m_textures.emplace(str_name, result);
 		}
 	}
 
 	return result;
 }
 
-std::shared_ptr<arda::Sprite> arda::Graphics::GetMappedImage(std::string_view name, FileSystem & fs, Ini & ini)
+std::shared_ptr<arda::MappedImage> arda::Graphics::GetMappedImage(std::string_view name, FileSystem & fs, Ini & ini)
 {
-	return std::shared_ptr<Sprite>();
+	std::shared_ptr<MappedImage> result;
+	auto block = ini.GetBlock<ini::MappedImage>(name);
+
+	if (block == nullptr)
+		return nullptr;
+
+	//get the texture
+	auto basename = boost::filesystem::basename(block->GetTexture());
+	auto tex = GetTexture(basename,fs);
+	
+	//calculate the uv coords
+	std::vector<glm::vec2> coords;
+	auto tsize = block->GetTextureSize();
+	auto tcoords = block->GetCoords();
+	coords.push_back({ tcoords.x / static_cast<double>(tsize.x), 1.0 - (tcoords.y / static_cast<double>(tsize.y)) });
+	coords.push_back({ tcoords.z / static_cast<double>(tsize.x), 1.0 - (tcoords.y / static_cast<double>(tsize.y)) });
+	coords.push_back({ tcoords.x / static_cast<double>(tsize.x), 1.0 - (tcoords.w / static_cast<double>(tsize.y)) });
+	coords.push_back({ tcoords.z / static_cast<double>(tsize.x), 1.0 - (tcoords.w / static_cast<double>(tsize.y)) });
+
+	result = std::make_shared<MappedImage>(tex, coords);
+	return result;
 }
 
 void arda::Graphics::ClearTextures()

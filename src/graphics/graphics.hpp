@@ -9,6 +9,7 @@ namespace arda
 	class Sprite;
 	class ITexture;
 	class FileSystem;
+	class MappedImage;
 	class Ini;
 
 	class Graphics
@@ -34,9 +35,14 @@ namespace arda
 		void HideCursor();
 		void ShowCursor();
 
-		std::shared_ptr<Sprite> CreateSprite(std::shared_ptr<ITexture> tex=nullptr);
+		std::shared_ptr<Sprite> CreateSprite(std::vector<glm::vec2> pos = { { -1.0,-1.0 },{ 1.0,-1.0 },{ -1.0, 1.0 },{ 1.0,1.0 } });
+		std::shared_ptr<Sprite> CreateSprite(std::shared_ptr<ITexture> tex, 
+			std::vector<glm::vec2> pos=	{ { -1.0,-1.0 },{ 1.0,-1.0 },{ -1.0, 1.0 },{ 1.0,1.0 } });
+		std::shared_ptr<Sprite> CreateSprite(std::shared_ptr<MappedImage>, 
+			std::vector<glm::vec2> pos = { { -1.0,-1.0 },{ 1.0,-1.0 },{ -1.0, 1.0 },{ 1.0,1.0 } });
+
 		std::shared_ptr<ITexture> GetTexture(std::string_view name, FileSystem& fs);
-		std::shared_ptr<Sprite> GetMappedImage(std::string_view name, FileSystem& fs, Ini& ini);
+		std::shared_ptr<MappedImage> GetMappedImage(std::string_view name, FileSystem& fs, Ini& ini);
 
 		void ClearTextures();
 	private:

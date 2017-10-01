@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <mutex>
 #include "../media/playable.hpp"
 
 namespace arda
@@ -28,5 +29,6 @@ namespace arda
 		int m_frequency;
 		int m_channels;
 		double m_position;
+		std::mutex m_mutex;
 	};
 }

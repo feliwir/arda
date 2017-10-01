@@ -75,4 +75,9 @@ namespace arda
 		return std::dynamic_pointer_cast<ini::Weapon>(m_weapons[std::string(name)]);
 	}
 
+	template<>
+	inline std::shared_ptr<ini::MappedImage> Ini::GetBlock(std::string_view name)
+	{
+		return std::dynamic_pointer_cast<ini::MappedImage>(m_mappedImages[std::string(name)]);
+	}
 }

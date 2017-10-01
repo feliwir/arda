@@ -1,18 +1,19 @@
 #include "titlescreen.hpp"
 #include "../../filesystem/filesystem.hpp"
+#include "../../ini/ini.hpp"
 #include "../../graphics/graphics.hpp"
 #include "../../graphics/sprite.hpp"
 #include "../../graphics/image.hpp"
 
-arda::TitleScreen::TitleScreen(FileSystem& fs,Graphics& graphics) :
+arda::TitleScreen::TitleScreen(FileSystem& fs,Graphics& graphics,Ini& ini) :
 m_graphics(graphics)
 {
 	auto& ren = m_graphics.GetRenderer();
-	auto tex = m_graphics.GetTexture("titlescreenuserinterface",fs);
-	m_title_ring = m_graphics.CreateSprite(tex);
+	auto mapped = m_graphics.GetMappedImage("TitleScreen",fs,ini);
+	m_title_ea = m_graphics.CreateSprite(mapped);
 
-	tex = m_graphics.GetTexture("load_w_ea",fs);
-	m_title_ea = m_graphics.CreateSprite(tex);
+	mapped = m_graphics.GetMappedImage("TitleScreenLogo", fs, ini);
+	m_title_ring = m_graphics.CreateSprite(mapped);
 
 	ren.AddDrawable(m_title_ea);
 	ren.AddDrawable(m_title_ring);

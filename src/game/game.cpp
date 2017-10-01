@@ -20,8 +20,8 @@ arda::Game::Game(Config & c, Graphics & g, Ini & i,FileSystem& fs) :
 
 
 	m_constructors.push_back(std::bind(&Game::CreateCutscene, this, "EALogoMovie"));
-	m_constructors.push_back(std::bind(&Game::CreateCutscene, this, "NewLineMovie"));
-	m_constructors.push_back(std::bind(&Game::CreateCutscene, this, "TolkienLogo"));
+	//m_constructors.push_back(std::bind(&Game::CreateCutscene, this, "NewLineMovie"));
+	//m_constructors.push_back(std::bind(&Game::CreateCutscene, this, "TolkienLogo"));
 	//m_constructors.push_back(std::bind(&Game::CreateCutscene, this, "Overall_Game_Intro"));
 	m_constructors.push_back(std::bind(&Game::CreateTitlescreen, this));
 }
@@ -96,7 +96,7 @@ std::shared_ptr<arda::State> arda::Game::CreateCutscene(std::string_view name)
 
 std::shared_ptr<arda::State> arda::Game::CreateTitlescreen()
 {
-	auto title = std::make_shared<TitleScreen>(m_fs,m_graphics);
+	auto title = std::make_shared<TitleScreen>(m_fs,m_graphics,m_ini);
 
 	return title;
 }

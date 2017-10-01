@@ -8,11 +8,12 @@ namespace arda
 	class Graphics;
 	class Video;
 	class Sprite;
+	class Ini;
 
 	class TitleScreen final : public State
 	{
 	public:
-		TitleScreen(FileSystem& fs,Graphics& graphics);
+		TitleScreen(FileSystem& fs,Graphics& graphics,Ini& ini);
 		~TitleScreen();
 
 		// Geerbt �ber State

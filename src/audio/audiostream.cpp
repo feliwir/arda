@@ -184,7 +184,8 @@ arda::AudioStream::AudioStream(std::shared_ptr<IStream> stream) :
 }
 
 arda::AudioStream::~AudioStream()
-{
+{	
+	m_mutex.lock();
 	m_state = STOPPED;
 	auto& source = m_internals->source;
 
@@ -206,6 +207,7 @@ arda::AudioStream::~AudioStream()
 
 	avcodec_close(codec_ctx);
 	avformat_close_input(&format_ctx);
+	m_mutex.unlock();
 }
 
 void arda::AudioStream::Start()
@@ -219,8 +221,10 @@ void arda::AudioStream::Start()
 
 	pool.AddJob([this,&source,&last]()
 	{
+
 		while(m_state == PLAYING)
 		{
+			m_mutex.lock();
 			//get all processed buffers:
 			int processed = 0;
 			alGetSourcei(source, AL_BUFFERS_PROCESSED, &processed);
@@ -242,7 +246,8 @@ void arda::AudioStream::Start()
 					break;
 				}
 			}
-				
+			m_mutex.unlock();
+
 			m_position = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - last).count()/1000.0;
 
 			std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -270,6 +275,7 @@ void arda::AudioStream::Pause()
 
 void arda::AudioStream::Stop()
 {
+	std::lock_guard<std::mutex> lock(m_mutex);
 	auto& source = m_internals->source;
 	m_state = STOPPED;
 	alSourceStop(source);
