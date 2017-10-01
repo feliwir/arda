@@ -30,6 +30,11 @@ namespace arda
 		// Inherited via IDrawable
 		virtual void Render(IRenderer& renderer) override;
 
+		inline std::shared_ptr<ITexture> GetTexture()
+		{
+			return m_texture;
+		}
+
 		inline void SetTexture(std::shared_ptr<ITexture> tex)
 		{
 			m_texture = tex;

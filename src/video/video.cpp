@@ -18,6 +18,7 @@ namespace arda
 	public:
 		std::unique_ptr<AvStream> avstream;
 		AVCodec* codec;
+		AVCodec* codec_a;
 		AVCodecContext* codec_ctx;
 		AVCodecContext* codec_ctx_a;
 		AVFormatContext* format_ctx;
@@ -34,7 +35,7 @@ namespace arda
 			int ret;
 
 			*got_frame = 0;
-
+			
 			if (pkt) {
 				ret = avcodec_send_packet(avctx, pkt);
 				// In particular, we don't expect AVERROR(EAGAIN), because we read all
@@ -70,6 +71,7 @@ arda::Video::Video(std::shared_ptr<IStream> stream) :
 	auto& codec_ctx = m_internals->codec_ctx;
 	auto& codec_ctx_a = m_internals->codec_ctx_a;
 	auto& codec = m_internals->codec;
+	auto& codec_a = m_internals->codec_a;
 	auto& tmpFrame = m_internals->tmpFrame;
 	auto& rgbFrame = m_internals->rgbFrame;
 	auto& alphaFrame = m_internals->alphaFrame;
@@ -115,7 +117,24 @@ arda::Video::Video(std::shared_ptr<IStream> stream) :
 	if (vid_streams > 1)
 	{
 		m_hasAlpha = true;
-		codec_ctx_a = format_ctx->streams[ALPHA]->codec;
+		auto origCtxA = format_ctx->streams[ALPHA]->codec;
+
+		// Find the decoder for the video stream
+		codec_a = avcodec_find_decoder(origCtxA->codec_id);
+		if (codec_a == NULL)
+			throw RuntimeException("Unsupported codec!");
+
+		// Copy context
+		codec_ctx_a = avcodec_alloc_context3(codec_a);
+		if (avcodec_copy_context(codec_ctx_a, origCtxA) != 0)
+		{
+			fprintf(stderr, "Couldn't copy codec context");
+			throw RuntimeException("Couldn't copy codec ctx!");
+		}
+
+		// Open codec
+		if (avcodec_open2(codec_ctx_a, codec_a, NULL)<0)
+			throw RuntimeException("Could not open codec!");
 
 		m_alphaImage.Create(glm::ivec2(codec_ctx_a->width, codec_ctx_a->height),
 							gli::format::FORMAT_RGB8_UNORM_PACK8, nullptr);
@@ -186,7 +205,7 @@ arda::Video::Video(std::shared_ptr<IStream> stream) :
 	av_init_packet(packet);
 
 	//read the first 2 frames already
-	//GetFrames();
+	GetFrames();
 	if (m_hasAlpha)
 		GetFrames();
 }
@@ -322,6 +341,11 @@ bool arda::Video::GetFrames()
 
 		if (updatedColor && (updatedAlpha || !m_hasAlpha))
 			break;
+	}
+
+	if (!keepGoing)
+	{
+		int a = 0;
 	}
 
 	return keepGoing;
