@@ -35,6 +35,11 @@ namespace arda
 			m_videos.emplace(std::string(name), vid);
 		}
 
+		inline void RegisterMappedImage(std::shared_ptr<Block> image, std::string_view name)
+		{
+			m_mappedImages.emplace(std::string(name), image);
+		}
+
 		template<class T>
 		inline std::shared_ptr<T> GetBlock(std::string_view name = "");
 
@@ -49,6 +54,7 @@ namespace arda
 		std::map<const std::string, std::shared_ptr<Block>> m_speeches;
 		std::map<const std::string, std::shared_ptr<Block>> m_music;
 		std::map<const std::string, std::shared_ptr<Block>> m_weapons;
+		std::map<const std::string, std::shared_ptr<Block>> m_mappedImages;
 	};
 
 	template<>

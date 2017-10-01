@@ -16,6 +16,18 @@ void arda::ini::Music::SetProperty(std::string_view name, const Property value)
 	{
 		m_volume = value.GetInteger();
 	}
+	else if (name == "SubmixSlider")
+	{
+		m_submixSlider = value.GetString();
+	}
+	else if (name == "ReverbEffektLevel")
+	{
+		m_reverbEffektLevel = value.GetInteger();
+	}
+	else if (name == "DryLevel")
+	{
+		m_dryLevel = value.GetInteger();
+	}
 	else if (name == "Control")
 	{
 		m_control = value.GetString();

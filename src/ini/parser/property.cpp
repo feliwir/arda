@@ -96,6 +96,19 @@ double arda::Property::GetDouble() const
 	return std::get<double>(token.Value);
 }
 
+glm::ivec4 arda::Property::GetCoords() const
+{
+	if (!CheckArgs())
+		return glm::ivec4();
+	glm::ivec4 result = glm::ivec4();
+	for (int i = 0; i < m_args.size(); i++)
+	{
+		
+		int k = 1;
+	}
+	return result;
+}
+
 bool arda::Property::CheckArgs() const
 {
 	if (std::empty(m_args))

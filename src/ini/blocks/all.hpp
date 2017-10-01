@@ -4,3 +4,4 @@
 #include "ini_weapon.hpp"
 #include "ini_speech.hpp"
 #include "ini_music.hpp"
+#include "ini_mappedImage.hpp"

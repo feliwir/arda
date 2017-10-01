@@ -20,6 +20,9 @@ namespace arda::ini
 		std::string m_filename;
 		std::string m_control;
 		std::string m_type;
+		std::string m_submixSlider;
+		unsigned int m_reverbEffektLevel;
+		unsigned int m_dryLevel;
 		unsigned int m_volume;
 
 		static int m_defaultVolume;
