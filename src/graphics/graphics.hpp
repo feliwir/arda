@@ -8,6 +8,8 @@ namespace arda
 	class Config;
 	class Sprite;
 	class ITexture;
+	class FileSystem;
+	class Ini;
 
 	class Graphics
 	{
@@ -33,9 +35,18 @@ namespace arda
 		void ShowCursor();
 
 		std::shared_ptr<Sprite> CreateSprite(std::shared_ptr<ITexture> tex=nullptr);
+		std::shared_ptr<ITexture> GetTexture(std::string_view name, FileSystem& fs);
+		std::shared_ptr<Sprite> GetMappedImage(std::string_view name, FileSystem& fs, Ini& ini);
 
+		void ClearTextures();
 	private:
+		std::map<std::string, std::shared_ptr<ITexture>> m_textures;
 		std::unique_ptr<IRenderer> m_renderer;
 		glm::vec4 m_clearColor;
+		std::string m_artFolder;
+		std::string m_compiledFolder;
+		std::string m_regularFolder;
+		std::vector<std::string> m_texExtensions;
+		std::vector<std::string> m_texFolders;
 	};
 }
