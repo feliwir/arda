@@ -14,9 +14,10 @@ const std::map<const std::string, arda::Parser::BlockConstruct> arda::Parser::m_
 {
 	{"GameData", Block::Create<ini::GameData>},
 	{"Video", Block::Create<ini::Video> },
-	{"DialogEvent", Block::Create<ini::Speech> },
-	{"MusicTrack", Block::Create<ini::Music> },
-	{"Weapon", Block::Create<ini::Weapon>}
+	{"DialogEvent", Block::Create<ini::DialogEvent> },
+	{"MusicTrack", Block::Create<ini::MusicTrack> },
+	{"Weapon", Block::Create<ini::Weapon>},
+	{"MappedImage", Block::Create<ini::MappedImage> }
 };
 
 arda::Parser::Parser(Ini & ini) : m_ini(ini)

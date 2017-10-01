@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include "token.hpp"
+#include <glm/glm.hpp>
 
 namespace arda
 {
@@ -14,6 +15,7 @@ namespace arda
 		std::string GetUnicode() const;
 		long long GetInteger() const;
 		double GetDouble() const;
+		glm::ivec4 GetCoords() const;
 
 		bool CheckArgs() const;
 	private:

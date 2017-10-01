@@ -20,19 +20,24 @@ namespace arda
 		Ini(Config& config,FileSystem& fs);
 		~Ini();
 
-		inline void RegisterSpeech(std::shared_ptr<Block> speech, std::string_view name)
+		inline void RegisterDialogEvent(std::shared_ptr<Block> speech, std::string_view name)
 		{
-			m_speeches.emplace(std::string(name), speech);
+			m_dialogEvents.emplace(std::string(name), speech);
 		}
 
-		inline void RegisterMusic(std::shared_ptr<Block> music, std::string_view name)
+		inline void RegisterMusicTrack(std::shared_ptr<Block> music, std::string_view name)
 		{
-			m_music.emplace(std::string(name), music);
+			m_musicTracks.emplace(std::string(name), music);
 		}
 
 		inline void RegisterVideo(std::shared_ptr<Block> vid, std::string_view name)
 		{
 			m_videos.emplace(std::string(name), vid);
+		}
+
+		inline void RegisterMappedImage(std::shared_ptr<Block> image, std::string_view name)
+		{
+			m_mappedImages.emplace(std::string(name), image);
 		}
 
 		template<class T>
@@ -46,15 +51,16 @@ namespace arda
 		std::vector<std::string> m_globalIncludes;
 		std::map<const std::string, std::shared_ptr<ParsingContext>> m_files;
 		std::map<const std::string, std::shared_ptr<Block>> m_videos;
-		std::map<const std::string, std::shared_ptr<Block>> m_speeches;
-		std::map<const std::string, std::shared_ptr<Block>> m_music;
+		std::map<const std::string, std::shared_ptr<Block>> m_dialogEvents;
+		std::map<const std::string, std::shared_ptr<Block>> m_musicTracks;
 		std::map<const std::string, std::shared_ptr<Block>> m_weapons;
+		std::map<const std::string, std::shared_ptr<Block>> m_mappedImages;
 	};
 
 	template<>
-	inline std::shared_ptr<ini::Speech> Ini::GetBlock(std::string_view name)
+	inline std::shared_ptr<ini::DialogEvent> Ini::GetBlock(std::string_view name)
 	{
-		return std::dynamic_pointer_cast<ini::Speech>(m_speeches[std::string(name)]);
+		return std::dynamic_pointer_cast<ini::DialogEvent>(m_dialogEvents[std::string(name)]);
 	}
 
 	template<>

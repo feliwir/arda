@@ -1,5 +1,6 @@
 #include "property.hpp"
 #include "../../core/debugger.hpp"
+#include "string_util.hpp"
 
 arda::Property::Property(std::vector<Token>& args) : m_args(args)
 {
@@ -94,6 +95,37 @@ double arda::Property::GetDouble() const
 	}
 
 	return std::get<double>(token.Value);
+}
+
+glm::ivec4 arda::Property::GetCoords() const
+{
+	if (!CheckArgs() || m_args.size() != 4)
+		return glm::ivec4();
+	glm::ivec4 result = glm::ivec4();
+//Left:0 Top : 0 Right : 1023 Bottom : 768
+
+	for (int i = 0; i < m_args.size(); i++)
+	{
+		std::array<std::string_view, 2> val = SplitAtFirst<':'>(std::get<std::string>(m_args[i].Value));
+		
+		if (val[0] == "Left")
+		{
+			result.x = std::stoi(std::string(val[1]));
+		}
+		else if (val[0] == "Top")
+		{
+			result.y = std::stoi(std::string(val[1]));
+		}
+		else if (val[0] == "Right")
+		{
+			result.z = std::stoi(std::string(val[1]));
+		}
+		else if (val[0] == "Bottom")
+		{
+			result.w = std::stoi(std::string(val[1]));
+		}
+	}
+	return result;
 }
 
 bool arda::Property::CheckArgs() const
