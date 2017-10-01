@@ -35,7 +35,9 @@ arda::TitleScreen::TitleScreen(FileSystem& fs, Graphics& graphics, Ini& ini) :
 	m_video = std::make_shared<Video>(stream);
 	auto tex = m_graphics.GetRenderer().CreateTexture();
 
-	m_ring = m_graphics.CreateSprite(tex,{ {-0.1,-0.1},{0.1,-0.1},{-0.1,0.1},{0.1,0.1} });
+	float x = 0.06;
+	float y = 0.76;
+	m_ring = m_graphics.CreateSprite(tex, { {-x,-x-y},{x,-x-y},{-x,x-y},{x,x-y} });
 
 	m_ring->SetOpacity(0.0);
 	ren.AddDrawable(m_ring);
