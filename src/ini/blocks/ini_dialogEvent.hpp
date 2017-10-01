@@ -3,10 +3,10 @@
 
 namespace arda::ini
 {
-	class Speech final : public Block
+	class DialogEvent final : public Block
 	{
 	public:
-		Speech();
+		DialogEvent();
 
 		// Inherited via Block
 		virtual void SetProperty(std::string_view name, const Property value) override;

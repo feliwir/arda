@@ -1,14 +1,14 @@
-#include "ini_music.hpp"
+#include "ini_musicTrack.hpp"
 #include "../ini.hpp"
 
-int arda::ini::Music::m_defaultVolume = 0;
+int arda::ini::MusicTrack::m_defaultVolume = 0;
 
-arda::ini::Music::Music()
+arda::ini::MusicTrack::MusicTrack()
 	:m_volume(m_defaultVolume)
 {
 }
 
-void arda::ini::Music::SetProperty(std::string_view name, const Property value)
+void arda::ini::MusicTrack::SetProperty(std::string_view name, const Property value)
 {
 	if (name == "Filename")
 		m_filename = value.GetString();
@@ -38,7 +38,7 @@ void arda::ini::Music::SetProperty(std::string_view name, const Property value)
 	}
 }
 
-void arda::ini::Music::Register(Ini & ini, std::string_view name)
+void arda::ini::MusicTrack::Register(Ini & ini, std::string_view name)
 {
-	ini.RegisterMusic(shared_from_this(), name);
+	ini.RegisterMusicTrack(shared_from_this(), name);
 }

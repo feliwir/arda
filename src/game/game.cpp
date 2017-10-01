@@ -64,7 +64,7 @@ std::shared_ptr<arda::State> arda::Game::CreateCutscene(std::string_view name)
 	//get the video block from the ini
 	auto video_ini = m_ini.GetBlock<ini::Video>(name);
 
-	auto audio_ini = m_ini.GetBlock<ini::Speech>(video_ini->GetFilename());
+	auto audio_ini = m_ini.GetBlock<ini::DialogEvent>(video_ini->GetFilename());
 
 	if (video_ini == nullptr)
 		throw RuntimeException("Invalid cutscene name: "+std::string(name));

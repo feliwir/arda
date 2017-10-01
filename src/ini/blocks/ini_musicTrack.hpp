@@ -3,10 +3,10 @@
 
 namespace arda::ini
 {
-	class Music final : public Block
+	class MusicTrack final : public Block
 	{
 	public:
-		Music();
+		MusicTrack();
 
 		// Inherited via Block
 		virtual void SetProperty(std::string_view name, const Property value) override;

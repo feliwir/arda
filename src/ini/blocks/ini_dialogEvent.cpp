@@ -1,14 +1,14 @@
-#include "ini_speech.hpp"
+#include "ini_dialogEvent.hpp"
 #include "../ini.hpp"
 
-int arda::ini::Speech::m_defaultVolume = 0;
+int arda::ini::DialogEvent::m_defaultVolume = 0;
 
-arda::ini::Speech::Speech() :
+arda::ini::DialogEvent::DialogEvent() :
 	m_volume(m_defaultVolume)
 {
 }
 
-void arda::ini::Speech::SetProperty(std::string_view name, const Property value)
+void arda::ini::DialogEvent::SetProperty(std::string_view name, const Property value)
 {
 	if (name == "Filename")
 		m_filename = value.GetString();
@@ -24,7 +24,7 @@ void arda::ini::Speech::SetProperty(std::string_view name, const Property value)
 	}
 }
 
-void arda::ini::Speech::Register(Ini & ini, std::string_view name)
+void arda::ini::DialogEvent::Register(Ini & ini, std::string_view name)
 {
-	ini.RegisterSpeech(shared_from_this(), name);
+	ini.RegisterDialogEvent(shared_from_this(), name);
 }
