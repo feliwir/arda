@@ -193,6 +193,7 @@ arda::Video::Video(std::shared_ptr<IStream> stream) :
 
 arda::Video::~Video()
 {
+	m_state = STOPPED;
 	auto& format_ctx = m_internals->format_ctx;
 	auto& avstream = m_internals->avstream;
 	auto& codec_ctx = m_internals->codec_ctx;

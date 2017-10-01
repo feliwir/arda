@@ -14,6 +14,7 @@ namespace arda
 	{
 	public:
 		Global(Config& c);
+		~Global();
 
 		template<class T>
 		long long TimeFromStart()

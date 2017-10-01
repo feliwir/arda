@@ -83,7 +83,6 @@ arda::Application::Application(const std::vector<std::string>& args)
 
 arda::Application::~Application()
 {
-
 }
 
 void arda::Application::Run()

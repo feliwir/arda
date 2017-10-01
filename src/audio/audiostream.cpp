@@ -185,6 +185,7 @@ arda::AudioStream::AudioStream(std::shared_ptr<IStream> stream) :
 
 arda::AudioStream::~AudioStream()
 {
+	m_state = STOPPED;
 	auto& source = m_internals->source;
 
 	// //make sure all buffers are unqueued:

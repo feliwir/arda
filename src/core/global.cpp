@@ -11,3 +11,8 @@ arda::Global::Global(Config & c) : m_debugger(std::make_shared<Debugger>(c))
 	//register all LIBAV codecs & formats here
 	av_register_all();
 }
+
+arda::Global::~Global()
+{
+	m_pool.JoinAll();
+}
