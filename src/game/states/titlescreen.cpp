@@ -17,8 +17,8 @@ m_graphics(graphics)
 	m_title_ring = m_graphics.CreateSprite(mapped);
 	m_title_ring->SetOpacity(0.0);
 
-	ren.AddDrawable(m_title_ea);
 	ren.AddDrawable(m_title_ring);
+	ren.AddDrawable(m_title_ea);
 }
 
 arda::TitleScreen::~TitleScreen()
