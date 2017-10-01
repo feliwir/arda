@@ -190,10 +190,10 @@ std::shared_ptr<arda::MappedImage> arda::Graphics::GetMappedImage(std::string_vi
 	std::vector<glm::vec2> coords;
 	auto tsize = block->GetTextureSize();
 	auto tcoords = block->GetCoords();
-	coords.push_back({ tcoords.x / static_cast<double>(tsize.x), 1.0 - (tcoords.y / static_cast<double>(tsize.y)) });
-	coords.push_back({ tcoords.z / static_cast<double>(tsize.x), 1.0 - (tcoords.y / static_cast<double>(tsize.y)) });
 	coords.push_back({ tcoords.x / static_cast<double>(tsize.x), 1.0 - (tcoords.w / static_cast<double>(tsize.y)) });
 	coords.push_back({ tcoords.z / static_cast<double>(tsize.x), 1.0 - (tcoords.w / static_cast<double>(tsize.y)) });
+	coords.push_back({ tcoords.x / static_cast<double>(tsize.x), 1.0 - (tcoords.y / static_cast<double>(tsize.y)) });
+	coords.push_back({ tcoords.z / static_cast<double>(tsize.x), 1.0 - (tcoords.y / static_cast<double>(tsize.y)) });
 
 	result = std::make_shared<MappedImage>(tex, coords);
 	return result;
