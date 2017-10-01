@@ -53,17 +53,25 @@ namespace arda
 		virtual std::shared_ptr<ITexture> CreateTexture(Image& img) = 0;
 		virtual std::shared_ptr<IBuffer> CreateBuffer(IBuffer::Type, IBuffer::Usage) = 0;
 		virtual std::shared_ptr<Layout> CreateLayout() = 0;
+
+		inline std::shared_ptr<Shader> GetActiveShader()
+		{
+			return m_activeShader;
+		}
 	protected:
-		void RegisterCallbacks();		
+		void RegisterCallbacks();	
+		void ActivateShader(std::shared_ptr<Shader> sh);	
 	private:
 		//callbacks
 		static void CallbackResize(GLFWwindow* window, int width, int height);
 	protected:
 		GLFWwindow* m_window;
 
-		std::unique_ptr<Shader> m_spriteShader;
-		std::unique_ptr<Shader> m_modelShader;
+		std::shared_ptr<Shader> m_spriteShader;
+		std::shared_ptr<Shader> m_modelShader;
 	
+		std::shared_ptr<Shader> m_activeShader;
+
 		std::vector<std::shared_ptr<IDrawable>> m_drawables;
 	};
 }

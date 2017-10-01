@@ -2,8 +2,23 @@
 #include <string>
 
 #include <string_view>
+#include <array>
+
 namespace arda
 {
+	template<char sep>
+	static inline std::array<std::string_view, 2> SplitAtFirst(std::string_view string)
+	{
+		std::array<std::string_view, 2> arr;
+
+		int pos = string.find_first_of(sep);
+
+		arr[0] = string.substr(0, pos);
+		arr[1] = string.substr(pos + 1, string.size() - pos);
+
+		return arr;
+	}
+
     template<char sep>
     static inline std::string_view ReadTill(std::string_view str,int& pos)
     {

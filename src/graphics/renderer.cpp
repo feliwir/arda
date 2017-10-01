@@ -32,3 +32,10 @@ void arda::IRenderer::CallbackResize(GLFWwindow * window, int width, int height)
 
 	renderer->Resize(width, height);
 }
+
+
+void arda::IRenderer::ActivateShader(std::shared_ptr<Shader> sh)
+{
+	sh->Bind();
+	m_activeShader = sh;
+}

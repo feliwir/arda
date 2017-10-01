@@ -11,7 +11,7 @@ arda::Config::Config(const std::vector<std::string>& args) :
 	m_gfxApi(0),
 	m_iniDir("data/ini"),
 	m_debugPort(2017),
-	m_windowed(true)
+	m_windowed(false)
 {
 	cxxopts::Options options("Arda Engine", "A modern reimplementation of the SAGE engine");
 	options.add_options()

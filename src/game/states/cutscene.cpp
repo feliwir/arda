@@ -1,8 +1,8 @@
 #include "cutscene.hpp"
-#include "../audio/audiostream.hpp"
-#include "../video/video.hpp"
-#include "../graphics/graphics.hpp"
-#include "../graphics/sprite.hpp"
+#include "../../audio/audiostream.hpp"
+#include "../../video/video.hpp"
+#include "../../graphics/graphics.hpp"
+#include "../../graphics/sprite.hpp"
 
 arda::Cutscene::Cutscene(std::shared_ptr<Video> video, std::shared_ptr<AudioStream> audio,Graphics& g)
 	: m_video(video)

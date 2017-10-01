@@ -7,6 +7,7 @@
 #include <boost/filesystem.hpp>
 #include <iostream>
 #include "string_util.hpp"
+#include "../../core/debugger.hpp"
 #include "../ini.hpp"
 #include "../../filesystem/stream.hpp"
 

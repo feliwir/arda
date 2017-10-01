@@ -1,7 +1,7 @@
 #include "sprite.hpp"
 #include "renderer.hpp"
 
-arda::Sprite::Sprite(IRenderer& renderer)
+arda::Sprite::Sprite(IRenderer& renderer) : m_opacity(1.0)
 {
 	m_positions = renderer.CreateBuffer(IBuffer::VERTEX_BUFFER,
 										IBuffer::STATIC);

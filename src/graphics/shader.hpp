@@ -34,8 +34,6 @@ namespace arda
 			return m_uniforms[std::string(name)];
 		}
 	protected:
-		std::map<std::string, int> m_uniforms;
-
-		
+		std::map<std::string, int> m_uniforms;		
     };
 }

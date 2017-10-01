@@ -18,6 +18,8 @@ namespace arda
 		virtual void Pause() override;
 		virtual void Stop() override;
 		virtual double GetPosition() override;
+
+		void SetVolume(int volume);
 	private:
 		bool UpdateBuffers();
 	private:
