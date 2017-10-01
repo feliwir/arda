@@ -135,6 +135,12 @@ void arda::GLShader::Compile(ShaderType type, std::string_view src)
 	}
 }
 
+void arda::GLShader::SetFloatProperty(std::string_view name, float value)
+{
+	int id = GetUniform(name);
+	glUniform1f(id, value);
+}
+
 void arda::GLShader::AddUniform(std::string_view name)
 {
 	m_uniforms[std::string(name)] = glGetUniformLocation(m_program, name.data());

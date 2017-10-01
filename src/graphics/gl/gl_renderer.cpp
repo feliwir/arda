@@ -53,11 +53,14 @@ arda::GLRenderer::GLRenderer(Config& c) : IRenderer(c)
 	m_spriteShader->Compile(shader::sprite_vert, shader::sprite_frag);
 	m_spriteShader->Link();
 	m_spriteShader->AddUniform("sprite_tex");
+	m_spriteShader->AddUniform("opacity");
 }
 
 void arda::GLRenderer::Render()
 {
 	ActivateShader(m_spriteShader);
+	glEnable(GL_BLEND);
+	glDisable(GL_DEPTH_TEST);
 	glActiveTexture(GL_TEXTURE0);
 	glUniform1i(m_spriteShader->GetUniform("sprite_tex"), 0);
 

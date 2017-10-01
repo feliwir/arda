@@ -1,6 +1,7 @@
 #pragma once
 #include "state.hpp"
 #include <memory>
+#include <chrono>
 
 namespace arda
 {
@@ -21,6 +22,7 @@ namespace arda
 		virtual void Update() override;
 		virtual bool IsFinished() override;
 	private:
+		std::chrono::high_resolution_clock::time_point m_start;
 		Graphics& m_graphics;
 		std::shared_ptr<Video> m_video;
 		std::shared_ptr<Sprite> m_title_ea;

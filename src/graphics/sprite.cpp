@@ -24,7 +24,7 @@ mask)
 }
 
 arda::Sprite::Sprite(IRenderer & renderer, std::shared_ptr<ITexture> tex, std::vector<glm::vec2> positions, 
-	std::vector<glm::vec2> coords, std::shared_ptr<ITexture> mask) : m_texture(tex), m_mask(mask)
+	std::vector<glm::vec2> coords, std::shared_ptr<ITexture> mask) : m_texture(tex), m_mask(mask), m_opacity(1.0)
 {
 	m_vertices = renderer.CreateBuffer(IBuffer::VERTEX_BUFFER,
 		IBuffer::STATIC);
@@ -62,5 +62,7 @@ void arda::Sprite::Render(IRenderer& renderer)
 {
 	m_layout->Bind();
 	m_texture->Bind();
+	renderer.GetActiveShader()->SetFloatProperty("opacity", m_opacity);
+
 	renderer.Draw(m_vertices, m_indices);
 }

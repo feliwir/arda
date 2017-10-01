@@ -20,14 +20,14 @@ namespace arda
 
 		virtual void Link() override;
 
-		// Geerbt über Shader
 		virtual void AddUniform(std::string_view name) override;
+
+		virtual void SetFloatProperty(std::string_view name, float value) override;
+
 	protected:
 		virtual void Compile(ShaderType type, std::string_view src) override;
 	private:
 		GLuint m_program;
 		std::array<GLuint, 5> m_shaders;
-
-
 	};
 }

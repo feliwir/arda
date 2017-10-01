@@ -27,6 +27,8 @@ namespace arda
 
 		virtual void Link() = 0;
 
+		virtual void SetFloatProperty(std::string_view name, float value) = 0;
+
 		virtual void AddUniform(std::string_view name) = 0;
 
 		inline int GetUniform(std::string_view name)

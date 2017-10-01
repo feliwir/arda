@@ -228,8 +228,8 @@ void arda::AudioStream::Start()
 			//get all processed buffers:
 			int processed = 0;
 			alGetSourcei(source, AL_BUFFERS_PROCESSED, &processed);
-			ALuint freed=0;
-			alSourceUnqueueBuffers(source, processed, &freed);
+			ALuint freed[AudioStreamInternals::chainsize];
+			alSourceUnqueueBuffers(source, processed, freed);
 			Audio::checkErrorAl("Cannot unqueue the buffers");
 
 			//check if until we actually need new buffers
