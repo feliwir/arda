@@ -104,7 +104,7 @@ void arda::D3DTexture::Update(Image & img)
 					"Failed to create D3D Shader Resource View");
 }
 
-void arda::D3DTexture::Bind()
+void arda::D3DTexture::Bind(int i=0)
 {
 
 }

@@ -52,8 +52,10 @@ arda::GLRenderer::GLRenderer(Config& c) : IRenderer(c)
 	m_spriteShader = std::make_unique<GLShader>();
 	m_spriteShader->Compile(shader::sprite_vert, shader::sprite_frag);
 	m_spriteShader->Link();
-	m_spriteShader->AddUniform("sprite_tex");
+	m_spriteShader->AddUniform("color_tex");
+	m_spriteShader->AddUniform("mask_tex");
 	m_spriteShader->AddUniform("opacity");
+	m_spriteShader->AddUniform("use_mask");
 }
 
 void arda::GLRenderer::Render()
@@ -62,8 +64,6 @@ void arda::GLRenderer::Render()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_DEPTH_TEST);
-	glActiveTexture(GL_TEXTURE0);
-	glUniform1i(m_spriteShader->GetUniform("sprite_tex"), 0);
 
 	//sort and bind the correct shader
 	for (auto& drawable : m_drawables)

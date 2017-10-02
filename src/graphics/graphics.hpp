@@ -35,9 +35,10 @@ namespace arda
 		void HideCursor();
 		void ShowCursor();
 
-		std::shared_ptr<Sprite> CreateSprite(std::vector<glm::vec2> pos = { { -1.0,-1.0 },{ 1.0,-1.0 },{ -1.0, 1.0 },{ 1.0,1.0 } });
+		std::shared_ptr<Sprite> CreateSprite(std::vector<glm::vec2> pos = { { -1.0,-1.0 },{ 1.0,-1.0 },{ -1.0, 1.0 },{ 1.0,1.0 } },
+			std::shared_ptr<ITexture> mask = nullptr);
 		std::shared_ptr<Sprite> CreateSprite(std::shared_ptr<ITexture> tex, 
-			std::vector<glm::vec2> pos=	{ { -1.0,-1.0 },{ 1.0,-1.0 },{ -1.0, 1.0 },{ 1.0,1.0 } });
+			std::vector<glm::vec2> pos=	{ { -1.0,-1.0 },{ 1.0,-1.0 },{ -1.0, 1.0 },{ 1.0,1.0 } }, std::shared_ptr<ITexture> mask = nullptr);
 		std::shared_ptr<Sprite> CreateSprite(std::shared_ptr<MappedImage>, 
 			std::vector<glm::vec2> pos = { { -1.0,-1.0 },{ 1.0,-1.0 },{ -1.0, 1.0 },{ 1.0,1.0 } });
 

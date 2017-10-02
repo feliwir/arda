@@ -46,8 +46,11 @@ void arda::GLTexture::Update(Image& img)
 	
 }
 
-void arda::GLTexture::Bind()
+void arda::GLTexture::Bind(int i)
 {
+	if (i >= 0)
+		glActiveTexture(i);
+
 	glBindTexture(GL_TEXTURE_2D, m_handle);
 }
 

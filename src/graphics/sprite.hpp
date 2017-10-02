@@ -45,6 +45,11 @@ namespace arda
 			m_mask = mask;
 		}
 
+		inline std::shared_ptr<ITexture> GetMask()
+		{
+			return m_mask;
+		}
+
 		inline void SetOpacity(float opacity)
 		{
 			m_opacity = opacity;

@@ -18,7 +18,7 @@ namespace arda
 
 		// Geerbt über ITexture
 		virtual void Update(Image & img) override;
-		virtual void Bind() override;
+		virtual void Bind(int i) override;
 		virtual void Generate() override;
 	private:
 		ID3D11Texture2D* m_handle;

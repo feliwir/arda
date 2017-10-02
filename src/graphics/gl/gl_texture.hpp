@@ -14,7 +14,7 @@ namespace arda
 
 		// Inherited via ITexture
 		virtual void Update(Image& img) override;
-		virtual void Bind() override;
+		virtual void Bind(int i=-1) override;
 		virtual void Generate() override;
 
 	private:

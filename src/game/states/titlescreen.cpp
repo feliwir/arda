@@ -34,10 +34,11 @@ arda::TitleScreen::TitleScreen(FileSystem& fs, Graphics& graphics, Ini& ini) :
 
 	m_video = std::make_shared<Video>(stream);
 	auto tex = m_graphics.GetRenderer().CreateTexture();
+	auto mask = m_graphics.GetRenderer().CreateTexture();
 
-	float x = 0.06;
+	float x = 0.1;
 	float y = 0.76;
-	m_ring = m_graphics.CreateSprite(tex, { {-x,-x-y},{x,-x-y},{-x,x-y},{x,x-y} });
+	m_ring = m_graphics.CreateSprite(tex, { {-x,-x-y},{x,-x-y},{-x,x-y},{x,x-y} },mask);
 
 	m_ring->SetOpacity(0.0);
 	ren.AddDrawable(m_ring);
@@ -72,6 +73,7 @@ void arda::TitleScreen::Update()
 	}
 
 	m_ring->GetTexture()->Update(m_video->GetColorImage());
+	m_ring->GetMask()->Update(m_video->GetAlphaImage());
 }
 
 bool arda::TitleScreen::IsFinished()

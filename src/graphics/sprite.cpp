@@ -61,8 +61,19 @@ arda::Sprite::~Sprite()
 void arda::Sprite::Render(IRenderer& renderer)
 {
 	m_layout->Bind();
-	m_texture->Bind();
+	m_texture->Bind(0);
+
 	renderer.GetActiveShader()->SetFloatProperty("opacity", m_opacity);
+	bool masked = (m_mask != nullptr);
+	renderer.GetActiveShader()->SetBooleanProperty("use_mask", masked);
+
+	renderer.GetActiveShader()->SetIntegerProperty("color_tex", 0);
+
+	if (masked)
+	{
+		renderer.GetActiveShader()->SetIntegerProperty("mask_tex", 1);
+		m_mask->Bind(1);
+	}
 
 	renderer.Draw(m_vertices, m_indices);
 }

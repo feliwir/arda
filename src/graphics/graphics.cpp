@@ -124,14 +124,15 @@ void arda::Graphics::ShowCursor()
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
 
-std::shared_ptr<arda::Sprite> arda::Graphics::CreateSprite(std::vector<glm::vec2> pos)
+std::shared_ptr<arda::Sprite> arda::Graphics::CreateSprite(std::vector<glm::vec2> pos, std::shared_ptr<ITexture> mask)
 {
-	return std::make_shared<arda::Sprite>(*m_renderer, nullptr, pos);
+	return std::make_shared<arda::Sprite>(*m_renderer, nullptr, pos,mask);
 }
 
-std::shared_ptr<arda::Sprite> arda::Graphics::CreateSprite(std::shared_ptr<ITexture> tex, std::vector<glm::vec2> pos)
+std::shared_ptr<arda::Sprite> arda::Graphics::CreateSprite(std::shared_ptr<ITexture> tex, std::vector<glm::vec2> pos,
+	std::shared_ptr<ITexture> mask)
 {
-	return std::make_shared<arda::Sprite>(*m_renderer, tex, pos);
+	return std::make_shared<arda::Sprite>(*m_renderer, tex, pos,mask);
 }
 
 std::shared_ptr<arda::Sprite> arda::Graphics::CreateSprite(std::shared_ptr<MappedImage> mapped, std::vector<glm::vec2> pos)

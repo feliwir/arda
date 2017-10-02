@@ -23,7 +23,8 @@ namespace arda
 		virtual void AddUniform(std::string_view name) override;
 
 		virtual void SetFloatProperty(std::string_view name, float value) override;
-
+		virtual void SetIntegerProperty(std::string_view name, int value) override;
+		virtual void SetBooleanProperty(std::string_view name, bool value) override;
 	protected:
 		virtual void Compile(ShaderType type, std::string_view src) override;
 	private:

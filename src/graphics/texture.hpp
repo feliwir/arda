@@ -11,7 +11,7 @@ namespace arda
 		ITexture(Image& img);
 
 		virtual void Update(Image& img) = 0;
-		virtual void Bind() = 0;
+		virtual void Bind(int i) = 0;
 	protected:
 		virtual void Generate() = 0;
 	protected:
