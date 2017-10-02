@@ -67,11 +67,9 @@ void arda::Sprite::Render(IRenderer& renderer)
 	bool masked = (m_mask != nullptr);
 	renderer.GetActiveShader()->SetBooleanProperty("use_mask", masked);
 
-	renderer.GetActiveShader()->SetIntegerProperty("color_tex", 0);
-
 	if (masked)
 	{
-		renderer.GetActiveShader()->SetIntegerProperty("mask_tex", 1);
+		
 		m_mask->Bind(1);
 	}
 

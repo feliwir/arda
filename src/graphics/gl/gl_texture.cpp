@@ -42,14 +42,13 @@ void arda::GLTexture::Update(Image& img)
 		{
 			glTexImage2D(target, level, GL_RGBA, extent.x, extent.y, 0, gl_fmt.External, gl_fmt.Type, tex.data(0, 0, level));
 		}
-	}	
-	
+	}		
 }
 
 void arda::GLTexture::Bind(int i)
 {
 	if (i >= 0)
-		glActiveTexture(i);
+		glActiveTexture(GL_TEXTURE0 + i);
 
 	glBindTexture(GL_TEXTURE_2D, m_handle);
 }

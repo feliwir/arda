@@ -65,6 +65,9 @@ void arda::GLRenderer::Render()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_DEPTH_TEST);
 
+	GetActiveShader()->SetIntegerProperty("color_tex", 0);
+	GetActiveShader()->SetIntegerProperty("mask_tex", 1);
+
 	//sort and bind the correct shader
 	for (auto& drawable : m_drawables)
 	{

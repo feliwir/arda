@@ -36,7 +36,7 @@ arda::TitleScreen::TitleScreen(FileSystem& fs, Graphics& graphics, Ini& ini) :
 	auto tex = m_graphics.GetRenderer().CreateTexture();
 	auto mask = m_graphics.GetRenderer().CreateTexture();
 
-	float x = 0.1;
+	float x = 0.075;
 	float y = 0.76;
 	m_ring = m_graphics.CreateSprite(tex, { {-x,-x-y},{x,-x-y},{-x,x-y},{x,x-y} },mask);
 
