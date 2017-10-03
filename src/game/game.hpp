@@ -25,6 +25,7 @@ namespace arda
 		//second parameter only required when speech!=movie
 		std::shared_ptr<State> CreateCutscene(std::string_view name);
 		std::shared_ptr<State> CreateTitlescreen();
+		std::shared_ptr<State> CreateMenu();
 	private:
 		Config& m_config;
 		Graphics& m_graphics;

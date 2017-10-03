@@ -10,6 +10,7 @@
 #include "../gui/gui.hpp"
 #include "states/state.hpp"
 #include "states/cutscene.hpp"
+#include "states/menu.hpp"
 #include "states/titlescreen.hpp"
 
 arda::Game::Game(Config & c, Graphics & g, Ini & i,FileSystem& fs) :
@@ -104,4 +105,11 @@ std::shared_ptr<arda::State> arda::Game::CreateTitlescreen()
 	auto title = std::make_shared<TitleScreen>(m_fs,m_graphics,m_ini);
 
 	return title;
+}
+
+std::shared_ptr<arda::State> arda::Game::CreateMenu()
+{
+	auto menu = std::make_shared<Menu>();
+	
+	return menu;
 }

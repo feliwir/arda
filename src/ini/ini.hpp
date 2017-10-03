@@ -60,24 +60,44 @@ namespace arda
 	template<>
 	inline std::shared_ptr<ini::DialogEvent> Ini::GetBlock(std::string_view name)
 	{
-		return std::dynamic_pointer_cast<ini::DialogEvent>(m_dialogEvents[std::string(name)]);
+		auto it = m_dialogEvents.find(std::string(name));
+
+		if(it!=m_dialogEvents.end())
+			return std::dynamic_pointer_cast<ini::DialogEvent>(it->second);
+
+		return nullptr;
 	}
 
 	template<>
 	inline std::shared_ptr<ini::Video> Ini::GetBlock(std::string_view name)
 	{
-		return std::dynamic_pointer_cast<ini::Video>(m_videos[std::string(name)]);
+		auto it = m_videos.find(std::string(name));
+		
+		if(it!=m_videos.end())
+			return std::dynamic_pointer_cast<ini::Video>(it->second);
+
+		return nullptr;
 	}
 
 	template<>
 	inline std::shared_ptr<ini::Weapon> Ini::GetBlock(std::string_view name)
 	{
-		return std::dynamic_pointer_cast<ini::Weapon>(m_weapons[std::string(name)]);
+		auto it = m_weapons.find(std::string(name));
+		
+		if(it!=m_weapons.end())
+			return std::dynamic_pointer_cast<ini::Weapon>(it->second);
+
+		return nullptr;
 	}
 
 	template<>
 	inline std::shared_ptr<ini::MappedImage> Ini::GetBlock(std::string_view name)
 	{
-		return std::dynamic_pointer_cast<ini::MappedImage>(m_mappedImages[std::string(name)]);
+		auto it = m_mappedImages.find(std::string(name));
+		
+		if(it!=m_mappedImages.end())
+			return std::dynamic_pointer_cast<ini::MappedImage>(it->second);
+
+		return nullptr;
 	}
 }

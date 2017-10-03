@@ -60,7 +60,7 @@ void arda::TitleScreen::Start()
 
 void arda::TitleScreen::Update()
 {
-	auto now  = std::chrono::steady_clock::now();
+	auto now  = std::chrono::high_resolution_clock::now();
 	auto passed = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_start);
 	
 	if (passed.count() > 1000)
@@ -79,7 +79,7 @@ void arda::TitleScreen::Update()
 
 bool arda::TitleScreen::IsFinished()
 {
-	auto now = std::chrono::steady_clock::now();
+	auto now = std::chrono::high_resolution_clock::now();
 	auto passed = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_start);
 
 	if (passed.count() > 5000)
