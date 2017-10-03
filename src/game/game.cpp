@@ -7,6 +7,7 @@
 #include "../filesystem/filesystem.hpp"
 #include "../audio/audiostream.hpp"
 #include "../video/video.hpp"
+#include "../gui/gui.hpp"
 #include "states/state.hpp"
 #include "states/cutscene.hpp"
 #include "states/titlescreen.hpp"
@@ -18,6 +19,8 @@ arda::Game::Game(Config & c, Graphics & g, Ini & i,FileSystem& fs) :
 	if (!m_config.IsWindowed())
 		m_graphics.SetFullscreen(true);
 
+	//create our gui
+	m_gui = std::make_unique<GUI>(c,g,fs);
 
 	m_constructors.push_back(std::bind(&Game::CreateCutscene, this, "EALogoMovie"));
 	//m_constructors.push_back(std::bind(&Game::CreateCutscene, this, "NewLineMovie"));
@@ -55,6 +58,8 @@ bool arda::Game::Update()
 	}
 
 	m_state->Update();
+
+	m_gui->Update();
 
 	return true;
 }

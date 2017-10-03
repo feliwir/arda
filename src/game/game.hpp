@@ -2,6 +2,7 @@
 #include <vector>
 #include <memory>
 #include <functional>
+#include "../gui/gui.hpp"
 
 namespace arda
 {
@@ -29,6 +30,7 @@ namespace arda
 		Graphics& m_graphics;
 		Ini& m_ini;
 		FileSystem& m_fs;
+		std::unique_ptr<GUI> m_gui;
 
 		std::vector<StateConstruct> m_constructors;
 		std::shared_ptr<State> m_state;
