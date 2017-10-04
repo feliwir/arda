@@ -45,13 +45,14 @@ arda::TitleScreen::TitleScreen(FileSystem& fs, Graphics& graphics, Ini& ini) :
 	ren.AddDrawable(m_ring);
 
 	m_blending = std::make_shared<BlendAnimation>(
-		{
-		BlendAnimation::Keyframe{0,0.0},
-		BlendAnimation::Keyframe{1000,0.0},
-		BlendAnimation::Keyframe{2000,1.0}
+		std::vector<BlendAnimation::Keyframe>{
+		{0,0.0},
+		{1000,0.0},
+		{3000,1.0},
+		{4000,1.0}
 		}, 
-		{m_title_ea},
-		{m_title_ring,m_ring});
+		std::vector<std::shared_ptr<Sprite>>{m_title_ea},
+		std::vector<std::shared_ptr<Sprite>>{m_title_ring,m_ring});
 }
 
 arda::TitleScreen::~TitleScreen()
@@ -64,37 +65,19 @@ arda::TitleScreen::~TitleScreen()
 
 void arda::TitleScreen::Start()
 {
-	m_start = std::chrono::high_resolution_clock::now();
+	m_blending->Start();
 	m_video->Start();
 }
 
 void arda::TitleScreen::Update()
 {
-	auto now  = std::chrono::high_resolution_clock::now();
-	auto passed = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_start);
+	m_blending->Update();
 	
-	if (passed.count() > 1000)
-	{
-		auto dur = passed.count() - 1000;
-		auto alpha = dur / 2000.0;
-		alpha = glm::clamp(alpha, 0.0, 1.0);
-		m_title_ea->SetOpacity(1.0 - alpha);
-		m_title_ring->SetOpacity(alpha);
-		m_ring->SetOpacity(alpha);
-	}
-
 	m_ring->GetTexture()->Update(m_video->GetColorImage());
 	m_ring->GetMask()->Update(m_video->GetAlphaImage());
 }
 
 bool arda::TitleScreen::IsFinished()
 {
-	auto now = std::chrono::high_resolution_clock::now();
-	auto passed = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_start);
-
-	if (passed.count() > 5000)
-	{
-		return true;
-	}
-	return false;
+	return m_blending->IsFinished();
 }

@@ -24,10 +24,13 @@ namespace arda
 		void Start();
 
 		void Update();
+
+		bool IsFinished();
 	private:
 		std::chrono::high_resolution_clock::time_point m_start;
 		std::vector<Keyframe> m_keyframes;
 		std::vector<std::shared_ptr<Sprite>> m_first;
 		std::vector<std::shared_ptr<Sprite>> m_second;
+		bool m_finished;
     };
 }
