@@ -38,17 +38,24 @@ target_sources(${PROJECT} PRIVATE ${SRCS} ${HDRS})
 
 target_compile_definitions(${PROJECT} PRIVATE ENGINE_NAME="${PROJECT}")
 
+set(OTHER_LIBRARIES "")
+
 target_link_libraries(${PROJECT} 
                         glfw 
                         ${OPENGL_gl_LIBRARY}
                         ${OPENAL_LIBRARY}
                         ${JPEG_LIBRARIES}
                         ${Boost_LIBRARIES} 
-                        ${FFMPEG_LIBRARIES})
+                        ${FFMPEG_LIBRARIES}
+                        ${OTHER_LIBRARIES})
 
 if(ARDA_BUILD_D3D)
     target_link_libraries(${PROJECT} d3d11)
 endif(ARDA_BUILD_D3D)
+
+if(MINGW)
+    target_link_libraries ${PROJECT} wsock32 ws2_32)
+endif(MINGW)
 
 target_include_directories(${PROJECT} PRIVATE 
                             glfw 
