@@ -1,11 +1,9 @@
 set(DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 set(HDRS ${HDRS}
-"${DIR}/apt.hpp"
-"${DIR}/constant.hpp"
+"${DIR}/blend.hpp"
 PARENT_SCOPE)
 
 set(SRCS ${SRCS}
-"${DIR}/apt.cpp"
-"${DIR}/constant.cpp"
+"${DIR}/blend.cpp"
 PARENT_SCOPE)

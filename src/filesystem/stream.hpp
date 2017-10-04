@@ -13,6 +13,9 @@ namespace arda
 			END
 		};
 	public:
+		IStream() : m_position(0), m_size(0)
+		{}
+
 		inline int GetSize() { return m_size; }
 		inline int GetPosition() { return m_position; }
 

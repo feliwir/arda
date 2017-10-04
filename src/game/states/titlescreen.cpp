@@ -4,6 +4,7 @@
 #include "../../graphics/graphics.hpp"
 #include "../../graphics/sprite.hpp"
 #include "../../graphics/image.hpp"
+#include "../../graphics/transitions/blend.hpp"
 #include "../../core/exception.hpp"
 #include "../../video/video.hpp"
 #include <ratio>
@@ -42,6 +43,15 @@ arda::TitleScreen::TitleScreen(FileSystem& fs, Graphics& graphics, Ini& ini) :
 
 	m_ring->SetOpacity(0.0);
 	ren.AddDrawable(m_ring);
+
+	m_blending = std::make_shared<BlendAnimation>(
+		{
+		BlendAnimation::Keyframe{0,0.0},
+		BlendAnimation::Keyframe{1000,0.0},
+		BlendAnimation::Keyframe{2000,1.0}
+		}, 
+		{m_title_ea},
+		{m_title_ring,m_ring});
 }
 
 arda::TitleScreen::~TitleScreen()

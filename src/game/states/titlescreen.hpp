@@ -10,6 +10,7 @@ namespace arda
 	class Video;
 	class Sprite;
 	class Ini;
+	class BlendAnimation;
 
 	class TitleScreen final : public State
 	{
@@ -28,5 +29,6 @@ namespace arda
 		std::shared_ptr<Sprite> m_title_ea;
 		std::shared_ptr<Sprite> m_title_ring;
 		std::shared_ptr<Sprite> m_ring;
+		std::shared_ptr<BlendAnimation> m_blending;
 	};
 }

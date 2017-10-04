@@ -10,6 +10,8 @@ if(WIN32)
     endif(ARDA_BUILD_D3D)
 endif(WIN32)
 
+add_subdirectory(transitions)
+
 set(HDRS ${HDRS}
 "${DIR}/buffer.hpp"
 "${DIR}/drawable.hpp" 

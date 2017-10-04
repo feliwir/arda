@@ -9,6 +9,7 @@ set(HDRS ${HDRS}
 "${DIR}/file.hpp"
 "${DIR}/filestream.hpp"
 "${DIR}/filesystem.hpp"
+"${DIR}/memorystream.hpp"
 "${DIR}/refpackstream.hpp"
 "${DIR}/stream.hpp"
 "${DIR}/util.hpp"
@@ -22,5 +23,6 @@ set(SRCS ${SRCS}
 "${DIR}/file.cpp"
 "${DIR}/filestream.cpp"
 "${DIR}/filesystem.cpp"
+"${DIR}/memorystream.cpp"
 "${DIR}/refpackstream.cpp"
 PARENT_SCOPE)

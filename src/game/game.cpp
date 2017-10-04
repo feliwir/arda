@@ -28,6 +28,7 @@ arda::Game::Game(Config & c, Graphics & g, Ini & i,FileSystem& fs) :
 	//m_constructors.push_back(std::bind(&Game::CreateCutscene, this, "TolkienLogo"));
 	//m_constructors.push_back(std::bind(&Game::CreateCutscene, this, "Overall_Game_Intro"));
 	m_constructors.push_back(std::bind(&Game::CreateTitlescreen, this));
+	m_constructors.push_back(std::bind(&Game::CreateMenu, this));
 }
 
 bool arda::Game::Update()
@@ -109,7 +110,7 @@ std::shared_ptr<arda::State> arda::Game::CreateTitlescreen()
 
 std::shared_ptr<arda::State> arda::Game::CreateMenu()
 {
-	auto menu = std::make_shared<Menu>();
+	auto menu = std::make_shared<Menu>(*m_gui);
 	
 	return menu;
 }
