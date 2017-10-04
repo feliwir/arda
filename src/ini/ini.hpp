@@ -40,6 +40,11 @@ namespace arda
 			m_mappedImages.emplace(std::string(name), image);
 		}
 
+		inline void RegisterGamedata(std::shared_ptr<Block> gameData, std::string_view name)
+		{
+			m_gameData = gameData;
+		}
+
 		template<class T>
 		inline std::shared_ptr<T> GetBlock(std::string_view name = "");
 
@@ -49,6 +54,7 @@ namespace arda
 		FileSystem& m_fs;
 		std::mutex m_access;
 		std::vector<std::string> m_globalIncludes;
+		std::shared_ptr<Block> m_gameData;
 		std::map<const std::string, std::shared_ptr<ParsingContext>> m_files;
 		std::map<const std::string, std::shared_ptr<Block>> m_videos;
 		std::map<const std::string, std::shared_ptr<Block>> m_dialogEvents;
