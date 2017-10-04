@@ -11,7 +11,7 @@ namespace arda
 	class Video final : public IPlayable
 	{
 	public:
-		Video(std::shared_ptr<IStream> stream);
+		Video(std::shared_ptr<IStream> stream,bool loop=false);
 		~Video();
 
 		// Geerbt über IPlayable
@@ -49,6 +49,7 @@ namespace arda
 		int m_curFrame;
 		int m_width;
 		int m_height;
+		bool m_loop;
 		Image m_rgbImage;
 		Image m_alphaImage;
 	};

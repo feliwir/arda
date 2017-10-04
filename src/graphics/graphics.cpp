@@ -148,7 +148,7 @@ std::shared_ptr<arda::Sprite> arda::Graphics::CreateSprite(std::shared_ptr<Mappe
 std::shared_ptr<arda::ITexture> arda::Graphics::GetTexture(std::string_view name,FileSystem& fs)
 {
 	auto str_name = std::string(name);
-	auto& it = m_textures.find(str_name);
+	auto it = m_textures.find(str_name);
 
 	if (it != m_textures.end())
 		return it->second;

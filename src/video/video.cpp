@@ -56,7 +56,7 @@ namespace arda
 	};
 }
 
-arda::Video::Video(std::shared_ptr<IStream> stream) :
+arda::Video::Video(std::shared_ptr<IStream> stream,bool loop) :
 	m_internals(std::make_unique<VideoInternals>()),
 	m_hasAlpha(false),
 	m_width(0),
@@ -64,7 +64,8 @@ arda::Video::Video(std::shared_ptr<IStream> stream) :
 	m_curFrame(0),
 	m_fps(0.0),
 	m_position(0.0),
-	m_frameTime(0)
+	m_frameTime(0),
+	m_loop(loop)
 {
 	auto& format_ctx = m_internals->format_ctx;
 	auto& avstream = m_internals->avstream;
@@ -241,19 +242,45 @@ void arda::Video::Start()
 {
 	//get the thread pool
 	auto& pool = GetGlobal().GetThreadPool();
+	auto& avstream = m_internals->avstream;
 
 	m_state = PLAYING;
 
-	pool.AddJob([this]()
+	pool.AddJob([this,&avstream]()
 	{
 		auto last = std::chrono::high_resolution_clock::now();
 		while (m_state == PLAYING)
 		{
 			if (!GetFrames())
 			{
-				m_state = STOPPED;
-				break;
+				if (!m_loop)
+				{
+					m_state = STOPPED;
+					break;
+				}
+				else
+				{
+					ARDA_LOG("Reset video!");
+					auto& format_ctx = m_internals->format_ctx;
+					auto& stream = format_ctx->streams[COLOR];
+					auto& codec_ctx = m_internals->codec_ctx;
+
+					avformat_flush(format_ctx);
+					avcodec_flush_buffers(codec_ctx);
+					avio_seek(avstream->GetContext(), 0, SEEK_SET);
+					av_seek_frame(format_ctx, COLOR, 0, AVSEEK_FLAG_BYTE);
+
+					if (m_hasAlpha)
+					{
+						auto& stream_a = format_ctx->streams[ALPHA];
+						auto& codec_ctx_a = m_internals->codec_ctx_a;
+
+						avcodec_flush_buffers(codec_ctx_a);
+						av_seek_frame(format_ctx, ALPHA, 0, AVSEEK_FLAG_BYTE);
+					}
+				}
 			}
+
 			std::this_thread::sleep_until(last+std::chrono::microseconds(m_frameTime));
 			last = last + std::chrono::microseconds(m_frameTime);
 		}

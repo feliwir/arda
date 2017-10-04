@@ -32,11 +32,11 @@ arda::TitleScreen::TitleScreen(FileSystem& fs, Graphics& graphics, Ini& ini) :
 	if (stream == nullptr)
 		throw RuntimeException("Invalid cutscene name: " + video_ini->GetFilename());
 
-	m_video = std::make_shared<Video>(stream);
+	m_video = std::make_shared<Video>(stream,true);
 	auto tex = m_graphics.GetRenderer().CreateTexture();
 	auto mask = m_graphics.GetRenderer().CreateTexture();
 
-	float x = 0.1;
+	float x = 0.075;
 	float y = 0.76;
 	m_ring = m_graphics.CreateSprite(tex, { {-x,-x-y},{x,-x-y},{-x,x-y},{x,x-y} },mask);
 
@@ -47,6 +47,7 @@ arda::TitleScreen::TitleScreen(FileSystem& fs, Graphics& graphics, Ini& ini) :
 arda::TitleScreen::~TitleScreen()
 {
 	auto& ren = m_graphics.GetRenderer();
+	ren.RemoveDrawable(m_ring);
 	ren.RemoveDrawable(m_title_ring);	
 	ren.RemoveDrawable(m_title_ea);
 }
@@ -59,10 +60,10 @@ void arda::TitleScreen::Start()
 
 void arda::TitleScreen::Update()
 {
-	auto now  = std::chrono::steady_clock::now();
+	auto now  = std::chrono::high_resolution_clock::now();
 	auto passed = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_start);
 	
-	if (passed.count() > 300)
+	if (passed.count() > 1000)
 	{
 		auto dur = passed.count() - 1000;
 		auto alpha = dur / 2000.0;
@@ -78,5 +79,12 @@ void arda::TitleScreen::Update()
 
 bool arda::TitleScreen::IsFinished()
 {
+	auto now = std::chrono::high_resolution_clock::now();
+	auto passed = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_start);
+
+	if (passed.count() > 5000)
+	{
+		return true;
+	}
 	return false;
 }
