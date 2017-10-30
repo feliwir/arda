@@ -54,7 +54,7 @@ if(ARDA_BUILD_D3D)
 endif(ARDA_BUILD_D3D)
 
 if(MINGW)
-    target_link_libraries ${PROJECT} wsock32 ws2_32)
+    target_link_libraries (${PROJECT} wsock32 ws2_32)
 endif(MINGW)
 
 target_include_directories(${PROJECT} PRIVATE 
